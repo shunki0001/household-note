@@ -9,16 +9,23 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     //
-    public function index()
-{
-    /** @var \App\Models\User $user */
-    // $user = auth()->user();
-    $user = Auth::user();
+    public function index(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        // $user = auth()->user();
+        $user = Auth::user();
 
-    $expenses = $user->expenses()->latest()->get();
+        $expenses = $user->expenses()->latest()->get();
 
-    return Inertia::render('Dashboard', [
-        'expenses' => $expenses,
-    ]);
-}
+        return Inertia::render('Dashboard', [
+            'expenses' => $expenses,
+        ]);
+
+
+        // $expenses = $request->user()->expenses()->latest()->get();
+
+        // return Inertia::render('Expenses/Index', [
+        //     'expenses' => $expenses,
+        // ]);
+    }
 }
