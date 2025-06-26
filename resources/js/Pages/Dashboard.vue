@@ -5,10 +5,12 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
+import { watch  } from 'vue';
 
 const props = defineProps({
-    expenses: Array
+    expenses: Array,
 });
 
 const form = useForm({
@@ -23,6 +25,28 @@ const submit = () => {
         onSuccess: () => form.reset(), // 登録後にフォームを初期化
     });
 }
+
+// 現在のページのpropsを取得
+const page = usePage();
+
+// フラッシュメッセージの監視
+watch(
+    () => page.props.flash?.message,
+    (message) => {
+        if (message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        }
+    }
+);
+
 </script>
 
 <template>
