@@ -21,11 +21,21 @@ class DashboardController extends Controller
             'expenses' => $expenses,
         ]);
 
-
         // $expenses = $request->user()->expenses()->latest()->get();
 
         // return Inertia::render('Expenses/Index', [
         //     'expenses' => $expenses,
         // ]);
+    }
+
+    public function destroy(Expense $expense)
+    {
+        // 自分のデータだか削除可能にする
+        if(Auth::id() !== $expense->user_id) {
+            abort(403);
+        }
+
+        $expense->delete();
+        return redirect()->route('dashboard')->with('message', '削除しました');
     }
 }

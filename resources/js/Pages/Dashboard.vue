@@ -4,6 +4,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -138,6 +139,9 @@ const submit = () => {
                                 <td class="border px-4 py-2">{{ expense.date }}</td>
                                 <td class="border px-4 py-2">{{ expense.title }}</td>
                                 <td class="border px-4 py-2">{{ expense.category }}</td>
+                                <td class="border px-4 py-2">
+                                    <DeleteButton :expenseId="expense.id"/>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
