@@ -6,6 +6,10 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
+const props = defineProps({
+    expenses: Array
+});
+
 const form = useForm({
     amount: '',
     date: '',
@@ -114,6 +118,32 @@ const submit = () => {
                 </div>
             </div>
         </div>
+
+        <!-- 一覧表示部分 -->
+         <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div class="p-6 text-gray-900">
+                    <table class="table-auto w-full">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2">金額</th>
+                                <th class="px-4 py-2">日付</th>
+                                <th class="px-4 py-2">費用名</th>
+                                <th class="px-4 py-2">カテゴリー</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="expense in expenses" :key="expense.id">
+                                <td class="border px-4 py-2">{{ expense.amount }}</td>
+                                <td class="border px-4 py-2">{{ expense.date }}</td>
+                                <td class="border px-4 py-2">{{ expense.title }}</td>
+                                <td class="border px-4 py-2">{{ expense.category }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+         </div>
 
     </AuthenticatedLayout>
 </template>
