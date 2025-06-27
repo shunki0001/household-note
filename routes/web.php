@@ -34,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [DashboardController::class, 'destroy'])->name('expenses.destroy');
+
+    Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
+    Route::put('/expenses/{expense}', [DashboardController::class, 'update'])->name('expenses.update');
 });
 
 require __DIR__.'/auth.php';

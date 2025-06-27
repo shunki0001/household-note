@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-import { watch  } from 'vue';
+import { watch, onMounted  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
@@ -28,25 +28,40 @@ const submit = () => {
 }
 
 // // 現在のページのpropsを取得
-// const page = usePage();
+const page = usePage();
 
-// // フラッシュメッセージの監視
-// watch(
-//     () => page.props.flash?.message,
-//     (message) => {
-//         if (message) {
-//             Swal.fire({
-//                 toast: true,
-//                 position: 'top-end',
-//                 icon: 'success',
-//                 title: message,
-//                 showConfirmButton: false,
-//                 timer: 2000,
-//                 timerProgressBar: true,
-//             });
-//         }
-//     }
-// );
+// フラッシュメッセージの監視
+watch(
+    () => page.props.flash?.message,
+    (message) => {
+        if (message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        }
+    }
+);
+
+// onMountedを追加（ページ遷移時に即チェック）
+onMounted(() => {
+    if (page.props.flash?.message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: page.props.flash.message,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    }
+});
 
 </script>
 
@@ -166,6 +181,9 @@ const submit = () => {
                                 <td class="border px-4 py-2">{{ expense.title }}</td>
                                 <td class="border px-4 py-2">{{ expense.category }}</td>
                                 <td class="border px-4 py-2">
+                                    <!-- 要修正->コンポーネント化 -->
+                                     <!-- 編集ボタン -->
+                                    <Link :href="route('expenses.edit', expense.id)" class="text-blue-500 hover:underLine">編集</Link>
                                     <DeleteButton :expenseId="expense.id"/>
                                 </td>
                             </tr>
