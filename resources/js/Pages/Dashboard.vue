@@ -8,6 +8,7 @@ import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch  } from 'vue';
+import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
     expenses: Array,
@@ -26,26 +27,26 @@ const submit = () => {
     });
 }
 
-// 現在のページのpropsを取得
-const page = usePage();
+// // 現在のページのpropsを取得
+// const page = usePage();
 
-// フラッシュメッセージの監視
-watch(
-    () => page.props.flash?.message,
-    (message) => {
-        if (message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: message,
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            });
-        }
-    }
-);
+// // フラッシュメッセージの監視
+// watch(
+//     () => page.props.flash?.message,
+//     (message) => {
+//         if (message) {
+//             Swal.fire({
+//                 toast: true,
+//                 position: 'top-end',
+//                 icon: 'success',
+//                 title: message,
+//                 showConfirmButton: false,
+//                 timer: 2000,
+//                 timerProgressBar: true,
+//             });
+//         }
+//     }
+// );
 
 </script>
 
@@ -53,6 +54,7 @@ watch(
     <Head title="アカウントトップページ" />
 
     <AuthenticatedLayout>
+        <Toast/>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
