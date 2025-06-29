@@ -11,7 +11,8 @@ import { watch, onMounted  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
-    expenses: Array,
+    // expenses: Array,
+    expenses: Object,
 });
 
 const form = useForm({
@@ -162,6 +163,7 @@ onMounted(() => {
         </div>
 
         <!-- 一覧表示部分 -->
+         <!-- <pre>{{ expenses }}</pre> -->
          <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="p-6 text-gray-900">
@@ -175,7 +177,7 @@ onMounted(() => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="expense in expenses" :key="expense.id">
+                            <tr v-for="expense in expenses.data" :key="expense.id">
                                 <td class="border px-4 py-2">{{ expense.amount }}</td>
                                 <td class="border px-4 py-2">{{ expense.date }}</td>
                                 <td class="border px-4 py-2">{{ expense.title }}</td>
@@ -189,6 +191,26 @@ onMounted(() => {
                             </tr>
                         </tbody>
                     </table>
+                    <div class="mt-4 flex justify-center">
+                        <nav>
+                            <ul class="inline-flex -space-x-px">
+                                <li v-for="link in expenses.links" :key="link.label">
+                                    <Link
+                                        v-if="link.url"
+                                        :href="link.url"
+                                        class="px-3 py-1 rounded-md text-gray-700 bg-white border border-gray-300"
+                                        :class="{ 'bg-blue-500 text-white': link.active }"
+                                        v-html="link.label"
+                                    />
+                                    <span
+                                        v-else
+                                        class="px-3 py-1 rounded-md text-gray-400 bg-white border border-gray-300"
+                                        v-html="link.label"
+                                    ></span>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
          </div>

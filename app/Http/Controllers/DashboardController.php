@@ -15,7 +15,8 @@ class DashboardController extends Controller
         // $user = auth()->user();
         $user = Auth::user();
 
-        $expenses = $user->expenses()->latest()->get();
+        // $expenses = $user->expenses()->latest()->get();
+        $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
 
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,

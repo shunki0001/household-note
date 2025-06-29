@@ -10,9 +10,15 @@ class ExpenseController extends Controller
     // 一覧表示(ログインユーザーのみ)
     public function index(Request $request)
     {
-        $expenses = $request->user()->expenses()->latest()->get();
+        // $expenses = $request->user()->expenses()->latest()->get();
 
-        return Inertia::render('Expenses/Index', [
+        // return Inertia::render('Expenses/Index', [
+        //     'expenses' => $expenses,
+        // ]);
+
+        // $expenses = Expense::orderBy('date', 'desc')->paginate(5);
+        $expenses = $request->user()->expenses()->orderBy('date', 'desc')->paginate(5);
+        return Inertia::render('Dashboard', [
             'expenses' => $expenses,
         ]);
     }
