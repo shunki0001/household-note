@@ -191,6 +191,7 @@ onMounted(() => {
                             </tr>
                         </tbody>
                     </table>
+                    <!-- ページネーションリンクボタン -->
                     <div class="mt-4 flex justify-center">
                         <nav>
                             <ul class="inline-flex -space-x-px">
@@ -200,13 +201,20 @@ onMounted(() => {
                                         :href="link.url"
                                         class="px-3 py-1 rounded-md text-gray-700 bg-white border border-gray-300"
                                         :class="{ 'bg-blue-500 text-white': link.active }"
-                                        v-html="link.label"
-                                    />
+                                    >
+                                        <!-- ラベルを判定して日本語に変換 -->
+                                        <span v-if="link.label === 'pagination.previous'">&lt; 前へ</span>
+                                        <span v-else-if="link.label === 'pagination.next'">次へ &gt;</span>
+                                        <span v-else>{{ link.label }}</span>
+                                    </Link>
                                     <span
                                         v-else
                                         class="px-3 py-1 rounded-md text-gray-400 bg-white border border-gray-300"
-                                        v-html="link.label"
-                                    ></span>
+                                    >
+                                        <span v-if="link.label === 'pagination.previous'">&lt; 前へ</span>
+                                        <span v-else-if="link.label === 'pagination.next'">次へ &gt;</span>
+                                        <span v-else>{{ link.label }}</span>
+                                    </span>
                                 </li>
                             </ul>
                         </nav>
