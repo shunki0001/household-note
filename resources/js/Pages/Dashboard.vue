@@ -15,13 +15,14 @@ import Pagination from '@/Components/Pagination.vue';
 const props = defineProps({
     // expenses: Array,
     expenses: Object,
+    categories: Array,
 });
 
 const form = useForm({
     amount: '',
     date: '',
     title: '',
-    category: '',
+    category_id: '',
 });
 
 const submit = () => {
@@ -141,13 +142,23 @@ onMounted(() => {
 
                             <div>
                                 <InputLabel for="category" value="カテゴリー"/>
-                                <TextInput
+                                <!-- <TextInput
                                     id="category"
                                     type="text"
                                     class="mt-1 block"
                                     v-model="form.category"
                                     autofocus
-                                />
+                                /> -->
+                                <select v-model="form.category_id">
+                                    <option disabled value="">カテゴリを選択</option>
+                                    <option
+                                        v-for="category in props.categories"
+                                        :key="category.id"
+                                        :value="category.id"
+                                    >
+                                        {{ category.name }}
+                                    </option>
+                                </select>
                                 <InputError class="mt-2" :message="form.errors.category"/>
                             </div>
 
@@ -184,7 +195,7 @@ onMounted(() => {
                                     <td class="border px-4 py-2">{{ expense.amount }}</td>
                                     <td class="border px-4 py-2">{{ expense.date }}</td>
                                     <td class="border px-4 py-2">{{ expense.title }}</td>
-                                    <td class="border px-4 py-2">{{ expense.category }}</td>
+                                    <td class="border px-4 py-2">{{ expense.category?.name ?? '未分類' }}</td>
                                     <td class="border px-4 py-2">
                                         <!-- 要修正->コンポーネント化 -->
                                         <!-- 編集ボタン -->

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Expense;
+// use App\Models\Category;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -30,12 +31,30 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric',
             'date' => 'required|date',
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            // 'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
         // ログインユーザーに紐づけて保存
-        $request->user()->expenses()->create($validated);
+        // $request->user()->expenses()->create($validated);
+        Expense::create([
+            'amount' => $validated['amount'],
+            'date' => $validated['date'],
+            'title' => $validated['title'],
+            'category_id' => $validated['category_id'],
+            'user_id' => $request->user()->id,
+        ]);
 
         return redirect()->route('dashboard')->with('message', '登録しました');
     }
+
+    // カテゴリー作成
+    // public function create()
+    // {
+    //     $categories = Category::all();
+
+    //     return Inertia::render('Dashboard', [
+    //         'categories' => $categories
+    //     ]);
+    // }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Expense;
+use App\Models\Category;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +15,17 @@ class DashboardController extends Controller
         /** @var \App\Models\User $user */
         // $user = auth()->user();
         $user = Auth::user();
+        $categories = Category::all();
 
-        // $expenses = $user->expenses()->latest()->get();
-        $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
+        // $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
+        $expenses = $user->expenses()
+            ->with('category')
+            ->orderBy('date', 'desc')
+            ->paginate(5);
 
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,
+            'categories' => $categories,
             'flash' => [
                 'message' => session('message')
             ]
@@ -54,6 +60,8 @@ class DashboardController extends Controller
             abort(403);
         }
 
+        $categories = Category::all(); // 編集画面でカテゴリー一覧を渡す
+
         return Inertia::render('Expenses/Edit', [
             'expense' => $expense,
         ]);
@@ -70,7 +78,7 @@ class DashboardController extends Controller
             'amount' => 'required|numeric',
             'date' => 'required|date',
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
         $expense->update($validated);
