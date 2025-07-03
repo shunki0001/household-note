@@ -8,13 +8,14 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     expense: Object,
+    categories: Array,
 });
 
 const form = useForm({
     amount: props.expense.amount,
     date: props.expense.date,
     title: props.expense.title,
-    category: props.expense.category,
+    category_id: props.expense.category_id,
 });
 
 const submit = () => {
@@ -76,13 +77,16 @@ const submit = () => {
 
                                 <div>
                                     <InputLabel for="category" value="カテゴリー"/>
-                                    <TextInput
-                                        id="category"
-                                        type="text"
-                                        class="mt-1 block"
-                                        v-model="form.category"
-                                    />
-                                    <InputError class="mt-2" :message="form.errors.category"/>
+                                    <select v-model="form.category_id">
+                                        <option disabled value="">カテゴリを選択</option>
+                                        <option v-for="category in props.categories"
+                                            :key="category.id"
+                                            :value="category.id"
+                                        >
+                                            {{ category.name }}
+                                        </option>
+                                    </select>
+                                    <InputError class="mt-2" :message="form.errors.category_id"/>
                                 </div>
 
                                 <div class="mt-4 flex items-center">

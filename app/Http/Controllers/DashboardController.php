@@ -31,15 +31,6 @@ class DashboardController extends Controller
             ]
         ]);
 
-        // return Inertia::render('Dashboard', [
-        //     'expenses' => $expenses,
-        // ]);
-
-        // $expenses = $request->user()->expenses()->latest()->get();
-
-        // return Inertia::render('Expenses/Index', [
-        //     'expenses' => $expenses,
-        // ]);
     }
 
     public function destroy(Expense $expense)
@@ -64,6 +55,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Expenses/Edit', [
             'expense' => $expense,
+            'categories' => $categories,
         ]);
     }
 

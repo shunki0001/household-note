@@ -13,7 +13,6 @@ import Pagination from '@/Components/Pagination.vue';
 
 
 const props = defineProps({
-    // expenses: Array,
     expenses: Object,
     categories: Array,
 });
@@ -142,13 +141,6 @@ onMounted(() => {
 
                             <div>
                                 <InputLabel for="category" value="カテゴリー"/>
-                                <!-- <TextInput
-                                    id="category"
-                                    type="text"
-                                    class="mt-1 block"
-                                    v-model="form.category"
-                                    autofocus
-                                /> -->
                                 <select v-model="form.category_id">
                                     <option disabled value="">カテゴリを選択</option>
                                     <option
