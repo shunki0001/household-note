@@ -1,9 +1,5 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// import InputError from '@/Components/InputError.vue';
-// import InputLabel from '@/Components/InputLabel.vue';
-// import PrimaryButton from '@/Components/PrimaryButton.vue';
-// import TextInput from '@/Components/TextInput.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
@@ -106,69 +102,6 @@ onMounted(() => {
                             :submit-url="route('expenses.store')"
                             :method="'post'"
                         />
-                        <!-- <form @submit.prevent="submit">
-                            <div>
-                                <InputLabel for="amount" value="金額"/>
-
-                                <TextInput
-                                    id="amount"
-                                    type="number"
-                                    class="mt-1 block"
-                                    v-model="form.amount"
-                                    autofocus
-                                    autocomplete="username"
-                                />
-
-                                <InputError class="mt-2" :message="form.errors.amount"/>
-                            </div>
-
-                            <div>
-                                <InputLabel for="date" value="日付"/>
-                                <TextInput
-                                    id="date"
-                                    type="date"
-                                    v-model="form.date"
-                                    class="mt-1 block"
-                                    autofocus
-                                />
-                                <InputError class="mt-2" :message="form.errors.date"/>
-                            </div>
-
-                            <div>
-                                <InputLabel for="title" value="費用名"/>
-                                <TextInput
-                                    id="title"
-                                    type="text"
-                                    class="mt-1 block"
-                                    v-model="form.title"
-                                    autofocus
-                                />
-                                <InputError class="mt-2" :message="form.errors.title"/>
-                            </div>
-
-                            <div>
-                                <InputLabel for="category" value="カテゴリー"/>
-                                <select v-model="form.category_id">
-                                    <option disabled value="">カテゴリを選択</option>
-                                    <option
-                                        v-for="category in props.categories"
-                                        :key="category.id"
-                                        :value="category.id"
-                                    >
-                                        {{ category.name }}
-                                    </option>
-                                </select>
-                                <InputError class="mt-2" :message="form.errors.category"/>
-                            </div>
-
-                            <div class="mt-4 flex items-center">
-                                <PrimaryButton
-                                    class="ms-4"
-                                >
-                                    登録
-                                </PrimaryButton>
-                            </div>
-                        </form> -->
                     </div>
                 </div>
             </div>
