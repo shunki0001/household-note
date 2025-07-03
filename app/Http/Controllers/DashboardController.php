@@ -20,7 +20,7 @@ class DashboardController extends Controller
         // $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
         $expenses = $user->expenses()
             ->with('category')
-            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc') // 入力日から最新の５件表示
             ->paginate(5);
 
         return Inertia::render('Dashboard', [

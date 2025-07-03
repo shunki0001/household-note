@@ -1,15 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+// import InputError from '@/Components/InputError.vue';
+// import InputLabel from '@/Components/InputLabel.vue';
+// import PrimaryButton from '@/Components/PrimaryButton.vue';
+// import TextInput from '@/Components/TextInput.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 import Pagination from '@/Components/Pagination.vue';
+import ExpenseForm from '@/Components/ExpenseForm.vue';
 
 
 const props = defineProps({
@@ -99,7 +100,13 @@ onMounted(() => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        <form @submit.prevent="submit">
+                        <ExpenseForm
+                            :expense="{}"
+                            :categories="props.categories"
+                            :submit-url="route('expenses.store')"
+                            :method="'post'"
+                        />
+                        <!-- <form @submit.prevent="submit">
                             <div>
                                 <InputLabel for="amount" value="金額"/>
 
@@ -161,7 +168,7 @@ onMounted(() => {
                                     登録
                                 </PrimaryButton>
                             </div>
-                        </form>
+                        </form> -->
                     </div>
                 </div>
             </div>

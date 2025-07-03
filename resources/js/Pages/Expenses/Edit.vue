@@ -1,28 +1,29 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+// import InputError from '@/Components/InputError.vue';
+// import InputLabel from '@/Components/InputLabel.vue';
+// import PrimaryButton from '@/Components/PrimaryButton.vue';
+// import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import ExpenseForm from '@/Components/ExpenseForm.vue';
 
 const props = defineProps({
     expense: Object,
     categories: Array,
 });
 
-const form = useForm({
-    amount: props.expense.amount,
-    date: props.expense.date,
-    title: props.expense.title,
-    category_id: props.expense.category_id,
-});
+// const form = useForm({
+//     amount: props.expense.amount,
+//     date: props.expense.date,
+//     title: props.expense.title,
+//     category_id: props.expense.category_id,
+// });
 
-const submit = () => {
-    form.put(route('expenses.update', props.expense.id), {
-        onSuccess: () => form.reset(),
-    });
-}
+// const submit = () => {
+//     form.put(route('expenses.update', props.expense.id), {
+//         onSuccess: () => form.reset(),
+//     });
+// }
 
 </script>
 
@@ -41,7 +42,13 @@ const submit = () => {
                 <div class="mx-auto max-w-7xl sm:px-6 lg:px-8" >
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 text-gray-900">
-                            <form @submit.prevent="submit">
+                            <ExpenseForm
+                                :expense="props.expense"
+                                :categories="props.categories"
+                                :submit-url="route('expenses.update', props.expense.id)"
+                                :method="'put'"
+                            />
+                            <!-- <form @submit.prevent="submit">
                                 <div>
                                     <InputLabel for="amount" value="金額" />
                                     <TextInput
@@ -94,7 +101,7 @@ const submit = () => {
                                         更新
                                     </PrimaryButton>
                                 </div>
-                            </form>
+                            </form> -->
                         </div>
                     </div>
 
