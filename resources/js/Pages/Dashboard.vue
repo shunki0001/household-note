@@ -3,11 +3,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-import { watch, onMounted  } from 'vue';
+import { watch, onMounted, ref  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
-
+import BarChart from '@/Components/BarChart.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -62,6 +62,45 @@ onMounted(() => {
         });
     }
 });
+
+// グラフ設定
+const monthlyChartData = ref(null);
+const categoryChartData = ref(null);
+
+const fetchMonthlyData = async () => {
+    const response = await fetch('http://localhost:8001/api/chart/monthly');
+    const data = await response.json();
+
+    monthlyChartData.value = {
+        labels: data.map(item => `${item.month}月`),
+        datasets: [{
+            label: '月別支出合計',
+            data: data.map(item => item.total),
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }],
+        title: '月別支出グラフ'
+    };
+};
+
+// const fetchCategoryData = async (month = 7) => {
+//     const response = await fetch(`http://localhost:8001/api/chart/category/${month}`);
+//     const data = await response.json();
+
+//     categoryChartData.value = {
+//         labels: data.map(item => item.category),
+//         datasets: [{
+//             label: `${month}月のカテゴリ別支出`,
+//             data: data.map(item => item.total),
+//             backgroundColor: 'rgba(255, 99, 132, 0.7)'
+//         }],
+//         title: `${month}月のカテゴリ別支出グラフ`
+//     };
+// };
+
+onMounted(() => {
+    fetchMonthlyData();
+    // fetchCategoryData();
+})
 
 </script>
 
@@ -143,6 +182,14 @@ onMounted(() => {
                 </div>
 
             </div>
+        </div>
+
+        <div class="p-4">
+            <h2 class="text-xl font-bold mb-4">月別支出</h2>
+            <BarChart v-if="monthlyChartData" :chartData="monthlyChartData" />
+
+            <!-- <h2 class="text-xl font-bold mb-4">カテゴリー別支出</h2>
+            <BarChart v-if="categoryChartData" :chartData="categoryChartData" /> -->
         </div>
 
     </AuthenticatedLayout>
