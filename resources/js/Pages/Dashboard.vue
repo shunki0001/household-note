@@ -200,6 +200,10 @@ onMounted(() => {
                 >
                     <div class="p-6 text-gray-900">
                         <BarChart2/>
+                        <BarChart2
+                            label="a"
+                            apiUrl="/api/chart-data/category-monthly"
+                        />
                     </div>
                 </div>
             </div>

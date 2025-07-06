@@ -21,18 +21,6 @@ class ChartController extends Controller
             return response()->json($data);
     }
 
-    // カテゴリー別支出データ
-    // public function getCategoryExpenses($month)
-    // {
-    //     $data = Expense::selectRaw('category, SUM(amount) as total')
-    //         ->whereMonth('date', $month)
-    //         ->groupBy('category')
-    //         ->orderBy('total', 'desc')
-    //         ->get();
-
-    //         return response()->json($data);
-    // }
-
     public function getMonthlyTotals()
     {
         $data = [];
@@ -51,6 +39,42 @@ class ChartController extends Controller
         return response()->json([
             'labels' => $months,
             'totals' => $data,
+        ]);
+    }
+    public function getCategoryTotals() {
+        $data = [];
+        $labels = [];
+
+        // x軸の月ラベル
+        for ($month = 1; $month <= 12; $month++) {
+            $labels[] = $month. '月';
+        }
+
+        // カテゴリー一覧をDBから取得
+        $categories = DB::table('categories')->pluck('name', 'id');
+
+        foreach($categories as $categoryId => $categoryName) {
+            $monthlyTotals = [];
+
+            for ($month = 1; $month <= 12; $month++) {
+                $sum = DB::table('expenses')
+                    ->where('category_id', $categoryId)
+                    ->whereYear('date', 2025)
+                    ->whereMonth('date', $month)
+                    ->sum('amount');
+
+                $monthlyTotals[] = (int) $sum;
+            }
+
+            $datasets[] = [
+                'label' => $categoryName,
+                'data' => $monthlyTotals,
+            ];
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'datasets' => $datasets,
         ]);
     }
 
