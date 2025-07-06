@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Expense;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
@@ -31,5 +32,26 @@ class ChartController extends Controller
 
     //         return response()->json($data);
     // }
+
+    public function getMonthlyTotals()
+    {
+        $data = [];
+        $months = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $total = DB::table('expenses')
+                ->whereYear('date', 2025)
+                ->whereMonth('date', $month)
+                ->sum('amount');
+
+                $data[] = (int) $total;
+                $months[] = $month. '月';
+        }
+
+        return response()->json([
+            'labels' => $months,
+            'totals' => $data,
+        ]);
+    }
 
 }

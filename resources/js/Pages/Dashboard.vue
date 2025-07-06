@@ -8,6 +8,7 @@ import Toast from '@/Components/Toast.vue';
 import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import BarChart from '@/Components/BarChart.vue';
+import BarChart2 from '@/Components/BarChart2.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -190,6 +191,18 @@ onMounted(() => {
 
             <!-- <h2 class="text-xl font-bold mb-4">カテゴリー別支出</h2>
             <BarChart v-if="categoryChartData" :chartData="categoryChartData" /> -->
+        </div>
+
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                        <BarChart2/>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </AuthenticatedLayout>

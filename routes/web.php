@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -37,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [DashboardController::class, 'update'])->name('expenses.update');
+
+    Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
 });
 
 require __DIR__.'/auth.php';
