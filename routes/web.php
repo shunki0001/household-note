@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
     Route::get('/api/chart-data/category-monthly', [ChartController::class, 'getCategoryTotals']);
+    Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryTotals']);
 });
 
 require __DIR__.'/auth.php';

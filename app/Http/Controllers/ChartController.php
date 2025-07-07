@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Expense;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ChartController extends Controller
 {
@@ -146,6 +147,51 @@ class ChartController extends Controller
             'labels' => $labels,
             'datasets' => $datasets,
         ]);
+    }
+
+    // ドーナツグラフ用のグラフデータ取得
+    public function doughnutGetCategoryTotals() {
+        // テストデータ
+        // $labels = ["食費", "交通費", "趣味", "光熱費"];
+        // $datasets = [1000, 3000, 50000, 6000];
+
+        // return response()->json([
+        //     'labels' => $labels,
+        //     'datasets' => $datasets,
+        // ]);
+        $now = Carbon::now(); // 現在日時
+
+        // $data = Expense::select('category_id', DB::raw('SUM(amount) as total'))
+        //     ->whereYear('date', $now->year) // 今年
+        //     ->whereMonth('date', $now->month) // 今月
+        //     ->groupBy('category_id')
+        //     ->with('category')
+        //     ->get();
+
+        // // カテゴリー名の配列を生成
+        // $labels = $data->map(function($item) {
+        //     return optional($item->category)->name ?? '未分類';
+        // });
+
+        // $response = [
+        //     'labels' => $data->pluck('category.name'), // カテゴリー名
+        //     'totals' => $data->pluck('total') // 合計金額
+        // ];
+
+        $categories = Category::withSum(['expenses' => function($query) use ($now) {
+            $query->whereYear('date', $now->year)
+                  ->whereMonth('date', $now->month);
+        }], 'amount')->get();
+
+        $response = [
+            'labels' => $categories->pluck('name'),
+            'totals' => $categories->pluck('expenses_sum_amount')
+        ];
+
+        // return response()->json($response);
+
+
+        return response()->json($response);
     }
 
 }

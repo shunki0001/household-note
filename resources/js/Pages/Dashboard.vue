@@ -9,6 +9,7 @@ import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import BarChart from '@/Components/BarChart.vue';
 import BarChart2 from '@/Components/BarChart2.vue';
+import DoughnutChart from '@/Components/DoughnutChart.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -204,6 +205,19 @@ onMounted(() => {
                             label="a"
                             apiUrl="/api/chart-data/category-monthly"
                         />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                    ドーナツグラフ
+                    <DoughnutChart />
                     </div>
                 </div>
             </div>
