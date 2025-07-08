@@ -24,24 +24,6 @@ class ChartController extends Controller
 
     public function getMonthlyTotals()
     {
-        // $data = [];
-        // $months = [];
-
-        // for ($month = 1; $month <= 12; $month++) {
-        //     $total = DB::table('expenses')
-        //         ->whereYear('date', 2025)
-        //         ->whereMonth('date', $month)
-        //         ->sum('amount');
-
-        //         $data[] = (int) $total;
-        //         $months[] = $month. '月';
-        // }
-
-        // return response()->json([
-        //     'labels' => $months,
-        //     'totals' => $data,
-        // ]);
-
         // 月ラベル作成
         $month = [];
         for ($month = 1; $month <=12; $month++) {
@@ -70,42 +52,6 @@ class ChartController extends Controller
         ]);
     }
     public function getCategoryTotals() {
-        // $data = [];
-        // $labels = [];
-
-        // // x軸の月ラベル
-        // for ($month = 1; $month <= 12; $month++) {
-        //     $labels[] = $month. '月';
-        // }
-
-        // // 全カテゴリを取得
-        // $categories = Category::all();
-
-        // foreach($categories as $category) {
-        //     $monthlyTotals = [];
-
-        //     for ($month = 1; $month <= 12; $month++) {
-        //         $sum = DB::table('expenses')
-        //             ->where('category_id', $category->id)
-        //             ->whereYear('date', 2025)
-        //             ->whereMonth('date', $month)
-        //             ->sum('amount');
-
-        //         $monthlyTotals[] = (int) $sum;
-        //     }
-
-        //     $datasets[] = [
-        //         'label' => $category->name,
-        //         'data' => $monthlyTotals,
-        //     ];
-        // }
-
-        // return response()->json([
-        //     'labels' => $labels,
-        //     'datasets' => $datasets,
-        // ]);
-
-        // パフォーマンス最適化バージョン
 
         // 月ラベル作成
         $labels = [];
@@ -151,46 +97,24 @@ class ChartController extends Controller
 
     // ドーナツグラフ用のグラフデータ取得
     public function doughnutGetCategoryTotals() {
-        // テストデータ
-        // $labels = ["食費", "交通費", "趣味", "光熱費"];
-        // $datasets = [1000, 3000, 50000, 6000];
-
-        // return response()->json([
-        //     'labels' => $labels,
-        //     'datasets' => $datasets,
-        // ]);
         $now = Carbon::now(); // 現在日時
 
-        // $data = Expense::select('category_id', DB::raw('SUM(amount) as total'))
-        //     ->whereYear('date', $now->year) // 今年
-        //     ->whereMonth('date', $now->month) // 今月
-        //     ->groupBy('category_id')
-        //     ->with('category')
-        //     ->get();
+        $data = Expense::select('category_id', DB::raw('SUM(amount) as total'))
+            ->whereYear('date', $now->year) // 今年
+            ->whereMonth('date', $now->month) // 今月
+            ->groupBy('category_id')
+            ->with('category')
+            ->get();
 
-        // // カテゴリー名の配列を生成
-        // $labels = $data->map(function($item) {
-        //     return optional($item->category)->name ?? '未分類';
-        // });
-
-        // $response = [
-        //     'labels' => $data->pluck('category.name'), // カテゴリー名
-        //     'totals' => $data->pluck('total') // 合計金額
-        // ];
-
-        $categories = Category::withSum(['expenses' => function($query) use ($now) {
-            $query->whereYear('date', $now->year)
-                  ->whereMonth('date', $now->month);
-        }], 'amount')->get();
+        // カテゴリー名の配列を生成
+        $labels = $data->map(function($item) {
+            return optional($item->category)->name ?? '未分類';
+        });
 
         $response = [
-            'labels' => $categories->pluck('name'),
-            'totals' => $categories->pluck('expenses_sum_amount')
+            'labels' => $data->pluck('category.name'), // カテゴリー名
+            'totals' => $data->pluck('total') // 合計金額
         ];
-
-        // return response()->json($response);
-
-
         return response()->json($response);
     }
 

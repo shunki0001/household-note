@@ -14,7 +14,7 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels)
 // propsを定義
 const props = defineProps({
     label: { type: String, default: 'カテゴリー別支出合計' },
-    apiUrl: { type: String, default: 'api/chart-data/doughnut' }, // API名は分けた方が良いかも
+    apiUrl: { type: String, default: 'api/chart-data/doughnut' },
     colors: {
         type: Array,
         default: () => [
@@ -76,13 +76,16 @@ onMounted(async () => {
         const response = await fetch(props.apiUrl)
         const json = await response.json()
 
+        // 数値化してから渡す
+        const totals = json.totals.map(t => Number(t));
+
         // ドーナツグラフ用に必ず単一データセットにまとめる
         chartData.value = {
             labels: json.labels,
             datasets: [
                 {
                     label: props.label,
-                    data: json.totals, // APIは labels と totals を返すこと
+                    data: totals, // APIは labels と totals を返すこと
                     backgroundColor: props.colors.slice(0, json.labels.length)
                 }
             ]
