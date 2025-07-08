@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-import { watch, onMounted, ref  } from 'vue';
+import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
@@ -14,6 +14,14 @@ import DoughnutChart from '@/Components/DoughnutChart.vue';
 const props = defineProps({
     expenses: Object,
     categories: Array,
+    totalExpense: {
+        type: Number,
+        default: 0,
+    },
+});
+
+const formattedTotal = computed(() => {
+    return Number(props.totalExpense).toLocaleString();
 });
 
 const form = useForm({
@@ -216,8 +224,10 @@ onMounted(() => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                    ドーナツグラフ
+                    今月の家計状況
                     <DoughnutChart />
+                    <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
+                    <p>今月の合計支出: {{ formattedTotal }}円</p>
                     </div>
                 </div>
             </div>

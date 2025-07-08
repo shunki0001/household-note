@@ -6,12 +6,14 @@ use App\Models\Category;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     //
     public function index(Request $request)
     {
+        $now = Carbon::now();
         /** @var \App\Models\User $user */
         // $user = auth()->user();
         $user = Auth::user();
@@ -23,12 +25,18 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc') // 入力日から最新の５件表示
             ->paginate(5);
 
+        // 今月の合計支出
+        $totalExpense = Expense::whereYear('date', $now->year)
+        ->whereMonth('date', $now->month)
+        ->sum('amount');
+
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,
             'categories' => $categories,
             'flash' => [
                 'message' => session('message')
-            ]
+            ],
+            'totalExpense' => $totalExpense,
         ]);
 
     }

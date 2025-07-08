@@ -51,6 +51,8 @@ class ChartController extends Controller
             'totals' => array_values($data), // ０始まりにする
         ]);
     }
+
+    // 1~12月毎に分けたカテゴリー別合計金額
     public function getCategoryTotals() {
 
         // 月ラベル作成
