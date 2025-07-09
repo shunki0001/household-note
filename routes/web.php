@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/expenses/{expense}', [DashboardController::class, 'update'])->name('expenses.update');
 
     Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
-    Route::get('/api/chart-data/category-monthly', [ChartController::class, 'getCategoryTotals']);
+    Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryTotals']);
     Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryTotals']);
 
     // ページ移動

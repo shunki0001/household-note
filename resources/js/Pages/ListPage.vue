@@ -9,11 +9,7 @@ import BarChart2 from '@/Components/BarChart2.vue';
                 class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
             >
                 <div class="p-6 text-gray-900">
-                    カテゴリー別合計グラフ
-                    <BarChart2
-                        label="a"
-                        apiUrl="/api/chart-data/category-monthly"
-                    />
+                    ◯月の支出一覧
                 </div>
             </div>
         </div>

@@ -1,5 +1,13 @@
 <script setup>
 import BarChart2 from '@/Components/BarChart2.vue';
+import { ref } from 'vue'
+
+// const currentMonth = ref(1);
+const currentMonth = ref(new Date().getMonth() + 1);
+
+const changePage = (month) => {
+    currentMonth.value = month;
+}
 </script>
 
 <template>
@@ -9,11 +17,28 @@ import BarChart2 from '@/Components/BarChart2.vue';
                 class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
             >
                 <div class="p-6 text-gray-900">
-                    カテゴリー別合計グラフ
+                    カテゴリー別合計グラフ ({{ currentMonth }}月)
                     <BarChart2
-                        label="a"
-                        apiUrl="/api/chart-data/category-monthly"
+                        label="カテゴリー別"
+                        apiUrl="/api/chart-data/category-monthly-single"
+                        :month="currentMonth"
                     />
+
+                    <!-- ページネーション -->
+                    <div class="mt-4 flex justify-center space-x-2">
+                        <button
+                            v-for="month in 12"
+                            :key="month"
+                            class="px-3 py-1 border rounded hover:bg-blue-100"
+                            :class="{
+                                'bg-blue-500 text-white': currentMonth === month,
+                                'bg-white text-black': currentMonth !== month
+                            }"
+                            @click="changePage(month)"
+                        >
+                            {{ month }}月
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

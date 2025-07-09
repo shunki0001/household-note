@@ -1,105 +1,107 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Bar } from 'vue-chartjs'
-import {
-    Chart as ChartJS,
-    Title, Tooltip, Legend,
-    BarElement, CategoryScale, LinearScale
-} from 'chart.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { onMounted, ref, watch } from 'vue'
+import { Chart, registerables } from 'chart.js'
+import axios from 'axios'
 
-// Chart.jsのプラグイン登録
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels)
+Chart.register(...registerables)
 
-// propsを定義
+// props
 const props = defineProps({
-    label: { type: String, default: '月別支出合計' },
-    apiUrl: { type: String, default: '/api/chart-data' },
-    colors: {
-        type: Array,
-        default: () => ['#42b983', '#42b983', '#42b983', '#42b983']
-    }
+  apiUrl: {
+    type: String,
+    required: true,
+  },
+  label: {
+    type: String,
+    default: 'カテゴリー別支出',
+  },
+  month: {
+    type: Number,
+    required: true,
+  },
 })
 
-const chartData = ref({ labels: [], datasets: [] })
-const chartOptions = ref(createChartOptions())
+// chart element
+const chartRef = ref(null)
+let chartInstance = null
 
-// Chartオプション生成関数
-function createChartOptions(max = undefined) {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: { padding: { top: 20 } },
-        plugins: {
-            datalabels: {
-                anchor: 'end',
-                align: 'end',
-                formatter: (value) => `¥${value.toLocaleString()}`,
-                color: '#333',
-                font: { weight: 'bold', size: 12 }
+// グラフ描画関数
+const renderChart = (labels, datasets) => {
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+
+  chartInstance = new Chart(chartRef.value, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `${props.month}月の${props.label}`,
+          font: {
+            size: 18,
+          },
+        },
+        legend: {
+          display: true,
+          position: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return `${context.dataset.label}: ¥${context.parsed.y.toLocaleString()}`
             },
-            legend: { display: true },
-            tooltip: {
-                callbacks: {
-                    label: (context) => `¥${context.parsed.y.toLocaleString()}`
-                }
-            }
+          },
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: max,
-                ticks: {
-                    callback: (value) => `¥${value.toLocaleString()}`
-                }
-            }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function (value) {
+              return `¥${value.toLocaleString()}`
+            },
+          },
+          title: {
+            display: true,
+            text: '金額（円）',
+          },
         },
-        aspectRatio: 2
-    }
+        x: {
+          title: {
+            display: true,
+            text: '月',
+          },
+        },
+      },
+    },
+  })
 }
 
-// APIからデータ取得
-onMounted(async () => {
-    try {
-        const response = await fetch(props.apiUrl)
-        const json = await response.json()
+// データ取得と描画
+const fetchChartData = async () => {
+  try {
+    const response = await axios.get(`${props.apiUrl}?month=${props.month}`)
+    const { labels, datasets } = response.data
+    renderChart(labels, datasets)
+  } catch (error) {
+    console.error('グラフデータの取得に失敗しました:', error)
+  }
+}
 
-        const maxValue = Math.max(...(json.totals || json.datasets?.flatMap(ds => ds.data) || [0]))
-        const adjustedMax = Math.ceil((maxValue + 10000) / 1000) * 1000
-
-        if (json.datasets) {
-            // 複数カテゴリ
-            chartData.value = {
-                labels: json.labels,
-                datasets: json.datasets.map((dataset, index) => ({
-                    ...dataset,
-                    backgroundColor: props.colors[index % props.colors.length]
-                }))
-            }
-        } else {
-            // 単一データセット
-            chartData.value = {
-                labels: json.labels,
-                datasets: [
-                    {
-                        label: props.label,
-                        data: json.totals,
-                        backgroundColor: [props.colors[0]]
-                    }
-                ]
-            }
-        }
-
-        chartOptions.value = createChartOptions(adjustedMax)
-
-    } catch (error) {
-        console.error('データ取得エラー:', error)
-    }
-})
+// 初回と月変更時に再取得
+onMounted(fetchChartData)
+watch(() => props.month, fetchChartData)
 </script>
 
 <template>
-    <div style="height: 400px;">
-        <Bar :data="chartData" :options="chartOptions" />
-    </div>
+  <div class="w-full h-[400px]">
+    <canvas ref="chartRef"></canvas>
+  </div>
 </template>
