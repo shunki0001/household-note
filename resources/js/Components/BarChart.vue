@@ -1,43 +1,105 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import { Chart, registerables } from 'chart.js';
+import { ref, onMounted } from 'vue'
+import { Bar } from 'vue-chartjs'
+import {
+    Chart as ChartJS,
+    Title, Tooltip, Legend,
+    BarElement, CategoryScale, LinearScale
+} from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
-Chart.register(...registerables);
+// Chart.jsのプラグイン登録
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels)
 
+// propsを定義
 const props = defineProps({
-    chartData: {
-        type: Object,
-        required: true
+    label: { type: String, default: '月別支出合計' },
+    apiUrl: { type: String, default: '/api/chart-data' },
+    colors: {
+        type: Array,
+        default: () => ['#42b983', '#42b983', '#42b983', '#42b983']
     }
-});
+})
 
-const canvasRef = ref(null);
-let chartInstance = null;
+const chartData = ref({ labels: [], datasets: [] })
+const chartOptions = ref(createChartOptions())
 
-const renderChart = () => {
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
-    chartInstance = new Chart(canvasRef.value, {
-        type: 'bar',
-        data: props.chartData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: props.chartData.title }
+// Chartオプション生成関数
+function createChartOptions(max = undefined) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'end',
+                formatter: (value) => `¥${value.toLocaleString()}`,
+                color: '#333',
+                font: { weight: 'bold', size: 12 }
+            },
+            legend: { display: true },
+            tooltip: {
+                callbacks: {
+                    label: (context) => `¥${context.parsed.y.toLocaleString()}`
+                }
             }
-        }
-    });
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: max,
+                ticks: {
+                    callback: (value) => `¥${value.toLocaleString()}`
+                }
+            }
+        },
+        aspectRatio: 2
+    }
 }
 
-onMounted(renderChart);
+// APIからデータ取得
+onMounted(async () => {
+    try {
+        const response = await fetch(props.apiUrl)
+        const json = await response.json()
 
-// データが切り替わったとき再描写
-watch(() => props.chartData, renderChart, { deep: true });
+        const maxValue = Math.max(...(json.totals || json.datasets?.flatMap(ds => ds.data) || [0]))
+        const adjustedMax = Math.ceil((maxValue + 10000) / 1000) * 1000
+
+        if (json.datasets) {
+            // 複数カテゴリ
+            chartData.value = {
+                labels: json.labels,
+                datasets: json.datasets.map((dataset, index) => ({
+                    ...dataset,
+                    backgroundColor: props.colors[index % props.colors.length]
+                }))
+            }
+        } else {
+            // 単一データセット
+            chartData.value = {
+                labels: json.labels,
+                datasets: [
+                    {
+                        label: props.label,
+                        data: json.totals,
+                        backgroundColor: [props.colors[0]]
+                    }
+                ]
+            }
+        }
+
+        chartOptions.value = createChartOptions(adjustedMax)
+
+    } catch (error) {
+        console.error('データ取得エラー:', error)
+    }
+})
 </script>
 
 <template>
-    <canvas ref="canvasRef"></canvas>
+    <div style="height: 400px;">
+        <Bar :data="chartData" :options="chartOptions" />
+    </div>
 </template>

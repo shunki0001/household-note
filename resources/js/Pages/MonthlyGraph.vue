@@ -1,5 +1,5 @@
 <script setup>
-import BarChart2 from '@/Components/BarChart2.vue';
+import BarChart from '@/Components/BarChart.vue';
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import BarChart2 from '@/Components/BarChart2.vue';
             >
                 <div class="p-6 text-gray-900">
                     月合計支出グラフ
-                    <BarChart2/>
+                    <BarChart/>
                 </div>
             </div>
         </div>

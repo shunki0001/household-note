@@ -84,47 +84,6 @@ class ChartController extends Controller
             'labels' => $labels,
             'datasets' => $datasets,
         ]);
-
-        // // 月ラベル作成
-        // $labels = [];
-        // for ($month = 1; $month <= 12; $month++) {
-        //     $labels[] = $month . '月';
-        // }
-
-        // // カテゴリ情報（id => name のマップ）
-        // $categories = Category::pluck('name', 'id'); // 例: [1 => '食費', 2 => '交通費', ...]
-
-        // // 一括集計（SQL発行はこの1回のみ）
-        // $expenses = Expense::selectRaw('category_id, MONTH(date) as month, SUM(amount) as total')
-        //     ->whereYear('date', 2025)
-        //     ->groupBy('category_id', 'month')
-        //     ->get();
-
-        // // カテゴリごとにデータを初期化
-        // $datasets = [];
-
-        // foreach ($categories as $categoryId => $categoryName) {
-        //     // 初期化：各月の金額を0で埋める
-        //     $monthlyTotals = array_fill(1, 12, 0);
-
-        //     // 現在のカテゴリに該当するデータだけ抽出
-        //     $categoryExpenses = $expenses->where('category_id', $categoryId);
-
-        //     foreach ($categoryExpenses as $expense) {
-        //         $monthlyTotals[$expense->month] = (int) $expense->total;
-        //     }
-
-        //     // 1月始まりの配列にする
-        //     $datasets[] = [
-        //         'label' => $categoryName,
-        //         'data' => array_values($monthlyTotals),
-        //     ];
-        // }
-
-        // return response()->json([
-        //     'labels' => $labels,
-        //     'datasets' => $datasets,
-        // ]);
     }
 
     // ドーナツグラフ用のグラフデータ取得
