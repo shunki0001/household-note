@@ -130,8 +130,10 @@ class ChartController extends Controller
     // ドーナツグラフ用のグラフデータ取得
     public function doughnutGetCategoryTotals() {
         $now = Carbon::now(); // 現在日時
+        $userId = Auth::id(); // ログインユーザーID
 
         $data = Expense::select('category_id', DB::raw('SUM(amount) as total'))
+            ->where('user_id', $userId)
             ->whereYear('date', $now->year) // 今年
             ->whereMonth('date', $now->month) // 今月
             ->groupBy('category_id')

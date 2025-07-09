@@ -17,6 +17,7 @@ class DashboardController extends Controller
         /** @var \App\Models\User $user */
         // $user = auth()->user();
         $user = Auth::user();
+        $userId = Auth::id();
         $categories = Category::all();
 
         // $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
@@ -27,6 +28,7 @@ class DashboardController extends Controller
 
         // 今月の合計支出
         $totalExpense = Expense::whereYear('date', $now->year)
+        ->where('user_id', $userId)
         ->whereMonth('date', $now->month)
         ->sum('amount');
 
