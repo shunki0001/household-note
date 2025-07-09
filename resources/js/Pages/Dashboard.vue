@@ -10,6 +10,7 @@ import ExpenseForm from '@/Components/ExpenseForm.vue';
 import BarChart from '@/Components/BarChart.vue';
 import BarChart2 from '@/Components/BarChart2.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -156,6 +157,33 @@ onMounted(() => {
             </div>
         </div>
 
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                        グラフ・一覧ページに移動するボタンを設置
+                        <div class="mt-4">
+                            <Link href="/list">
+                                <PrimaryButton class="ms-4">一覧ページに移動</PrimaryButton>
+                            </Link>
+                        </div>
+                        <div class="mt-4">
+                            <Link href="/graph/monthly">
+                                <PrimaryButton class="ms-4">月別支出グラフ</PrimaryButton>
+                            </Link>
+                        </div>
+                        <div class="mt-4">
+                            <Link href="/graph/category">
+                                <PrimaryButton class="ms-4">カテゴリー別支出グラフ</PrimaryButton>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 一覧表示部分 -->
         <!-- <pre>{{ expenses }}</pre> -->
         <div class="py-12">
@@ -194,12 +222,18 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="p-4">
-            <h2 class="text-xl font-bold mb-4">月別支出</h2>
-            <BarChart v-if="monthlyChartData" :chartData="monthlyChartData" />
-
-            <!-- <h2 class="text-xl font-bold mb-4">カテゴリー別支出</h2>
-            <BarChart v-if="categoryChartData" :chartData="categoryChartData" /> -->
+        <!-- 月合計支出グラフ -->
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                        月合計支出グラフ
+                        <BarChart2/>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="py-12">
@@ -208,7 +242,7 @@ onMounted(() => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        <BarChart2/>
+                        カテゴリー別合計グラフ
                         <BarChart2
                             label="a"
                             apiUrl="/api/chart-data/category-monthly"

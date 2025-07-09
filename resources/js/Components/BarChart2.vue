@@ -14,7 +14,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 // propsを定義
 const props = defineProps({
     label: { type: String, default: '月別支出合計' },
-    apiUrl: { type: String, default: 'api/chart-data' },
+    apiUrl: { type: String, default: '/api/chart-data' },
     colors: {
         type: Array,
         default: () => ['#42b983', '#42b983', '#42b983', '#42b983']

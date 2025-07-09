@@ -4,6 +4,7 @@ use App\Http\Controllers\ChartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\PageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,6 +43,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
     Route::get('/api/chart-data/category-monthly', [ChartController::class, 'getCategoryTotals']);
     Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryTotals']);
+
+    // ページ移動
+    Route::get('/list', [PageController::class, 'list'])->name('list');
+    Route::get('/graph/monthly', [PageController::class, 'monthlyGraph'])->name('graph.monthly');
+    Route::get('/graph/category', [PageController::class, 'categoryGraph'])->name('graph.category');
 });
 
 require __DIR__.'/auth.php';
