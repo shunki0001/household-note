@@ -22,35 +22,65 @@ class ChartController extends Controller
             return response()->json($data);
     }
 
-    public function getMonthlyTotals()
+    public function getMonthlyTotals(Request $request)
     {
-        // 月ラベル作成
+        $year = $request->query('year', Carbon::now()->year);
+        $userId = Auth::id();
+
         $month = [];
-        for ($month = 1; $month <=12; $month++) {
-            $months[] = $month . '月';
+        for ($i = 1; $i <= 12; $i++) {
+            $month[] = $i . '月';
         }
 
-        // SQL 1回で月毎の合計を取得
         $expenses = DB::table('expenses')
-            ->selectRaw('MONTH(date) as month, SUM(amount) as total')
-            ->whereYear('date', 2025)
+            ->selectRaw('MONTH(date) as month, SUM(amount) as total ')
+            ->where('user_id', $userId)
+            ->whereYear('date', $year)
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // 月別合計を0で初期化
         $data = array_fill(1, 12, 0);
 
-        // 集計結果を反映
         foreach ($expenses as $expense) {
             $data[$expense->month] = (int) $expense->total;
         }
 
         return response()->json([
-            'labels' => $months,
-            'totals' => array_values($data), // ０始まりにする
+            'labels' => $month,
+            'totals' => array_values($data),
         ]);
     }
+
+    // public function getMonthlyTotals()
+    // {
+    //     // 月ラベル作成
+    //     $month = [];
+    //     for ($month = 1; $month <=12; $month++) {
+    //         $months[] = $month . '月';
+    //     }
+
+    //     // SQL 1回で月毎の合計を取得
+    //     $expenses = DB::table('expenses')
+    //         ->selectRaw('MONTH(date) as month, SUM(amount) as total')
+    //         ->whereYear('date', 2025)
+    //         ->groupBy('month')
+    //         ->orderBy('month')
+    //         ->get();
+
+    //     // 月別合計を0で初期化
+    //     $data = array_fill(1, 12, 0);
+
+    //     // 集計結果を反映
+    //     foreach ($expenses as $expense) {
+    //         $data[$expense->month] = (int) $expense->total;
+    //     }
+
+    //     return response()->json([
+    //         'labels' => $months,
+    //         'totals' => array_values($data), // ０始まりにする
+    //     ]);
+    // }
 
     // 1~12月毎に分けたカテゴリー別合計金額
     public function getCategoryTotals(Request $request) {

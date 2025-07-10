@@ -7,8 +7,6 @@ import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
-import BarChart from '@/Components/BarChart.vue';
-import BarChart2 from '@/Components/BarChart2.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 
@@ -93,21 +91,6 @@ const fetchMonthlyData = async () => {
     };
 };
 
-// const fetchCategoryData = async (month = 7) => {
-//     const response = await fetch(`http://localhost:8001/api/chart/category/${month}`);
-//     const data = await response.json();
-
-//     categoryChartData.value = {
-//         labels: data.map(item => item.category),
-//         datasets: [{
-//             label: `${month}月のカテゴリ別支出`,
-//             data: data.map(item => item.total),
-//             backgroundColor: 'rgba(255, 99, 132, 0.7)'
-//         }],
-//         title: `${month}月のカテゴリ別支出グラフ`
-//     };
-// };
-
 onMounted(() => {
     fetchMonthlyData();
     // fetchCategoryData();
@@ -135,6 +118,21 @@ onMounted(() => {
                 >
                     <div class="p-6 text-gray-900">
                         ここにCRUD処理を入力
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                    今月の家計状況
+                    <DoughnutChart />
+                    <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
+                    <p>今月の合計支出: {{ formattedTotal }}円</p>
                     </div>
                 </div>
             </div>
@@ -219,51 +217,6 @@ onMounted(() => {
                     </div>
                 </div>
 
-            </div>
-        </div>
-
-        <!-- 月合計支出グラフ -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        月合計支出グラフ
-                        <BarChart2/>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        カテゴリー別合計グラフ
-                        <BarChart2
-                            label="a"
-                            apiUrl="/api/chart-data/category-monthly"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                    今月の家計状況
-                    <DoughnutChart />
-                    <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
-                    <p>今月の合計支出: {{ formattedTotal }}円</p>
-                    </div>
-                </div>
             </div>
         </div>
 
