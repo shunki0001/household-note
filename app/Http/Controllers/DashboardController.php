@@ -51,7 +51,8 @@ class DashboardController extends Controller
         }
 
         $expense->delete();
-        return redirect()->route('dashboard')->with('message', '削除しました');
+        return redirect()->back()->with('message', '削除しました');
+        // return redirect()->route('dashboard')->with('message', '削除しました');
     }
 
     // 編集ページ表示

@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
@@ -9,6 +9,7 @@ import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import axios from 'axios';
 
 const props = defineProps({
     expenses: Object,
@@ -76,25 +77,12 @@ onMounted(() => {
 const monthlyChartData = ref(null);
 const categoryChartData = ref(null);
 
-// const fetchMonthlyData = async () => {
-//     const response = await fetch('http://localhost:8001/api/chart/monthly');
-//     const data = await response.json();
-
-//     monthlyChartData.value = {
-//         labels: data.map(item => `${item.month}月`),
-//         datasets: [{
-//             label: '月別支出合計',
-//             data: data.map(item => item.total),
-//             backgroundColor: 'rgba(54, 162, 235, 0.7)'
-//         }],
-//         title: '月別支出グラフ'
-//     };
-// };
-
-// onMounted(() => {
-//     fetchMonthlyData();
-//     // fetchCategoryData();
-// })
+const reloadDashboard = () => {
+    router.visit(route('dashboard'), {
+        preserveScroll: true, // スクロール位置を保持したい場合
+        preserveState: true, // ページ遷移アニメーションを防ぎたい場合(任意)
+    });
+}
 
 </script>
 
@@ -207,7 +195,7 @@ const categoryChartData = ref(null);
                                         <!-- 要修正->コンポーネント化 -->
                                         <!-- 編集ボタン -->
                                         <Link :href="route('expenses.edit', expense.id)" class="text-blue-500 hover:underLine">編集</Link>
-                                        <DeleteButton :expenseId="expense.id"/>
+                                        <DeleteButton :expenseId="expense.id" @deleted="reloadDashboard"/>
                                     </td>
                                 </tr>
                             </tbody>

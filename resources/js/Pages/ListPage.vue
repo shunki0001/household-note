@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import DeleteButton from '@/Components/DeleteButton.vue';
 
 const expenses = ref([]);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
@@ -14,7 +16,6 @@ const fetchExpenses = async () => {
                 month: month.value,
             },
         });
-        console.log(response.data);
         expenses.value = response.data;
     } catch (error) {
         console.log('データ取得失敗', error);
@@ -50,7 +51,8 @@ onMounted(fetchExpenses);
 
                             <td class="border px-4 py-2 space-x-2">
                                 <button class="text-blue-500 hover:underline">編集</button>
-                                <button class="text-red-500 hover:underline">削除</button>
+                                <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
+                                <!-- <button class="text-red-500 hover:underline">削除</button> -->
                             </td>
                         </tr>
                         <tr v-if="expenses.length === 0">

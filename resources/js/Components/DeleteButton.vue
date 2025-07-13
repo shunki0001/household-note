@@ -1,10 +1,13 @@
 <script setup>
 import Swal from 'sweetalert2';
-import {router} from '@inertiajs/vue3'
+import {router} from '@inertiajs/vue3';
+import { defineEmits } from 'vue';
 
 const props = defineProps({
     expenseId: Number,
 });
+
+const emit = defineEmits(['deleted']); // 削除通知イベント
 
 const destroy = () => {
     Swal.fire({
@@ -21,10 +24,12 @@ const destroy = () => {
             router.delete(route('expenses.destroy', props.expenseId), {
                 onSuccess: () => {
                     // ページ更新
-                    router.reload();
+                    // router.reload();
+
 
                     // 削除完了通知
                     Swal.fire('削除しました', 'データは正常に削除されました', 'success');
+                    emit('deleted');
                 }
             });
         }
