@@ -12,15 +12,15 @@ use Carbon\Carbon;
 class ChartController extends Controller
 {
     // 1~12月の月別支出合計データ
-    public function getMonthlyExpenses()
-    {
-        $data = Expense::selectRaw('MONTH(date) as month, SUM(amount as total)')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+    // public function getMonthlyExpenses()
+    // {
+    //     $data = Expense::selectRaw('MONTH(date) as month, SUM(amount as total)')
+    //         ->groupBy('month')
+    //         ->orderBy('month')
+    //         ->get();
 
-            return response()->json($data);
-    }
+    //         return response()->json($data);
+    // }
 
     public function getMonthlyTotals(Request $request)
     {

@@ -76,25 +76,25 @@ onMounted(() => {
 const monthlyChartData = ref(null);
 const categoryChartData = ref(null);
 
-const fetchMonthlyData = async () => {
-    const response = await fetch('http://localhost:8001/api/chart/monthly');
-    const data = await response.json();
+// const fetchMonthlyData = async () => {
+//     const response = await fetch('http://localhost:8001/api/chart/monthly');
+//     const data = await response.json();
 
-    monthlyChartData.value = {
-        labels: data.map(item => `${item.month}月`),
-        datasets: [{
-            label: '月別支出合計',
-            data: data.map(item => item.total),
-            backgroundColor: 'rgba(54, 162, 235, 0.7)'
-        }],
-        title: '月別支出グラフ'
-    };
-};
+//     monthlyChartData.value = {
+//         labels: data.map(item => `${item.month}月`),
+//         datasets: [{
+//             label: '月別支出合計',
+//             data: data.map(item => item.total),
+//             backgroundColor: 'rgba(54, 162, 235, 0.7)'
+//         }],
+//         title: '月別支出グラフ'
+//     };
+// };
 
-onMounted(() => {
-    fetchMonthlyData();
-    // fetchCategoryData();
-})
+// onMounted(() => {
+//     fetchMonthlyData();
+//     // fetchCategoryData();
+// })
 
 </script>
 
