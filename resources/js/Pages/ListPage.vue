@@ -3,7 +3,10 @@ import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import DeleteButton from '@/Components/DeleteButton.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+
+// フラッシュメッセージの取得
+const page = usePage();
 
 const expenses = ref([]);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
@@ -24,7 +27,21 @@ const fetchExpenses = async () => {
 };
 
 // ページ読み込み時に実行
-onMounted(fetchExpenses);
+onMounted(() => {
+    fetchExpenses();
+    const message = page.props.flash?.message;
+    if(message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: message,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    }
+});
 </script>
 
 <template>
