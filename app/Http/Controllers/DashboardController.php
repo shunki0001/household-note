@@ -56,17 +56,19 @@ class DashboardController extends Controller
     }
 
     // 編集ページ表示
-    public function edit(Expense $expense)
+    public function edit(Expense $expense, Request $request)
     {
         if(Auth::id() !== $expense->user_id) {
             abort(403);
         }
 
         $categories = Category::all(); // 編集画面でカテゴリー一覧を渡す
+        $backRoute = $request->input('back', 'list'); // デフォルト：dashboard
 
         return Inertia::render('Expenses/Edit', [
             'expense' => $expense,
             'categories' => $categories,
+            'back' => $backRoute,
         ]);
     }
 
@@ -86,6 +88,10 @@ class DashboardController extends Controller
 
         $expense->update($validated);
 
-        return redirect()->route('dashboard')->with('message', '更新しました');
+        // backパラメータから戻り先を取得
+        $back = $request->input('back', 'list');
+
+        return redirect()->route($back)->with('message', '更新しました');
+        // return redirect()->back()->with('message', '更新しました');
     }
 }

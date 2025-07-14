@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import DeleteButton from '@/Components/DeleteButton.vue';
+import { Link } from '@inertiajs/vue3';
 
 const expenses = ref([]);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
@@ -50,7 +51,8 @@ onMounted(fetchExpenses);
                             <td class="border px-4 py-2">{{ expense.title }}</td>
 
                             <td class="border px-4 py-2 space-x-2">
-                                <button class="text-blue-500 hover:underline">編集</button>
+                                <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="text-blue-500 hover:underLine">編集</Link>
+                                <!-- <button class="text-blue-500 hover:underline">編集</button> -->
                                 <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
                                 <!-- <button class="text-red-500 hover:underline">削除</button> -->
                             </td>

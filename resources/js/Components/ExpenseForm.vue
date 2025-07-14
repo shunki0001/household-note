@@ -10,6 +10,7 @@ const props = defineProps({
     categories: Array,  // カテゴリー一覧
     submitUrl: String,  // 送信先ルート
     method: String,     // POST or PUT
+    back: String,
 });
 
 const form = useForm({
@@ -17,6 +18,7 @@ const form = useForm({
     date: props.expense.date ?? '',
     title: props.expense.title ?? '',
     category_id: props.expense.category_id ?? '',
+    back: props.back ?? 'dashboard',
 });
 
 const submit = () => {
@@ -59,6 +61,7 @@ const submit = () => {
             </select>
             <InputError class="mt-2" :message="form.errors.category_id"/>
         </div>
+        <input type="hidden" name="back" :value="form.back">
 
         <!-- 送信ボタン -->
         <div class="mt-4 flex items-center">

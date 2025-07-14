@@ -194,7 +194,7 @@ const reloadDashboard = () => {
                                     <td class="border px-4 py-2">
                                         <!-- 要修正->コンポーネント化 -->
                                         <!-- 編集ボタン -->
-                                        <Link :href="route('expenses.edit', expense.id)" class="text-blue-500 hover:underLine">編集</Link>
+                                        <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="text-blue-500 hover:underLine">編集</Link>
                                         <DeleteButton :expenseId="expense.id" @deleted="reloadDashboard"/>
                                     </td>
                                 </tr>

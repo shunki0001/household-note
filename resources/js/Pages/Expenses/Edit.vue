@@ -6,6 +6,7 @@ import ExpenseForm from '@/Components/ExpenseForm.vue';
 const props = defineProps({
     expense: Object,
     categories: Array,
+    back: String,
 });
 
 </script>
@@ -30,6 +31,7 @@ const props = defineProps({
                                 :categories="props.categories"
                                 :submit-url="route('expenses.update', props.expense.id)"
                                 :method="'put'"
+                                :back="back"
                             />
                         </div>
                     </div>
