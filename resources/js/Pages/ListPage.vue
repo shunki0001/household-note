@@ -42,6 +42,21 @@ onMounted(() => {
         });
     }
 });
+
+// 月変更ロジック
+const changeMonth = (delta) => {
+    month.value += delta;
+
+    if(month.value > 12) {
+        month.value = 1;
+        year.value += 1;
+    } else if (month.value < 1) {
+        month.value = 12;
+        year.value -= 1;
+    }
+
+    fetchExpenses();
+}
 </script>
 
 <template>
@@ -49,6 +64,8 @@ onMounted(() => {
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg bg-white p-6">
                 <h2 class="text-xl font-bold mb-4">{{ year }}年{{ month }}月の支出一覧</h2>
+                <button @click="changeMonth(-1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">前月</button>
+                <button @click="changeMonth(1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">次月</button>
 
                 <table class="min-w-full table-auto border border-gray-300 text-left">
                     <thead class="bg-gray-100">
@@ -69,9 +86,7 @@ onMounted(() => {
 
                             <td class="border px-4 py-2 space-x-2">
                                 <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="text-blue-500 hover:underLine">編集</Link>
-                                <!-- <button class="text-blue-500 hover:underline">編集</button> -->
                                 <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
-                                <!-- <button class="text-red-500 hover:underline">削除</button> -->
                             </td>
                         </tr>
                         <tr v-if="expenses.length === 0">
