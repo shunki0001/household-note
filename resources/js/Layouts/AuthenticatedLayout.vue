@@ -39,6 +39,27 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+
+                                <NavLink
+                                    :href="route('list')"
+                                    :active="route().current('list')"
+                                >
+                                    一覧ページへ
+                                </NavLink>
+
+                                <NavLink
+                                    :href="route('graph.monthly')"
+                                    :active="route().current('graph.monthly')"
+                                >
+                                    月別支出グラフ
+                                </NavLink>
+
+                                <NavLink
+                                    :href="route('graph.category')"
+                                    :active="route().current('graph.category')"
+                                >
+                                    カテゴリー別支出グラフ
+                                </NavLink>
                             </div>
                         </div>
 
@@ -74,14 +95,14 @@ const showingNavigationDropdown = ref(false);
                                         <DropdownLink
                                             :href="route('profile.edit')"
                                         >
-                                            Profile
+                                            プロフィール
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"
                                         >
-                                            Log Out
+                                            ログアウト
                                         </DropdownLink>
                                     </template>
                                 </Dropdown>
@@ -165,14 +186,14 @@ const showingNavigationDropdown = ref(false);
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
+                                プロフィール
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
                             >
-                                Log Out
+                                ログアウト
                             </ResponsiveNavLink>
                         </div>
                     </div>

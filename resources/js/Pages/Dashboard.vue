@@ -91,15 +91,15 @@ const reloadDashboard = () => {
 
     <AuthenticatedLayout>
         <Toast/>
-        <template #header>
+        <!-- <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
             >
                 Dashboard
             </h2>
-        </template>
+        </template> -->
 
-        <div class="py-12">
+        <!-- <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
@@ -109,7 +109,7 @@ const reloadDashboard = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -121,6 +121,8 @@ const reloadDashboard = () => {
                     <DoughnutChart />
                     <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
                     <p>今月の合計支出: {{ formattedTotal }}円</p>
+                    <p>今月の合計収入: ◯◯円</p>
+                    <p>収支: ◯◯円</p>
                     </div>
                 </div>
             </div>
