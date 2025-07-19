@@ -30,10 +30,21 @@ const form = useForm({
     title: '',
     category_id: '',
 });
+const formKey = ref(0);
+
+
+// const submit = () => {
+//     form.post(route('expenses.store'), {
+//         onSuccess: () => form.reset(), // 登録後にフォームを初期化
+//     });
+// }
 
 const submit = () => {
     form.post(route('expenses.store'), {
-        onSuccess: () => form.reset(), // 登録後にフォームを初期化
+        onSuccess: () => {
+            form.reset();
+            formKey.value++;
+        },
     });
 }
 
@@ -135,6 +146,7 @@ const reloadDashboard = () => {
                 >
                     <div class="p-6 text-gray-900">
                         <ExpenseForm
+                            :key="formKey"
                             :expense="{}"
                             :categories="props.categories"
                             :submit-url="route('expenses.store')"
@@ -178,6 +190,7 @@ const reloadDashboard = () => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                    最近の記録
                         <table class="table-auto w-full">
                             <thead>
                                 <tr>

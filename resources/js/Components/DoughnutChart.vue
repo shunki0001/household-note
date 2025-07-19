@@ -21,7 +21,9 @@ const props = defineProps({
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
             '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
         ]
-    }
+    },
+    chartData: Object,
+    chartOptions: Object,
 })
 
 // labelsはカテゴリーを格納

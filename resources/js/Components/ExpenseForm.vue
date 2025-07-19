@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { watch } from 'vue';
 
 const props = defineProps({
     expense: Object,    // 初期データ
@@ -19,6 +20,13 @@ const form = useForm({
     title: props.expense.title ?? '',
     category_id: props.expense.category_id ?? '',
     back: props.back ?? 'dashboard',
+});
+
+watch(() => props.expense, (newExpense) => {
+    form.amount = newExpense.amount ?? '';
+    form.date = newExpense.date ?? '';
+    form.title = newExpense.title ?? '';
+    form.category_id = newExpense.category_id ?? '';
 });
 
 const submit = () => {
