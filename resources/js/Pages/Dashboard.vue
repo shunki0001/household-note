@@ -15,14 +15,17 @@ const props = defineProps({
     expenses: Object,
     categories: Array,
     totalExpense: {
-        type: Number,
+        type: [Number, String],
         default: 0,
     },
+    // refreshKey: Number,
 });
 
 const formattedTotal = computed(() => {
     return Number(props.totalExpense).toLocaleString();
 });
+
+const refreshKey = ref(0)
 
 const form = useForm({
     amount: '',
@@ -43,7 +46,8 @@ const submit = () => {
     form.post(route('expenses.store'), {
         onSuccess: () => {
             form.reset();
-            formKey.value++;
+            // formKey.value++;
+            refreshKey.value++;
         },
     });
 }
@@ -129,7 +133,9 @@ const reloadDashboard = () => {
                 >
                     <div class="p-6 text-gray-900">
                     今月の家計状況
-                    <DoughnutChart />
+                    <DoughnutChart
+                        :refresh-key="refreshKey"
+                    />
                     <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
                     <p>今月の合計支出: {{ formattedTotal }}円</p>
                     <p>今月の合計収入: ◯◯円</p>
@@ -151,6 +157,7 @@ const reloadDashboard = () => {
                             :categories="props.categories"
                             :submit-url="route('expenses.store')"
                             :method="'post'"
+                            @expense-added="refreshKey++"
                         />
                     </div>
                 </div>
@@ -210,7 +217,7 @@ const reloadDashboard = () => {
                                         <!-- 要修正->コンポーネント化 -->
                                         <!-- 編集ボタン -->
                                         <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="text-blue-500 hover:underLine">編集</Link>
-                                        <DeleteButton :expenseId="expense.id" @deleted="reloadDashboard"/>
+                                        <DeleteButton :expenseId="expense.id" @deleted="refreshKey++"/>
                                     </td>
                                 </tr>
                             </tbody>

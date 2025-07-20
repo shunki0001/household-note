@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import {
     Chart as ChartJS,
@@ -24,6 +24,7 @@ const props = defineProps({
     },
     chartData: Object,
     chartOptions: Object,
+    refreshKey: { type: Number, default: 0 },
 })
 
 // labelsはカテゴリーを格納
@@ -72,34 +73,77 @@ function createChartOptions() {
     }
 }
 
-// APIからデータ取得
-onMounted(async () => {
+// refreshKeyの変更を監視して再取得
+// watch(
+//     () => props.refreshKey,
+//     async () => {
+//         await fetchChartData()
+//     }
+// )
+
+watch(() => props.refreshKey, async () => {
+    console.log('refreshKey changed:', props.refreshKey);
+    await fetchChartData();
+})
+
+// API取得ロジックを関数化
+async function fetchChartData() {
     try {
         const response = await fetch(props.apiUrl)
         const json = await response.json()
+        const totals = json.totals.map(t => Number(t))
 
-        // 数値化してから渡す
-        const totals = json.totals.map(t => Number(t));
+        console.log('API response:', json);
 
-        // ドーナツグラフ用に必ず単一データセットにまとめる
         chartData.value = {
             labels: json.labels,
             datasets: [
                 {
-                    label: props.label,
-                    data: totals, // APIは labels と totals を返すこと
+                    labels: props.label,
+                    data: totals,
                     backgroundColor: props.colors.slice(0, json.labels.length)
+
                 }
             ]
         }
-
-        // オプションをデータ取得後に作成
         chartOptions.value = createChartOptions()
-
     } catch (error) {
         console.error('データ取得エラー:', error)
     }
+}
+
+onMounted(() => {
+    fetchChartData()
 })
+
+// APIからデータ取得
+// onMounted(async () => {
+//     try {
+//         const response = await fetch(props.apiUrl)
+//         const json = await response.json()
+
+//         // 数値化してから渡す
+//         const totals = json.totals.map(t => Number(t));
+
+//         // ドーナツグラフ用に必ず単一データセットにまとめる
+//         chartData.value = {
+//             labels: json.labels,
+//             datasets: [
+//                 {
+//                     label: props.label,
+//                     data: totals, // APIは labels と totals を返すこと
+//                     backgroundColor: props.colors.slice(0, json.labels.length)
+//                 }
+//             ]
+//         }
+
+//         // オプションをデータ取得後に作成
+//         chartOptions.value = createChartOptions()
+
+//     } catch (error) {
+//         console.error('データ取得エラー:', error)
+//     }
+// })
 </script>
 
 <template>

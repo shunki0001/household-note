@@ -14,6 +14,8 @@ const props = defineProps({
     back: String,
 });
 
+const emit = defineEmits(['expense-added']);
+
 const form = useForm({
     amount: props.expense.amount ?? '',
     date: props.expense.date ?? '',
@@ -31,7 +33,12 @@ watch(() => props.expense, (newExpense) => {
 
 const submit = () => {
     if(props.method === 'post') {
-        form.post(props.submitUrl);
+        form.post(props.submitUrl, {
+            onSuccess: () => {
+                emit('expense-added');
+                form.reset();
+            }
+        });
     } else if (props.method === 'put') {
         form.put(props.submitUrl);
     }
