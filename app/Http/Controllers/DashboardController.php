@@ -51,7 +51,9 @@ class DashboardController extends Controller
         }
 
         $expense->delete();
-        return redirect()->back()->with('message', '削除しました');
+        // return redirect()->back()->with('message', '削除しました');
+        // ページリダイレクトではなく、JSONを返す(Inertia用)
+        return response()->json(['message' => '削除しました']);
         // return redirect()->route('dashboard')->with('message', '削除しました');
     }
 
