@@ -18,7 +18,6 @@ const props = defineProps({
         type: [Number, String],
         default: 0,
     },
-    // refreshKey: Number,
 });
 
 const formattedTotal = computed(() => {
@@ -33,20 +32,11 @@ const form = useForm({
     title: '',
     category_id: '',
 });
-const formKey = ref(0);
-
-
-// const submit = () => {
-//     form.post(route('expenses.store'), {
-//         onSuccess: () => form.reset(), // 登録後にフォームを初期化
-//     });
-// }
 
 const submit = () => {
     form.post(route('expenses.store'), {
         onSuccess: () => {
             form.reset();
-            // formKey.value++;
             refreshKey.value++;
         },
     });
@@ -126,6 +116,7 @@ const reloadDashboard = () => {
             </div>
         </div> -->
 
+        <!-- ドーナツグラフ&今月の収支状況 -->
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
@@ -136,7 +127,6 @@ const reloadDashboard = () => {
                     <DoughnutChart
                         :refresh-key="refreshKey"
                     />
-                    <!-- <p>今月の合計支出: {{ totalExpense.toLocaleString() }}円</p> -->
                     <p>今月の合計支出: {{ formattedTotal }}円</p>
                     <p>今月の合計収入: ◯◯円</p>
                     <p>収支: ◯◯円</p>
@@ -145,14 +135,15 @@ const reloadDashboard = () => {
             </div>
         </div>
 
+        <!-- 入力フォーム -->
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
+                        かんたん入力
                         <ExpenseForm
-                            :key="formKey"
                             :expense="{}"
                             :categories="props.categories"
                             :submit-url="route('expenses.store')"
@@ -164,13 +155,14 @@ const reloadDashboard = () => {
             </div>
         </div>
 
+        <!-- 一覧表示、グラフページへ遷移ボタン -->
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        グラフ・一覧ページに移動するボタンを設置
+                        履歴、グラフで確認
                         <div class="mt-4">
                             <Link href="/list">
                                 <PrimaryButton class="ms-4">一覧ページに移動</PrimaryButton>
@@ -214,7 +206,6 @@ const reloadDashboard = () => {
                                     <td class="border px-4 py-2">{{ expense.title }}</td>
                                     <td class="border px-4 py-2">{{ expense.category?.name ?? '未分類' }}</td>
                                     <td class="border px-4 py-2">
-                                        <!-- 要修正->コンポーネント化 -->
                                         <!-- 編集ボタン -->
                                         <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="text-blue-500 hover:underLine">編集</Link>
                                         <DeleteButton :expenseId="expense.id" @deleted="refreshKey++"/>
