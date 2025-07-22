@@ -1,3 +1,5 @@
+<!-- SPA構成では動作しない -->
+<!-- 使うにはSPA構成に対応したコードに修正が必要 -->
 <script setup>
 import Swal from 'sweetalert2';
 import { watch } from 'vue';

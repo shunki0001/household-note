@@ -5,6 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     expense: {
@@ -50,6 +51,17 @@ const submit = async () => {
     try {
         const response = await axios.post(props.submitUrl, form);
 
+        // 成功トースト表示
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        })
+
         emit('expense-added');
 
         form.amount = '';
@@ -57,6 +69,16 @@ const submit = async () => {
         form.title = '';
         form.category_id = '';
     } catch (error) {
+        // 失敗トースト表示
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '登録失敗しました',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        })
         console.error('登録失敗', error);
     }
 };

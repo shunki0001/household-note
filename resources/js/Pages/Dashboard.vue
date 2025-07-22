@@ -116,6 +116,7 @@ const reloadDashboard = () => {
     <Head title="アカウントトップページ" />
 
     <AuthenticatedLayout>
+        <!-- SPA構成では動作しない -->
         <Toast/>
         <!-- <template #header>
             <h2
