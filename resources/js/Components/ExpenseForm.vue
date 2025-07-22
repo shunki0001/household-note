@@ -1,27 +1,42 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { reactive, watch, defineEmits } from 'vue';
+import axios from 'axios';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { watch } from 'vue';
 
 const props = defineProps({
-    expense: Object,    // 初期データ
-    categories: Array,  // カテゴリー一覧
-    submitUrl: String,  // 送信先ルート
-    method: String,     // POST or PUT
-    back: String,
+    expense: {
+        type: Object,
+        default: () => ({})
+    },
+    categories: {
+        type: Array,
+        default: () => []
+    },
+    submitUrl: {
+        type: String,
+        required: true
+    },
+    method: {
+        type: String,
+        default: 'post'
+    },
+    back: {
+        type: String,
+        default: 'dashboard'
+    },
 });
 
 const emit = defineEmits(['expense-added']);
 
-const form = useForm({
+const form = reactive({
     amount: props.expense.amount ?? '',
     date: props.expense.date ?? '',
     title: props.expense.title ?? '',
     category_id: props.expense.category_id ?? '',
-    back: props.back ?? 'dashboard',
+    back: props.back,
 });
 
 watch(() => props.expense, (newExpense) => {
@@ -31,18 +46,20 @@ watch(() => props.expense, (newExpense) => {
     form.category_id = newExpense.category_id ?? '';
 });
 
-const submit = () => {
-    if(props.method === 'post') {
-        form.post(props.submitUrl, {
-            onSuccess: () => {
-                emit('expense-added');
-                form.reset();
-            }
-        });
-    } else if (props.method === 'put') {
-        form.put(props.submitUrl);
+const submit = async () => {
+    try {
+        const response = await axios.post(props.submitUrl, form);
+
+        emit('expense-added');
+
+        form.amount = '';
+        form.date = '';
+        form.title = '';
+        form.category_id = '';
+    } catch (error) {
+        console.error('登録失敗', error);
     }
-}
+};
 </script>
 
 <template>
@@ -51,20 +68,20 @@ const submit = () => {
         <div>
             <InputLabel for="amount" value="金額"/>
             <TextInput id="amount" type="number" class="mt-1 block" v-model="form.amount"/>
-            <InputError class="mt-2" :message="form.errors.amount"/>
         </div>
+
         <!-- 日付 -->
         <div>
             <InputLabel for="date" value="日付"/>
             <TextInput id="date" type="date" class="mt-1 block" v-model="form.date"/>
-            <InputError class="mt-2" :message="form.errors.date"/>
         </div>
+
         <!-- 費用名 -->
         <div>
             <InputLabel for="title" value="費用名"/>
             <TextInput id="title" type="text" class="mt-1 block" v-model="form.title"/>
-            <InputError class="mt-2" :message="form.errors.title"/>
         </div>
+
         <!-- カテゴリー -->
         <div>
             <InputLabel for="category_id" value="カテゴリー"/>
@@ -74,11 +91,9 @@ const submit = () => {
                     {{ category.name }}
                 </option>
             </select>
-            <InputError class="mt-2" :message="form.errors.category_id"/>
         </div>
-        <input type="hidden" name="back" :value="form.back">
 
-        <!-- 送信ボタン -->
+        <!-- ボタン -->
         <div class="mt-4 flex items-center">
             <PrimaryButton class="ms-4">
                 {{ props.method === 'post' ? '登録' : '更新' }}

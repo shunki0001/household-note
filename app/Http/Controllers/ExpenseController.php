@@ -14,9 +14,27 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $expenses = $request->user()->expenses()->orderBy('date', 'desc')->paginate(5);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'expenses' => $expenses,
+            ]);
+        }
+
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,
         ]);
+    }
+
+    public function latestJson(Request $request)
+    {
+        $expenses = $request->user()->expenses()
+            ->with('category')
+            ->orderBy('date', 'desc')
+            ->paginate(5);
+
+            return response()->json([
+                'expenses' => $expenses,
+            ]);
     }
 
     // 登録処理(ログインユーザーに紐付けて保存)
@@ -38,7 +56,12 @@ class ExpenseController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        return redirect()->route('dashboard')->with('message', '登録しました');
+        // return redirect()->route('dashboard')->with('message', '登録しました');
+
+        return response()->json([
+            'message' => '登録しました',
+            // 'expenses' => $expenses,
+        ]);
     }
 
     // 一覧表示

@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/expenses/{expense}', [DashboardController::class, 'update'])->name('expenses.update');
     Route::get('/expenses/monthly', [ExpenseController::class, 'getMonthlyExpenses']);
 
+    Route::get('/api/expenses/latest-json', [ExpenseController::class, 'latestJson'])->name('expenses.latestJson');
     Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
     Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryTotals']);
     Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryTotals']);

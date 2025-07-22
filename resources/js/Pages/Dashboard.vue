@@ -24,6 +24,7 @@ const formattedTotal = computed(() => {
     return Number(props.totalExpense).toLocaleString();
 });
 
+const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0)
 
 const form = useForm({
@@ -44,6 +45,26 @@ const submit = () => {
 
 // // 現在のページのpropsを取得
 const page = usePage();
+
+const expenseList = ref(props.expenses?.data ?? []);
+
+const reloadExpenses = async () => {
+    try {
+        // const response = await axios.get(route('expenses.latest'));
+        // expenseList.value = response.data.data;
+        const response = await axios.get(route('expenses.latestJson', { page: currentPage.value}));
+        expenseList.value = response.data.expenses.data;
+
+        refreshKey.value++; // グラフ再描画
+    } catch (e) {
+        console.error('再取得エラー', e);
+    }
+}
+
+const handleExpenseAdded = () => {
+    reloadExpenses(); // 一覧再取得
+    refreshKey.value++; // グラフ再取得
+}
 
 // フラッシュメッセージの監視
 watch(
@@ -148,7 +169,7 @@ const reloadDashboard = () => {
                             :categories="props.categories"
                             :submit-url="route('expenses.store')"
                             :method="'post'"
-                            @expense-added="refreshKey++"
+                            @expense-added="handleExpenseAdded"
                         />
                     </div>
                 </div>
@@ -200,7 +221,7 @@ const reloadDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="expense in expenses.data" :key="expense.id">
+                                <tr v-for="expense in expenseList" :key="expense.id">
                                     <td class="border px-4 py-2">{{ expense.amount }}</td>
                                     <td class="border px-4 py-2">{{ expense.date }}</td>
                                     <td class="border px-4 py-2">{{ expense.title }}</td>
@@ -208,7 +229,7 @@ const reloadDashboard = () => {
                                     <td class="border px-4 py-2">
                                         <!-- 編集ボタン -->
                                         <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="text-blue-500 hover:underLine">編集</Link>
-                                        <DeleteButton :expenseId="expense.id" @deleted="refreshKey++"/>
+                                        <DeleteButton :expenseId="expense.id" @deleted="reloadExpenses()"/>
                                     </td>
                                 </tr>
                             </tbody>
