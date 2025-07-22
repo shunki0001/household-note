@@ -49,7 +49,9 @@ watch(() => props.expense, (newExpense) => {
 
 const submit = async () => {
     try {
-        const response = await axios.post(props.submitUrl, form);
+        const response = props.method === 'post'
+            ? await axios.post(props.submitUrl, form)
+            : await axios.put(props.submitUrl, form);
 
         // 成功トースト表示
         Swal.fire({
@@ -60,7 +62,11 @@ const submit = async () => {
             showConfirmButton: false,
             timer: 2000,
             timerProgressBar: true,
-        })
+        }).then(() => {
+            if (props.method === 'put') {
+                window.location.href = '/dashboard';
+            }
+        });
 
         emit('expense-added');
 

@@ -38,7 +38,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/expenses/{expense}', [DashboardController::class, 'destroy'])->name('expenses.destroy');
 
     Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
-    Route::put('/expenses/{expense}', [DashboardController::class, 'update'])->name('expenses.update');
+    Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+    // Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     Route::get('/expenses/monthly', [ExpenseController::class, 'getMonthlyExpenses']);
 
     Route::get('/api/expenses/latest-json', [ExpenseController::class, 'latestJson'])->name('expenses.latestJson');

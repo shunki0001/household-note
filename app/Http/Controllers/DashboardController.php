@@ -15,12 +15,10 @@ class DashboardController extends Controller
     {
         $now = Carbon::now();
         /** @var \App\Models\User $user */
-        // $user = auth()->user();
         $user = Auth::user();
         $userId = Auth::id();
         $categories = Category::all();
 
-        // $expenses = $user->expenses()->orderBy('date', 'desc')->paginate(5);
         $expenses = $user->expenses()
             ->with('category')
             ->orderBy('created_at', 'desc') // 入力日から最新の５件表示
@@ -51,10 +49,8 @@ class DashboardController extends Controller
         }
 
         $expense->delete();
-        // return redirect()->back()->with('message', '削除しました');
         // ページリダイレクトではなく、JSONを返す(Inertia用)
         return response()->json(['message' => '削除しました']);
-        // return redirect()->route('dashboard')->with('message', '削除しました');
     }
 
     // 編集ページ表示
@@ -71,6 +67,7 @@ class DashboardController extends Controller
             'expense' => $expense,
             'categories' => $categories,
             'back' => $backRoute,
+            'submitUrl' => route('expenses.update', $expense->id),
         ]);
     }
 

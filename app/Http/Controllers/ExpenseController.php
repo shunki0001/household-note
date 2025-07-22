@@ -13,7 +13,7 @@ class ExpenseController extends Controller
     // 一覧表示(ログインユーザーのみ)
     public function index(Request $request)
     {
-        $expenses = $request->user()->expenses()->orderBy('date', 'desc')->paginate(5);
+        $expenses = $request->user()->expenses()->orderBy('created_at', 'desc')->paginate(5);
         if ($request->wantsJson()) {
             return response()->json([
                 'expenses' => $expenses,
@@ -29,7 +29,7 @@ class ExpenseController extends Controller
     {
         $expenses = $request->user()->expenses()
             ->with('category')
-            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(5);
 
             return response()->json([
@@ -56,11 +56,8 @@ class ExpenseController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        // return redirect()->route('dashboard')->with('message', '登録しました');
-
         return response()->json([
             'message' => '登録しました',
-            // 'expenses' => $expenses,
         ]);
     }
 
@@ -79,8 +76,27 @@ class ExpenseController extends Controller
             ->get();
 
             return response()->json($expenses);
-            // return Inertia::render('ListPage', [
-            //     'expenses' => $expenses,
-            // ]);
+    }
+
+    // 更新処理
+    public function update(Request $request, Expense $expense)
+    {
+        // ログインユーザーのデータのみ更新許可
+        if ($expense->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric',
+            'date' => 'required|date',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        $expense->update($validated);
+
+        return response()->json([
+            'message' => '更新しました',
+        ]);
     }
 }
