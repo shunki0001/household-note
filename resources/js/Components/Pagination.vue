@@ -1,25 +1,27 @@
 <template>
     <div class="mt-4 flex justify-center" v-if="links.length > 3">
     <nav>
-        <ul class="inline-flex -space-x-px">
-        <li v-for="link in links" :key="link.label">
+        <ul class="inline-flex items-center">
+        <li v-for="link in links" :key="link.label" class="mx-1">
             <Link
             v-if="link.url"
             :href="link.url"
-            class="px-3 py-1 rounded-md text-gray-700 bg-white border border-gray-300"
-            :class="{ 'bg-blue-500 text-white': link.active }"
+            preserve-scroll
+            class="w-10 h-10 flex items-center justify-center rounded-md border border-gray-400 text-gray-700 bg-white transition"
+            :class="{ 'bg-black text-white': link.active }"
             >
-            <span v-if="link.label === 'pagination.previous'">&lt; 前へ</span>
-            <span v-else-if="link.label === 'pagination.next'">次へ &gt;</span>
-            <span v-else>{{ link.label }}</span>
+            <span v-if="link.label === 'pagination.previous'">&lt;</span>
+            <span v-else-if="link.label === 'pagination.next'">&gt;</span>
+            <span v-else v-html="link.label" />
             </Link>
+
             <span
             v-else
-            class="px-3 py-1 rounded-md text-gray-400 bg-white border border-gray-300"
+            class="w-10 h-10 flex items-center justify-center rounded-md border border-gray-400 text-gray-400 bg-white"
             >
-            <span v-if="link.label === 'pagination.previous'">&lt; 前へ</span>
-            <span v-else-if="link.label === 'pagination.next'">次へ &gt;</span>
-            <span v-else>{{ link.label }}</span>
+            <span v-if="link.label === 'pagination.previous'">&lt;</span>
+            <span v-else-if="link.label === 'pagination.next'">&gt;</span>
+            <span v-else v-html="link.label" />
             </span>
         </li>
         </ul>

@@ -17,9 +17,13 @@ const props = defineProps({
     apiUrl: { type: String, default: 'api/chart-data/doughnut' },
     colors: {
         type: Array,
+        // default: () => [
+        //     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        //     '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
+        // ]
         default: () => [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-            '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
+            '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
+            '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
         ]
     },
     chartData: Object,
@@ -74,13 +78,6 @@ function createChartOptions() {
 }
 
 // refreshKeyの変更を監視して再取得
-// watch(
-//     () => props.refreshKey,
-//     async () => {
-//         await fetchChartData()
-//     }
-// )
-
 watch(() => props.refreshKey, async () => {
     console.log('refreshKey changed:', props.refreshKey);
     await fetchChartData();
@@ -116,34 +113,6 @@ onMounted(() => {
     fetchChartData()
 })
 
-// APIからデータ取得
-// onMounted(async () => {
-//     try {
-//         const response = await fetch(props.apiUrl)
-//         const json = await response.json()
-
-//         // 数値化してから渡す
-//         const totals = json.totals.map(t => Number(t));
-
-//         // ドーナツグラフ用に必ず単一データセットにまとめる
-//         chartData.value = {
-//             labels: json.labels,
-//             datasets: [
-//                 {
-//                     label: props.label,
-//                     data: totals, // APIは labels と totals を返すこと
-//                     backgroundColor: props.colors.slice(0, json.labels.length)
-//                 }
-//             ]
-//         }
-
-//         // オプションをデータ取得後に作成
-//         chartOptions.value = createChartOptions()
-
-//     } catch (error) {
-//         console.error('データ取得エラー:', error)
-//     }
-// })
 </script>
 
 <template>

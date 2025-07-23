@@ -95,25 +95,25 @@ const submit = async () => {
         <!-- 金額 -->
         <div>
             <InputLabel for="amount" value="金額"/>
-            <TextInput id="amount" type="number" class="mt-1 block" v-model="form.amount"/>
+            <TextInput id="amount" type="number" v-model="form.amount"/>
         </div>
 
         <!-- 日付 -->
         <div>
             <InputLabel for="date" value="日付"/>
-            <TextInput id="date" type="date" class="mt-1 block" v-model="form.date"/>
+            <TextInput id="date" type="date" v-model="form.date"/>
         </div>
 
         <!-- 費用名 -->
         <div>
             <InputLabel for="title" value="費用名"/>
-            <TextInput id="title" type="text" class="mt-1 block" v-model="form.title"/>
+            <TextInput id="title" type="text"v-model="form.title"/>
         </div>
 
         <!-- カテゴリー -->
         <div>
             <InputLabel for="category_id" value="カテゴリー"/>
-            <select v-model="form.category_id" class="w-full border p-2 rounded" required>
+            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs" required>
                 <option disabled value="">カテゴリーを選択</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}

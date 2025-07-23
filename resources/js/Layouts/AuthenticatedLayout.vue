@@ -38,7 +38,7 @@ const showingNavigationDropdown = ref(false);
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
-                                    Dashboard
+                                    Topページ
                                 </NavLink>
 
                                 <NavLink
@@ -166,7 +166,7 @@ const showingNavigationDropdown = ref(false);
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                         >
-                            Dashboard
+                            Topページ
                         </ResponsiveNavLink>
                     </div>
 

@@ -37,7 +37,7 @@ const handleDelete = async () => {
 
 <template>
 
-    <button @click="handleDelete" class="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600">
+    <button @click="handleDelete" class="inline-block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-sm">
         削除
     </button>
 </template>

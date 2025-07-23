@@ -141,11 +141,11 @@ const reloadDashboard = () => {
         <!-- ドーナツグラフ&今月の収支状況 -->
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                    今月の家計状況
+                <div class="flex flex-wrap lg:flex-nowrap gap-6">
+                    <!-- 左：今月の家計状況 -->
+                    <div class="w-full lg:w-3/5 bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
+                    <!-- 今月の家計状況 -->
+                    <h2 class="text-lg font-bold mb-4">今月の家計状況</h2>
                     <DoughnutChart
                         :refresh-key="refreshKey"
                     />
@@ -153,72 +153,49 @@ const reloadDashboard = () => {
                     <p>今月の合計収入: ◯◯円</p>
                     <p>収支: ◯◯円</p>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 入力フォーム -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        かんたん入力
-                        <ExpenseForm
-                            :expense="{}"
-                            :categories="props.categories"
-                            :submit-url="route('expenses.store')"
-                            :method="'post'"
-                            @expense-added="handleExpenseAdded"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <!-- 右：かんたん入力&グラフ確認 -->
+                    <div class="w-full lg:w-2/5 flex flex-col gap-6">
+                        <!-- かんたん入力 -->
+                        <div class="bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
+                            <h2 class="text-lg font-bold mb-4">かんたん入力</h2>
+                            <ExpenseForm
+                                :expense="{}"
+                                :categories="props.categories"
+                                :submit-url="route('expenses.store')"
+                                :method="'post'"
+                                @expense-added="handleExpenseAdded"
+                            />
+                        </div>
 
-        <!-- 一覧表示、グラフページへ遷移ボタン -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        履歴、グラフで確認
-                        <div class="mt-4">
-                            <Link href="/list">
-                                <PrimaryButton class="ms-4">一覧ページに移動</PrimaryButton>
-                            </Link>
-                        </div>
-                        <div class="mt-4">
-                            <Link href="/graph/monthly">
-                                <PrimaryButton class="ms-4">月別支出グラフ</PrimaryButton>
-                            </Link>
-                        </div>
-                        <div class="mt-4">
-                            <Link href="/graph/category">
-                                <PrimaryButton class="ms-4">カテゴリー別支出グラフ</PrimaryButton>
-                            </Link>
+                        <!-- 履歴・グラフへのリンク -->
+                        <div class="bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
+                            <h2 class="text-lg font-bold mb-4">履歴、グラフで確認</h2>
+                            <div class="space-y-2">
+                                <Link href="/list" class="btn-icon-text">一覧ページに移動</Link>
+                                <Link href="/graph/monthly" class="btn-icon-text">月別支出グラフ</Link>
+                                <Link href="/graph/category" class="btn-icon-text">カテゴリー別支出グラフ</Link>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 一覧表示部分 -->
-        <!-- <pre>{{ expenses }}</pre> -->
+        <!-- 最近の記録 -->
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl sm:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                    最近の記録
-                        <table class="table-auto w-full">
+                    <div class="p-6 text-gray-900 text-center">
+                        <h2 class="text-lg font-bold mb-4">最近の記録</h2>
+                        <table class="table-auto w-full text-left">
                             <thead>
                                 <tr>
                                     <th class="px-4 py-2">金額</th>
                                     <th class="px-4 py-2">日付</th>
                                     <th class="px-4 py-2">費用名</th>
                                     <th class="px-4 py-2">カテゴリー</th>
+                                    <th class="px-4 py-2">操作</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -228,18 +205,17 @@ const reloadDashboard = () => {
                                     <td class="border px-4 py-2">{{ expense.title }}</td>
                                     <td class="border px-4 py-2">{{ expense.category?.name ?? '未分類' }}</td>
                                     <td class="border px-4 py-2">
-                                        <!-- 編集ボタン -->
-                                        <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="text-blue-500 hover:underLine">編集</Link>
-                                        <DeleteButton :expenseId="expense.id" @deleted="reloadExpenses()"/>
+                                        <div class="flex space-x-2">
+                                            <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard'})" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
+                                            <DeleteButton :expenseId="expense.id" @deleted="reloadExpenses()" />
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-                        <!-- ページネーションリンクボタン -->
-                        <Pagination :links="expenses.links"/>
+                        <Pagination :links="expenses.links" />
                     </div>
                 </div>
-
             </div>
         </div>
 

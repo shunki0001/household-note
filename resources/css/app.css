@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn-icon-text {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 320px;
+    height: 52px;
+    margin: 0 auto;
+    padding: 1em 2em 1em 3.5em;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: #57cc99;
+    border-radius: 9999px; /* 楕円形（pill型） */
+    text-align: left;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.btn-icon-text::before {
+    content: '';
+    position: absolute;
+    left: 1.2em;
+    top: 50%;
+    width: 1em;
+    height: 1em;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="%23fff"><path d="M10 17l5-5-5-5v10z"/></svg>') no-repeat center center;
+    background-size: contain;
+    transform: translateY(-50%) translateX(1600%);
+}
+
+.btn-icon-text:hover {
+    background: #38a169;
+}
+
