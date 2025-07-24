@@ -189,7 +189,7 @@ const reloadDashboard = () => {
                     <div class="p-6 text-gray-900 text-center">
                         <h2 class="text-lg font-bold mb-4">最近の記録</h2>
                         <table class="table-auto w-full text-left">
-                            <thead>
+                            <thead class="bg-gray-300">
                                 <tr>
                                     <th class="px-4 py-2">金額</th>
                                     <th class="px-4 py-2">日付</th>
