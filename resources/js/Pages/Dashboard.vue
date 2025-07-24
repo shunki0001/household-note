@@ -1,15 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import DeleteButton from '@/Components/DeleteButton.vue';
+// import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
-import Pagination from '@/Components/Pagination.vue';
+// import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+// import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
+import ExpenseList from '@/Components/ExpenseList.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -26,6 +27,7 @@ const formattedTotal = computed(() => {
 
 const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0)
+const expenseListRef = ref(null)
 
 const form = useForm({
     amount: '',
@@ -62,7 +64,8 @@ const reloadExpenses = async () => {
 }
 
 const handleExpenseAdded = () => {
-    reloadExpenses(); // 一覧再取得
+    // reloadExpenses(); // 一覧再取得
+    expenseListRef.value?.reloadExpenses(); // 一覧再取得
     refreshKey.value++; // グラフ再取得
 }
 
@@ -187,33 +190,13 @@ const reloadDashboard = () => {
             <div class="mx-auto max-w-7xl sm:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 text-center">
-                        <h2 class="text-lg font-bold mb-4">最近の記録</h2>
-                        <table class="table-auto w-full text-left">
-                            <thead class="bg-gray-300">
-                                <tr>
-                                    <th class="px-4 py-2">金額</th>
-                                    <th class="px-4 py-2">日付</th>
-                                    <th class="px-4 py-2">費用名</th>
-                                    <th class="px-4 py-2">カテゴリー</th>
-                                    <th class="px-4 py-2">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="expense in expenseList" :key="expense.id">
-                                    <td class="border px-4 py-2">{{ expense.amount }}</td>
-                                    <td class="border px-4 py-2">{{ expense.date }}</td>
-                                    <td class="border px-4 py-2">{{ expense.title }}</td>
-                                    <td class="border px-4 py-2">{{ expense.category?.name ?? '未分類' }}</td>
-                                    <td class="border px-4 py-2">
-                                        <div class="flex space-x-2">
-                                            <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard'})" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
-                                            <DeleteButton :expenseId="expense.id" @deleted="reloadExpenses()" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <Pagination :links="expenses.links" />
+                        <ExpenseList
+                            :ref="expenseListRef"
+                            :initial-expenses="props.expenses"
+                            :refresh-key="refreshKey"
+                            @expenses-updated="refreshKey++"
+                        />
+
                     </div>
                 </div>
             </div>
