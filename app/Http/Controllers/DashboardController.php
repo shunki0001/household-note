@@ -24,6 +24,8 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc') // 入力日から最新の５件表示
             ->paginate(5);
 
+        // リロードしないと更新されない
+        // SPA構成には不向き
         // 今月の合計支出
         $totalExpense = Expense::whereYear('date', $now->year)
         ->where('user_id', $userId)
@@ -36,7 +38,7 @@ class DashboardController extends Controller
             'flash' => [
                 'message' => session('message')
             ],
-            'totalExpense' => $totalExpense,
+            // 'totalExpense' => $totalExpense,
         ]);
 
     }
@@ -92,5 +94,19 @@ class DashboardController extends Controller
 
         return redirect()->route($back)->with('message', '更新しました');
         // return redirect()->back()->with('message', '更新しました');
+    }
+
+    // 今月の合計支出をAPIでデータを渡せるように
+    public function total(Request $request)
+    {
+        $now = Carbon::now();
+        $userId = Auth::id();
+
+        $total = Expense::whereYear('date', $now->year)
+            ->where('user_id', $userId)
+            ->whereMonth('date', $now->month)
+            ->sum('amount');
+
+        return response()->json(['total' => $total ]);
     }
 }

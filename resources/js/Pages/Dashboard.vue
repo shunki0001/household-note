@@ -15,15 +15,38 @@ import ExpenseList from '@/Components/ExpenseList.vue';
 const props = defineProps({
     expenses: Object,
     categories: Array,
-    totalExpense: {
-        type: [Number, String],
-        default: 0,
-    },
+    // totalExpense: {
+    //     type: [Number, String],
+    //     default: 0,
+    // },
 });
 
+// const totalExpense = ref(Number(props.totalExpense));
+const totalExpense = ref(0);
 const formattedTotal = computed(() => {
-    return Number(props.totalExpense).toLocaleString();
+    // return Number(props.totalExpense).toLocaleString();
+    return totalExpense.value.toLocaleString();
 });
+
+const fetchTotalExpense = async () => {
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+
+        const response = await axios.get(route('expenses.total'), {
+            params: { year, month }
+        });
+        totalExpense.value = Number(response.data.total);
+    } catch (e) {
+        console.error('合計支出の取得エラー', e);
+    }
+};
+
+const handleExpensesUpdate = () => {
+    refreshKey.value++;
+    fetchTotalExpense();
+}
 
 const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0)
@@ -89,6 +112,7 @@ watch(
 
 // onMountedを追加（ページ遷移時に即チェック）
 onMounted(() => {
+    fetchTotalExpense(); // 初期合計取得
     if (page.props.flash?.message) {
         Swal.fire({
             toast: true,
@@ -194,7 +218,7 @@ const reloadDashboard = () => {
                             :ref="expenseListRef"
                             :initial-expenses="props.expenses"
                             :refresh-key="refreshKey"
-                            @expenses-updated="refreshKey++"
+                            @expenses-updated="handleExpensesUpdate"
                         />
 
                     </div>
