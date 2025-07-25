@@ -46,6 +46,13 @@ watch(
     }
 );
 
+watch(
+    () => props.refreshKey,
+    () => {
+        reloadExpenses();
+    }
+);
+
 onMounted(() => {
     if (page.props.flash?.message) {
         Swal.fire({
