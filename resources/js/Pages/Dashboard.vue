@@ -1,30 +1,21 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
-// import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
-// import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
 import ExpenseList from '@/Components/ExpenseList.vue';
 
 const props = defineProps({
     expenses: Object,
     categories: Array,
-    // totalExpense: {
-    //     type: [Number, String],
-    //     default: 0,
-    // },
 });
 
-// const totalExpense = ref(Number(props.totalExpense));
 const totalExpense = ref(0);
 const formattedTotal = computed(() => {
-    // return Number(props.totalExpense).toLocaleString();
     return totalExpense.value.toLocaleString();
 });
 
@@ -75,8 +66,6 @@ const expenseList = ref(props.expenses?.data ?? []);
 
 const reloadExpenses = async () => {
     try {
-        // const response = await axios.get(route('expenses.latest'));
-        // expenseList.value = response.data.data;
         const response = await axios.get(route('expenses.latestJson', { page: currentPage.value}));
         expenseList.value = response.data.expenses.data;
 
@@ -87,7 +76,6 @@ const reloadExpenses = async () => {
 }
 
 const handleExpenseAdded = () => {
-    // reloadExpenses(); // 一覧再取得
     expenseListRef.value?.reloadExpenses(); // 一覧再取得
     refreshKey.value++; // グラフ再取得
 }

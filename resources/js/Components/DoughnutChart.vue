@@ -17,10 +17,6 @@ const props = defineProps({
     apiUrl: { type: String, default: 'api/chart-data/doughnut' },
     colors: {
         type: Array,
-        // default: () => [
-        //     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        //     '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
-        // ]
         default: () => [
             '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
             '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
@@ -81,7 +77,7 @@ function createChartOptions() {
 watch(() => props.refreshKey, async () => {
     console.log('refreshKey changed:', props.refreshKey);
     await fetchChartData();
-})
+}, {flush: 'post'})
 
 // API取得ロジックを関数化
 async function fetchChartData() {

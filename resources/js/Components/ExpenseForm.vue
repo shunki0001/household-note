@@ -56,7 +56,7 @@ const { form, submit } = useExpenseFrom(props, emit);
         <!-- カテゴリー -->
         <div>
             <InputLabel for="category_id" value="カテゴリー"/>
-            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs" required>
+            <select v-model="form.category_id" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600 mt-1 block w-full max-w-xs" required>
                 <option disabled value="">カテゴリーを選択</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}

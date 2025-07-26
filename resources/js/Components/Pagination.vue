@@ -8,7 +8,7 @@
             :href="link.url"
             preserve-scroll
             class="w-10 h-10 flex items-center justify-center rounded-md border border-gray-400 text-gray-700 bg-white transition"
-            :class="{ 'bg-black text-white': link.active }"
+            :class="{ 'bg-gray-900 text-white': link.active }"
             >
             <span v-if="link.label === 'pagination.previous'">&lt;</span>
             <span v-else-if="link.label === 'pagination.next'">&gt;</span>
