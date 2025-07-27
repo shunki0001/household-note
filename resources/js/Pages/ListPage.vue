@@ -67,18 +67,19 @@ const changeMonth = (delta) => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg bg-white p-6">
-                    <h2 class="text-xl font-bold mb-4">{{ year }}年{{ month }}月の支出一覧</h2>
-                    <button @click="changeMonth(-1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">前月</button>
-                    <button @click="changeMonth(1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">次月</button>
-
-                    <table class="min-w-full table-auto border border-gray-300 text-left">
-                        <thead class="bg-gray-100">
+                    <div class="flex items-center justify-center space-x-3 mb-4">
+                        <button @click="changeMonth(-1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm">前月</button>
+                        <h2 class="text-xl font-bold text-center w-60">{{ year }}年{{ month }}月の支出一覧</h2>
+                        <button @click="changeMonth(1)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm">次月</button>
+                    </div>
+                    <table class="min-w-full table-auto border border-gray-300 text-right">
+                        <thead class="bg-gray-300">
                             <tr>
-                                <th class="border px-4 py-2">日付</th>
-                                <th class="border px-4 py-2">金額</th>
-                                <th class="border px-4 py-2">カテゴリ</th>
-                                <th class="border px-4 py-2">費用名</th>
-                                <th class="border px-4 py-2">操作</th>
+                                <th class="border px-4 py-2 w-36">日付</th>
+                                <th class="border px-4 py-2 w-40">金額</th>
+                                <th class="border px-4 py-2 w-36">カテゴリ</th>
+                                <th class="border px-4 py-2 w-36">費用名</th>
+                                <th class="border px-4 py-2 text-center w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,9 +89,11 @@ const changeMonth = (delta) => {
                                 <td class="border px-4 py-2">{{ expense.category?.name || '未分類' }}</td>
                                 <td class="border px-4 py-2">{{ expense.title }}</td>
 
-                                <td class="border px-4 py-2 space-x-2">
-                                    <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="text-blue-500 hover:underLine">編集</Link>
-                                    <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
+                                <td class="border px-4 py-2">
+                                    <div class="flex space-x-2 justify-end">
+                                        <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
+                                        <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
+                                    </div>
                                 </td>
                             </tr>
                             <tr v-if="expenses.length === 0">
