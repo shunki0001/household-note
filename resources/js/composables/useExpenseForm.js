@@ -20,30 +20,43 @@ export function useExpenseFrom(props, emit) {
 
     const submit = async () => {
         try {
+            console.log('useExpenseForm submit started'); // デバッグログ
+            console.log('Form data:', form); // デバッグログ
+
             const response = props.method === 'post'
                 ? await axios.post(props.submitUrl, form)
                 : await axios.put(props.submitUrl, form);
 
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    title: response.data.message,
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true,
-                }).then(() => {
-                    if(props.method === 'put') {
-                        window.location.href = '/dashboard';
-                    }
-                });
+            console.log('API response:', response.data); // デバッグログ
 
-                emit('expense-added');
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                title: response.data.message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+            }).then(() => {
+                if(props.method === 'put') {
+                    window.location.href = '/dashboard';
+                }
+            });
 
-                form.amount='';
-                form.date='';
-                form.title='';
-                form.category_id='';
+            // イベントを発火
+            console.log('Emitting expense-added event'); // デバッグログ
+            emit('expense-added');
+            console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
+
+            // フォームをリセット
+            console.log('Resetting form'); // デバッグログ
+            form.amount='';
+            form.date='';
+            form.title='';
+            form.category_id='';
+
+            console.log('Form reset completed'); // デバッグログ
         }   catch(error) {
+            console.error('Submit error:', error); // デバッグログ
             Swal.fire({
                 toast: true,
                 position: 'top-end',

@@ -26,8 +26,11 @@ const formattedTotal = computed(() => {
 });
 
 const currentPage = ref(props.expenses.current_page || 1)
-const refreshKey = ref(0)
+const refreshKey = ref(0) // グラフ用のみに使用
 const expenseListRef = ref(null)
+
+// 一覧データを直接管理
+const expenseList = ref(props.expenses?.data ?? []);
 
 const form = useForm({
     amount: '',
@@ -48,25 +51,41 @@ const submit = () => {
 // // 現在のページのpropsを取得
 const page = usePage();
 
-const expenseList = ref(props.expenses?.data ?? []);
-
-const reloadExpenses = async () => {
+// 一覧データを更新する関数
+const updateExpenseList = async () => {
     try {
-        // const response = await axios.get(route('expenses.latest'));
-        // expenseList.value = response.data.data;
+        console.log('Dashboard: updateExpenseList called'); // デバッグログ
         const response = await axios.get(route('expenses.latestJson', { page: currentPage.value}));
         expenseList.value = response.data.expenses.data;
-
-        refreshKey.value++; // グラフ再描画
+        console.log('Dashboard: expenseList updated with', expenseList.value.length, 'items'); // デバッグログ
     } catch (e) {
-        console.error('再取得エラー', e);
+        console.error('Dashboard: 一覧更新エラー', e);
     }
 }
 
 const handleExpenseAdded = () => {
-    // reloadExpenses(); // 一覧再取得
-    expenseListRef.value?.reloadExpenses(); // 一覧再取得
+    console.log('handleExpenseAdded called'); // デバッグログ
+
+    // 一覧データを直接更新
+    updateExpenseList();
+
+    // ExpenseListコンポーネントのreloadExpensesも呼び出し
+    if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
+        console.log('Calling reloadExpenses on ExpenseList'); // デバッグログ
+        expenseListRef.value.reloadExpenses();
+    } else {
+        console.log('ExpenseList ref not available'); // デバッグログ
+    }
+
     refreshKey.value++; // グラフ再取得
+    console.log('refreshKey updated:', refreshKey.value); // デバッグログ
+}
+
+// 削除完了時の処理
+const handleExpenseDeleted = () => {
+    console.log('Dashboard handleExpenseDeleted called'); // デバッグログ
+    refreshKey.value++; // グラフ再取得
+    console.log('refreshKey updated after delete:', refreshKey.value); // デバッグログ
 }
 
 // フラッシュメッセージの監視
@@ -193,8 +212,8 @@ const reloadDashboard = () => {
                         <ExpenseList
                             :ref="expenseListRef"
                             :initial-expenses="props.expenses"
-                            :refresh-key="refreshKey"
-                            @expenses-updated="refreshKey++"
+                            :expense-list="expenseList"
+                            @expense-deleted="handleExpenseDeleted"
                         />
 
                     </div>

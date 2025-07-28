@@ -8,24 +8,55 @@ import axios from 'axios';
 
 const props = defineProps({
     initialExpenses: Object,
-    refreshKey: Number,
+    expenseList: {
+        type: Array,
+        default: () => []
+    },
+    // refreshKey: Number, // 無限ループの原因となるため削除
 });
 
-const emit = defineEmits(['expenses-updated']);
+const emit = defineEmits(['expenses-updated', 'expense-deleted']);
 const page = usePage();
 const currentPage = ref(props.initialExpenses.current_page || 1);
-const expenseList = ref(props.initialExpenses.data ?? []);
+const localExpenseList = ref(props.initialExpenses.data ?? []);
 const expenses = ref(props.initialExpenses);
+
+// expenseList propsの変更を監視
+watch(() => props.expenseList, (newExpenseList) => {
+    console.log('ExpenseList: expenseList props changed', newExpenseList); // デバッグログ
+    if (newExpenseList && newExpenseList.length > 0) {
+        localExpenseList.value = newExpenseList;
+        console.log('ExpenseList: localExpenseList updated with', localExpenseList.value.length, 'items'); // デバッグログ
+    }
+}, { deep: true });
 
 const reloadExpenses = async () => {
 try {
+    console.log('ExpenseList reloadExpenses called'); // デバッグログ
+    console.log('Current page:', currentPage.value); // デバッグログ
+
     const response = await axios.get(route('expenses.latestJson', { page: currentPage.value }));
-    expenseList.value = response.data.expenses.data;
+    console.log('API response received:', response.data); // デバッグログ
+
+    // データを更新
+    localExpenseList.value = response.data.expenses.data;
     expenses.value = response.data.expenses;
-    emit('expenses-updated');
+
+    console.log('ExpenseList updated with', localExpenseList.value.length, 'items'); // デバッグログ
+    console.log('Updated expenseList:', localExpenseList.value); // デバッグログ
+
+    // emit('expenses-updated'); // 無限ループの原因となるため削除
+    // emit('expense-deleted');
 } catch (e) {
     console.error('再取得エラー', e);
 }
+};
+
+// 削除完了時の処理
+const handleExpenseDeleted = () => {
+    console.log('ExpenseList handleExpenseDeleted called'); // デバッグログ
+    reloadExpenses();
+    emit('expense-deleted'); // 親コンポーネントに削除完了を通知
 };
 
 // フラッシュメッセージの表示
@@ -46,12 +77,13 @@ watch(
     }
 );
 
-watch(
-    () => props.refreshKey,
-    () => {
-        reloadExpenses();
-    }
-);
+// refreshKeyの変更監視を削除（無限ループの原因）
+// watch(
+//     () => props.refreshKey,
+//     () => {
+//         reloadExpenses();
+//     }
+// );
 
 onMounted(() => {
     if (page.props.flash?.message) {
@@ -84,7 +116,7 @@ defineExpose({ reloadExpenses });
             </tr>
         </thead>
         <tbody>
-            <tr v-for="expense in expenseList" :key="expense.id">
+            <tr v-for="expense in localExpenseList" :key="expense.id">
                 <td class="border px-4 py-2">{{ expense.amount }}</td>
                 <td class="border px-4 py-2">{{ expense.date }}</td>
                 <td class="border px-4 py-2">{{ expense.title }}</td>
@@ -92,7 +124,7 @@ defineExpose({ reloadExpenses });
                 <td class="border px-4 py-2">
                 <div class="flex space-x-2">
                     <Link :href="route('expenses.edit', { expense: expense.id, back: 'dashboard' })" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
-                    <DeleteButton :expenseId="expense.id" @deleted="reloadExpenses" />
+                    <DeleteButton :expenseId="expense.id" @deleted="handleExpenseDeleted" />
                 </div>
                 </td>
             </tr>
