@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
+import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
     expense: Object,
