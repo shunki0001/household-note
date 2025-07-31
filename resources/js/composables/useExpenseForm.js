@@ -2,6 +2,7 @@ import { reactive, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+
 export function useExpenseFrom(props, emit) {
     const form = reactive({
         amount: props.expense.amount ?? '',
@@ -26,18 +27,20 @@ export function useExpenseFrom(props, emit) {
             const response = props.method === 'post'
                 ? await axios.post(props.submitUrl, form)
                 : await axios.put(props.submitUrl, form);
-
             console.log('API response:', response.data); // デバッグログ
 
             Swal.fire({
                 toast: true,
                 position: 'top-end',
+                icon: 'success',
                 title: response.data.message,
                 showConfirmButton: false,
                 timer: 2000,
                 timerProgressBar: true,
             }).then(() => {
-                if(props.method === 'put') {
+                if(form.back) {
+                    window.location.href = window.location.origin + '/' + form.back;
+                } else {
                     window.location.href = '/dashboard';
                 }
             });
