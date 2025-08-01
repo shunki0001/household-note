@@ -30,7 +30,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['expense-added']);
-const { form, submit } = useExpenseFrom(props, emit);
+const { form, errors, submit } = useExpenseFrom(props, emit);
 </script>
 
 <template>
@@ -38,30 +38,35 @@ const { form, submit } = useExpenseFrom(props, emit);
         <!-- 金額 -->
         <div>
             <InputLabel for="amount" value="金額"/>
+            <!-- <TextInput id="amount" type="number" min="0" v-model="form.amount"/> -->
             <TextInput id="amount" type="number" v-model="form.amount"/>
+            <InputError class="mt-2" :message="errors.amount"/>
         </div>
 
         <!-- 日付 -->
         <div>
             <InputLabel for="date" value="日付"/>
             <TextInput id="date" type="date" v-model="form.date"/>
+            <InputError class="mt-2" :message="errors.date"/>
         </div>
 
         <!-- 費用名 -->
         <div>
             <InputLabel for="title" value="費用名"/>
             <TextInput id="title" type="text"v-model="form.title"/>
+            <InputError class="mt-2" :message="errors.title"/>
         </div>
 
         <!-- カテゴリー -->
         <div>
             <InputLabel for="category_id" value="カテゴリー"/>
-            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs dark:bg-gray-200" required>
+            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs dark:bg-gray-200">
                 <option disabled value="">カテゴリーを選択</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
             </select>
+            <InputError class="mt-2" :message="errors.category_id"/>
         </div>
 
         <!-- ボタン -->

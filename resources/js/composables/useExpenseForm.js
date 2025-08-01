@@ -1,9 +1,11 @@
 import { reactive, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useForm } from '@inertiajs/vue3';
 
 
 export function useExpenseFrom(props, emit) {
+
     const form = reactive({
         amount: props.expense.amount ?? '',
         date: props.expense.date ?? '',
@@ -11,6 +13,53 @@ export function useExpenseFrom(props, emit) {
         category_id: props.expense.category_id ?? '',
         back: props.back,
     });
+
+    // エラーメッセージを管理するためのreactiveオブジェクト
+    const errors = reactive({
+        amount: '',
+        date: '',
+        title: '',
+        category_id: ''
+    });
+
+    // バリデーション関数
+    const validateForm = () => {
+        let isValid = true;
+
+        // エラーメッセージをリセット
+        Object.keys(errors).forEach(key => {
+            errors[key] = '';
+        });
+
+        // 金額のバリデーション
+        if (!form.amount || form.amount.toString().trim() === '') {
+            errors.amount = '金額を入力して下さい';
+            isValid = false;
+        } else if (parseFloat(form.amount) < 0) {
+            errors.amount = '金額は0以上の値を入力して下さい';
+            isValid = false;
+        }
+
+        // 日付のバリデーション
+        if (!form.date || form.date.toString().trim() === '') {
+            errors.date = '日付を入力して下さい';
+            isValid = false;
+        }
+
+        // 費用名のバリデーション
+        if (!form.title || form.title.toString().trim() === '') {
+            errors.title = '費用名を入力して下さい';
+            isValid = false;
+        }
+
+        // カテゴリーのバリデーション
+        if (!form.category_id || form.category_id.toString().trim() === '') {
+            errors.category_id = 'カテゴリーを選択して下さい';
+            isValid = false;
+        }
+
+        return isValid;
+    };
 
     watch(() => props.expanse, (newExpense) => {
         form.amount = newExpense.amount ?? '';
@@ -20,6 +69,11 @@ export function useExpenseFrom(props, emit) {
     });
 
     const submit = async () => {
+        // バリデーションを実行
+        if (!validateForm()) {
+            return; // バリデーションエラーがある場合は送信を中止
+        }
+
         try {
             console.log('useExpenseForm submit started'); // デバッグログ
             console.log('Form data:', form); // デバッグログ
@@ -73,5 +127,5 @@ export function useExpenseFrom(props, emit) {
         }
     };
 
-    return { form, submit };
+    return { form, errors, submit };
 }
