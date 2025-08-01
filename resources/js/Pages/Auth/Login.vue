@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { reactive } from 'vue';
 
 defineProps({
     canResetPassword: {
@@ -22,9 +23,62 @@ const form = useForm({
     remember: false,
 });
 
+// カスタムバリデーションエラーを管理
+const customErrors = reactive({
+    email: '',
+    password: ''
+});
+
+// バリデーション関数
+const validateForm = () => {
+    let isValid = true;
+
+    // エラーメッセージをリセット
+    customErrors.email = '';
+    customErrors.password = '';
+
+    // メールアドレスのバリデーション
+    if (!form.email || form.email.toString().trim() === '') {
+        customErrors.email = 'メールアドレスを入力して下さい';
+        isValid = false;
+    } else {
+        // メールアドレスの形式チェック
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+            customErrors.email = 'メールアドレスまたはパスワードが間違っています';
+            isValid = false;
+        }
+    }
+
+    // パスワードのバリデーション
+    if (!form.password || form.password.toString().trim() === '') {
+        customErrors.password = 'パスワードを入力して下さい';
+        isValid = false;
+    } else if (form.password.length < 8) {
+        customErrors.password = 'メールアドレスまたはパスワードが間違っています';
+        isValid = false;
+    }
+
+    return isValid;
+};
+
 const submit = () => {
+    // カスタムバリデーションを実行
+    if (!validateForm()) {
+        return; // バリデーションエラーがある場合は送信を中止
+    }
+
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
+        onError: (errors) => {
+            // サーバーからのエラーをカスタムエラーに設定
+            if (errors.email) {
+                customErrors.email = errors.email;
+            }
+            if (errors.password) {
+                customErrors.password = errors.password;
+            }
+        },
     });
 };
 </script>
@@ -46,12 +100,11 @@ const submit = () => {
                     type="email"
                     class="mt-1 block w-full"
                     v-model="form.email"
-                    required
                     autofocus
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="customErrors.email || form.errors.email" />
             </div>
 
             <div class="mt-4">
@@ -62,11 +115,10 @@ const submit = () => {
                     type="password"
                     class="mt-1 block w-full"
                     v-model="form.password"
-                    required
                     autocomplete="current-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="customErrors.password || form.errors.password" />
             </div>
 
             <div class="mt-4 block">
