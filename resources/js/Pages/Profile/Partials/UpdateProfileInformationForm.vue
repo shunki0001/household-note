@@ -4,6 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { reactive } from 'vue';
 
 defineProps({
     mustVerifyEmail: {
@@ -20,6 +21,61 @@ const form = useForm({
     name: user.name,
     email: user.email,
 });
+
+// カスタムバリデーションエラーを管理
+const customErrors = reactive({
+    name: '',
+    email: ''
+});
+
+// バリデーション関数
+const validateForm = () => {
+    let isValid = true;
+
+    // エラーメッセージをリセット
+    customErrors.name = '';
+    customErrors.email = '';
+
+    // 名前のバリデーション
+    if (!form.name || form.name.toString().trim() === '') {
+        customErrors.name = '名前を入力して下さい';
+        isValid = false;
+    }
+
+    // メールアドレスのバリデーション
+    if (!form.email || form.email.toString().trim() === '') {
+        customErrors.email = 'メールアドレスを入力して下さい';
+        isValid = false;
+    } else {
+        // メールアドレスの形式チェック
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+            customErrors.email = '正しいメールアドレスの形式で入力して下さい';
+            isValid = false;
+        }
+    }
+
+    return isValid;
+};
+
+const updateProfile = () => {
+    // カスタムバリデーションを実行
+    if (!validateForm()) {
+        return; // バリデーションエラーがある場合は送信を中止
+    }
+
+    form.patch(route('profile.update'), {
+        onError: (errors) => {
+            // サーバーからのエラーをカスタムエラーに設定
+            if (errors.name) {
+                customErrors.name = errors.name;
+            }
+            if (errors.email) {
+                customErrors.email = errors.email;
+            }
+        },
+    });
+};
 </script>
 
 <template>
@@ -35,7 +91,7 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="updateProfile"
             class="mt-6 space-y-6"
         >
             <div>
@@ -46,12 +102,11 @@ const form = useForm({
                     type="text"
                     class="mt-1 block w-full"
                     v-model="form.name"
-                    required
                     autofocus
                     autocomplete="name"
                 />
 
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-2" :message="customErrors.name || form.errors.name" />
             </div>
 
             <div>
@@ -62,11 +117,10 @@ const form = useForm({
                     type="email"
                     class="mt-1 block w-full"
                     v-model="form.email"
-                    required
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="customErrors.email || form.errors.email" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">

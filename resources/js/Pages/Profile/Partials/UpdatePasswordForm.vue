@@ -4,7 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
@@ -15,11 +15,70 @@ const form = useForm({
     password_confirmation: '',
 });
 
+// カスタムバリデーションエラーを管理
+const customErrors = reactive({
+    current_password: '',
+    password: '',
+    password_confirmation: ''
+});
+
+// バリデーション関数
+const validateForm = () => {
+    let isValid = true;
+
+    // エラーメッセージをリセット
+    customErrors.current_password = '';
+    customErrors.password = '';
+    customErrors.password_confirmation = '';
+
+    // 現在のパスワードのバリデーション
+    if (!form.current_password || form.current_password.toString().trim() === '') {
+        customErrors.current_password = '現在のパスワードを入力して下さい';
+        isValid = false;
+    }
+
+    // 新しいパスワードのバリデーション
+    if (!form.password || form.password.toString().trim() === '') {
+        customErrors.password = '新しいパスワードを入力して下さい';
+        isValid = false;
+    } else if (form.password.length < 8) {
+        customErrors.password = 'パスワードは8文字以上で入力して下さい';
+        isValid = false;
+    }
+
+    // パスワード確認のバリデーション
+    if (!form.password_confirmation || form.password_confirmation.toString().trim() === '') {
+        customErrors.password_confirmation = 'パスワード確認を入力して下さい';
+        isValid = false;
+    } else if (form.password !== form.password_confirmation) {
+        customErrors.password_confirmation = 'パスワードが一致しません';
+        isValid = false;
+    }
+
+    return isValid;
+};
+
 const updatePassword = () => {
+    // カスタムバリデーションを実行
+    if (!validateForm()) {
+        return; // バリデーションエラーがある場合は送信を中止
+    }
+
     form.put(route('password.update'), {
         preserveScroll: true,
         onSuccess: () => form.reset(),
-        onError: () => {
+        onError: (errors) => {
+            // サーバーからのエラーをカスタムエラーに設定
+            if (errors.current_password) {
+                customErrors.current_password = errors.current_password;
+            }
+            if (errors.password) {
+                customErrors.password = errors.password;
+            }
+            if (errors.password_confirmation) {
+                customErrors.password_confirmation = errors.password_confirmation;
+            }
+
             if (form.errors.password) {
                 form.reset('password', 'password_confirmation');
                 passwordInput.value.focus();
@@ -59,7 +118,7 @@ const updatePassword = () => {
                 />
 
                 <InputError
-                    :message="form.errors.current_password"
+                    :message="customErrors.current_password || form.errors.current_password"
                     class="mt-2"
                 />
             </div>
@@ -76,7 +135,7 @@ const updatePassword = () => {
                     autocomplete="new-password"
                 />
 
-                <InputError :message="form.errors.password" class="mt-2" />
+                <InputError :message="customErrors.password || form.errors.password" class="mt-2" />
             </div>
 
             <div>
@@ -94,7 +153,7 @@ const updatePassword = () => {
                 />
 
                 <InputError
-                    :message="form.errors.password_confirmation"
+                    :message="customErrors.password_confirmation || form.errors.password_confirmation"
                     class="mt-2"
                 />
             </div>
