@@ -92,26 +92,30 @@ export function useExpenseFrom(props, emit) {
                 timer: 2000,
                 timerProgressBar: true,
             }).then(() => {
-                if(form.back) {
+                // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
+                if (props.method === 'put' && form.back) {
                     window.location.href = window.location.origin + '/' + form.back;
-                } else {
+                } else if (props.method === 'put') {
                     window.location.href = '/dashboard';
                 }
             });
 
-            // イベントを発火
-            console.log('Emitting expense-added event'); // デバッグログ
-            emit('expense-added');
-            console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
+            // 新規登録時（POST）のみイベントを発火
+            if (props.method === 'post') {
+                console.log('Emitting expense-added event'); // デバッグログ
+                emit('expense-added');
+                console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
+            }
 
-            // フォームをリセット
-            console.log('Resetting form'); // デバッグログ
-            form.amount='';
-            form.date='';
-            form.title='';
-            form.category_id='';
-
-            console.log('Form reset completed'); // デバッグログ
+            // 新規登録時（POST）のみフォームをリセット
+            if (props.method === 'post') {
+                console.log('Resetting form'); // デバッグログ
+                form.amount='';
+                form.date='';
+                form.title='';
+                form.category_id='';
+                console.log('Form reset completed'); // デバッグログ
+            }
         }   catch(error) {
             console.error('Submit error:', error); // デバッグログ
             Swal.fire({

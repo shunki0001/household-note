@@ -71,4 +71,20 @@ class DashboardController extends Controller
         ]);
     }
 
+    // 今月の合計支出を取得するAPI
+    public function getTotalExpense()
+    {
+        $now = Carbon::now();
+        $userId = Auth::id();
+
+        $totalExpense = Expense::whereYear('date', $now->year)
+            ->where('user_id', $userId)
+            ->whereMonth('date', $now->month)
+            ->sum('amount');
+
+        return response()->json([
+            'totalExpense' => $totalExpense
+        ]);
+    }
+
 }

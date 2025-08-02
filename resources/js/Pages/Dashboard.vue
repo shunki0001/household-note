@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 // import DeleteButton from '@/Components/DeleteButton.vue';
-import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
@@ -21,8 +21,11 @@ const props = defineProps({
     },
 });
 
+// 合計金額をリアルタイムで管理
+const currentTotalExpense = ref(Number(props.totalExpense) || 0);
+
 const formattedTotal = computed(() => {
-    return Number(props.totalExpense).toLocaleString();
+    return currentTotalExpense.value.toLocaleString();
 });
 
 const currentPage = ref(props.expenses.current_page || 1)
@@ -32,23 +35,7 @@ const expenseListRef = ref(null)
 // 一覧データを直接管理
 const expenseList = ref(props.expenses?.data ?? []);
 
-const form = useForm({
-    amount: '',
-    date: '',
-    title: '',
-    category_id: '',
-});
-
-const submit = () => {
-    form.post(route('expenses.store'), {
-        onSuccess: () => {
-            form.reset();
-            refreshKey.value++;
-        },
-    });
-}
-
-// // 現在のページのpropsを取得
+// 現在のページのpropsを取得
 const page = usePage();
 
 // 一覧データを更新する関数
@@ -63,11 +50,26 @@ const updateExpenseList = async () => {
     }
 }
 
+// 合計金額を更新する関数
+const updateTotalExpense = async () => {
+    try {
+        console.log('Dashboard: updateTotalExpense called'); // デバッグログ
+        const response = await axios.get(route('dashboard.totalExpense'));
+        currentTotalExpense.value = Number(response.data.totalExpense) || 0;
+        console.log('Dashboard: totalExpense updated to', currentTotalExpense.value); // デバッグログ
+    } catch (e) {
+        console.error('Dashboard: 合計金額更新エラー', e);
+    }
+}
+
 const handleExpenseAdded = () => {
     console.log('handleExpenseAdded called'); // デバッグログ
 
     // 一覧データを直接更新
     updateExpenseList();
+
+    // 合計金額を更新
+    updateTotalExpense();
 
     // ExpenseListコンポーネントのreloadExpensesも呼び出し
     if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
@@ -84,6 +86,10 @@ const handleExpenseAdded = () => {
 // 削除完了時の処理
 const handleExpenseDeleted = () => {
     console.log('Dashboard handleExpenseDeleted called'); // デバッグログ
+
+    // 合計金額を更新
+    updateTotalExpense();
+
     refreshKey.value++; // グラフ再取得
     console.log('refreshKey updated after delete:', refreshKey.value); // デバッグログ
 }
@@ -184,7 +190,7 @@ const reloadDashboard = () => {
                             <ExpenseForm
                                 :expense="{}"
                                 :categories="props.categories"
-                                :submit-url="route('expenses.store')"
+                                :submitUrl="route('expenses.store')"
                                 :method="'post'"
                                 @expense-added="handleExpenseAdded"
                             />
@@ -210,7 +216,7 @@ const reloadDashboard = () => {
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 text-center">
                         <ExpenseList
-                            :ref="expenseListRef"
+                            ref="expenseListRef"
                             :initial-expenses="props.expenses"
                             :expense-list="expenseList"
                             @expense-deleted="handleExpenseDeleted"
