@@ -7,23 +7,10 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Http\Requests\StoreExpenseRequest;
 
 class ExpenseController extends Controller
 {
-    // 一覧表示(ログインユーザーのみ)
-    public function index(Request $request)
-    {
-        $expenses = $request->user()->expenses()->orderBy('created_at', 'desc')->paginate(5);
-        if ($request->wantsJson()) {
-            return response()->json([
-                'expenses' => $expenses,
-            ]);
-        }
-
-        return Inertia::render('Dashboard', [
-            'expenses' => $expenses,
-        ]);
-    }
 
     public function latestJson(Request $request)
     {
@@ -40,19 +27,11 @@ class ExpenseController extends Controller
     // 登録処理(ログインユーザーに紐付けて保存)
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'date' => 'required|date',
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-        ]);
+        $validated = $request->validated();
 
         // ログインユーザーに紐づけて保存
         Expense::create([
-            'amount' => $validated['amount'],
-            'date' => $validated['date'],
-            'title' => $validated['title'],
-            'category_id' => $validated['category_id'],
+            ...$validated,
             'user_id' => $request->user()->id,
         ]);
 
@@ -86,12 +65,7 @@ class ExpenseController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'date' => 'required|date',
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-        ]);
+        $validated = $request->validated();
 
         $expense->update($validated);
 

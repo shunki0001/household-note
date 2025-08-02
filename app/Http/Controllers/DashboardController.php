@@ -71,26 +71,4 @@ class DashboardController extends Controller
         ]);
     }
 
-    // 更新処理
-    public function update(Request $request, Expense $expense)
-    {
-        if(Auth::id() !== $expense->user_id) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'date' => 'required|date',
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-        ]);
-
-        $expense->update($validated);
-
-        // backパラメータから戻り先を取得
-        $back = $request->input('back', 'list');
-
-        return redirect()->route($back)->with('message', '更新しました');
-        // return redirect()->back()->with('message', '更新しました');
-    }
 }
