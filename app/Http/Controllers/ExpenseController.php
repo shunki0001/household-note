@@ -25,7 +25,7 @@ class ExpenseController extends Controller
     }
 
     // 登録処理(ログインユーザーに紐付けて保存)
-    public function store(Request $request)
+    public function store(StoreExpenseRequest $request)
     {
         $validated = $request->validated();
 
@@ -58,7 +58,7 @@ class ExpenseController extends Controller
     }
 
     // 更新処理
-    public function update(Request $request, Expense $expense)
+    public function update(StoreExpenseRequest $request, Expense $expense)
     {
         // ログインユーザーのデータのみ更新許可
         if ($expense->user_id !== $request->user()->id) {
