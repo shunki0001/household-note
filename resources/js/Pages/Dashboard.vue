@@ -19,13 +19,22 @@ const props = defineProps({
         type: [Number, String],
         default: 0,
     },
+    totalIncome: {
+        type: [Number, String],
+        default: 0,
+    }
 });
 
 // 合計金額をリアルタイムで管理
 const currentTotalExpense = ref(Number(props.totalExpense) || 0);
+const currentTotalIncome = ref(Number(props.totalIncome) || 0);
 
 const formattedTotal = computed(() => {
     return currentTotalExpense.value.toLocaleString();
+});
+
+const formattedTotalIncome = computed(() => {
+    return currentTotalIncome.value.toLocaleString();
 });
 
 const currentPage = ref(props.expenses.current_page || 1)
@@ -62,6 +71,18 @@ const updateTotalExpense = async () => {
     }
 }
 
+// 合計収入金額を更新する関数
+const updateTotalIncome = async () => {
+    try {
+        console.log('Dashboard: updateTotalIncome called'); // デバックログ
+        // const response = await axios.get(route('dashboard.totalExpense'));
+        currentTotalIncome.value = Number(response.data.totalIncome) || 0;
+        console.log('Dashboard: totalIncome updated to', currentTotalIncome.value); // デバックログ
+    } catch (e) {
+        console.error('Dashboard: 合計収入金額更新エラー', e);
+    }
+}
+
 const handleExpenseAdded = () => {
     console.log('handleExpenseAdded called'); // デバッグログ
 
@@ -70,6 +91,9 @@ const handleExpenseAdded = () => {
 
     // 合計金額を更新
     updateTotalExpense();
+
+    // 合計支出金額を更新
+    updateTotalIncome();
 
     // ExpenseListコンポーネントのreloadExpensesも呼び出し
     if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
@@ -178,7 +202,7 @@ const reloadDashboard = () => {
                         :refresh-key="refreshKey"
                     />
                     <p>今月の合計支出: {{ formattedTotal }}円</p>
-                    <p>今月の合計収入: ◯◯円</p>
+                    <p>今月の合計収入: {{ formattedTotalIncome }}円</p>
                     <p>収支: ◯◯円</p>
                     </div>
 
