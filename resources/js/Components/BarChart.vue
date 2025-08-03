@@ -28,8 +28,19 @@ const chartOptions = ref({})
 
 const fetchData = async () => {
     try {
-        const response = await fetch(`${props.apiUrl}?year=${props.year}`)
-        const json = await response.json()
+        let json;
+        if(props.apiUrl === 'mock') {
+            // テスト用データを定義
+            json = {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                totals: [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, ]
+            }
+        } else {
+            const response = await fetch(`${props.apiUrl}?year=${props.year}`);
+            json = await response.json();
+        }
+        // const response = await fetch(`${props.apiUrl}?year=${props.year}`)
+        // const json = await response.json()
 
         const maxValue = Math.max(...(json.totals || [0]))
         const adjustedMax = Math.ceil((maxValue + 10000) / 1000) * 1000
