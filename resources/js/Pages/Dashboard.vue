@@ -25,6 +25,11 @@ const props = defineProps({
     }
 });
 
+// 収支の算出
+const currentBalance = computed(() => {
+    return currentTotalIncome.value - currentTotalExpense.value;
+});
+
 // 合計金額をリアルタイムで管理
 const currentTotalExpense = ref(Number(props.totalExpense) || 0);
 const currentTotalIncome = ref(Number(props.totalIncome) || 0);
@@ -35,6 +40,10 @@ const formattedTotal = computed(() => {
 
 const formattedTotalIncome = computed(() => {
     return currentTotalIncome.value.toLocaleString();
+});
+
+const formattedBalance = computed(() => {
+    return currentBalance.value.toLocaleString();
 });
 
 const currentPage = ref(props.expenses.current_page || 1)
@@ -203,7 +212,7 @@ const reloadDashboard = () => {
                     />
                     <p>今月の合計支出: {{ formattedTotal }}円</p>
                     <p>今月の合計収入: {{ formattedTotalIncome }}円</p>
-                    <p>収支: ◯◯円</p>
+                    <p>収支: {{ formattedBalance }}円</p>
                     </div>
 
                     <!-- 右：かんたん入力&グラフ確認 -->
