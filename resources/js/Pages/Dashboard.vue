@@ -27,6 +27,18 @@ const props = defineProps({
     }
 });
 
+// フォーム切り替え用の状態
+const activeForm = ref('expense'); // 'expense' または 'income'
+
+// フォーム切り替え関数
+const switchToExpense = () => {
+    activeForm.value = 'expense';
+};
+
+const switchToIncome = () => {
+    activeForm.value = 'income';
+};
+
 // 収支の算出
 const currentBalance = computed(() => {
     return currentTotalIncome.value - currentTotalExpense.value;
@@ -223,13 +235,48 @@ const reloadDashboard = () => {
                         <!-- かんたん入力 -->
                         <div class="bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
                             <h2 class="text-lg font-bold mb-4">かんたん入力</h2>
-                            <ExpenseForm
-                                :expense="{}"
-                                :categories="props.categories"
-                                :submitUrl="route('expenses.store')"
-                                :method="'post'"
-                                @expense-added="handleExpenseAdded"
-                            />
+
+                            <!-- フォーム切り替えボタン -->
+                            <div class="flex mb-4 border rounded-lg overflow-hidden">
+                                <button
+                                    @click="switchToExpense"
+                                    :class="[
+                                        'flex-1 px-4 py-2 text-sm font-medium transition-colors',
+                                        activeForm === 'expense'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ]"
+                                >
+                                    支出
+                                </button>
+                                <button
+                                    @click="switchToIncome"
+                                    :class="[
+                                        'flex-1 px-4 py-2 text-sm font-medium transition-colors',
+                                        activeForm === 'income'
+                                            ? 'bg-green-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ]"
+                                >
+                                    収入
+                                </button>
+                            </div>
+
+                            <!-- フォーム表示エリア -->
+                            <div class="min-h-[400px]">
+                                <div v-if="activeForm === 'expense'">
+                                    <ExpenseForm
+                                        :expense="{}"
+                                        :categories="props.categories"
+                                        :submitUrl="route('expenses.store')"
+                                        :method="'post'"
+                                        @expense-added="handleExpenseAdded"
+                                    />
+                                </div>
+                                <div v-else-if="activeForm === 'income'">
+                                    <IncomeForm />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 履歴・グラフへのリンク -->
@@ -278,18 +325,7 @@ const reloadDashboard = () => {
         </div>
 
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        ここに収入フォームを
-                        <IncomeForm />
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
     </AuthenticatedLayout>
 </template>
