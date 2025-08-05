@@ -11,7 +11,6 @@ import DoughnutChart from '@/Components/DoughnutChart.vue';
 // import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
 import ExpenseList from '@/Components/ExpenseList.vue';
-import IncomeForm from '@/Components/IncomeForm.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -38,6 +37,7 @@ const expenseList = ref(props.expenses?.data ?? []);
 
 // 現在のページのpropsを取得
 const page = usePage();
+const latestTransactions = page.props.latestTransactions;
 
 // 一覧データを更新する関数
 const updateExpenseList = async () => {
@@ -227,6 +227,21 @@ const reloadDashboard = () => {
                 </div>
             </div>
         </div>
+
+        <!-- <TransactionList :transactions="latestTransactions"/> -->
+        <!-- 仮で埋め込み -->
+        <!-- <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                        <TransactionList />
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
