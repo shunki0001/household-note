@@ -11,6 +11,8 @@ import DoughnutChart from '@/Components/DoughnutChart.vue';
 // import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
 import ExpenseList from '@/Components/ExpenseList.vue';
+import TransactionList from '@/Components/TransactionList.vue';
+import IncomeForm from '@/Components/IncomeForm.vue';
 
 const props = defineProps({
     expenses: Object,
@@ -263,7 +265,7 @@ const reloadDashboard = () => {
 
         <!-- <TransactionList :transactions="latestTransactions"/> -->
         <!-- 仮で埋め込み -->
-        <!-- <div class="py-12">
+        <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
@@ -273,7 +275,7 @@ const reloadDashboard = () => {
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
 
 
         <div class="py-12">
