@@ -4,20 +4,20 @@ import Swal from 'sweetalert2';
 import { useForm } from '@inertiajs/vue3';
 
 
-export function useExpenseFrom(props, emit) {
+export function useIncomeForm(props, emit) {
 
     const form = reactive({
         amount: props.income.amount ?? '',
-        date: props.income.date ?? '',
-        category_id: props.income.incomeCategory_id ?? '',
+        income_date: props.income.income_date ?? '',
+        income_category_id: props.income.income_category_id ?? '',
         back: props.back,
     });
 
     // エラーメッセージを管理するためのreactiveオブジェクト
     const errors = reactive({
         amount: '',
-        date: '',
-        incomeCategory_id: ''
+        income_date: '',
+        income_category_id: ''
     });
 
     // バリデーション関数
@@ -39,14 +39,14 @@ export function useExpenseFrom(props, emit) {
         }
 
         // 日付のバリデーション
-        if (!form.date || form.date.toString().trim() === '') {
-            errors.date = '日付を入力して下さい(useIncomeFormから出力)';
+        if (!form.income_date || form.income_date.toString().trim() === '') {
+            errors.income_date = '日付を入力して下さい(useIncomeFormから出力)';
             isValid = false;
         }
 
         // カテゴリーのバリデーション
-        if (!form.category_id || form.category_id.toString().trim() === '') {
-            errors.category_id = 'カテゴリーを選択して下さい(useIncomeFormから出力)';
+        if (!form.income_category_id || form.income_category_id.toString().trim() === '') {
+            errors.income_category_id = 'カテゴリーを選択して下さい(useIncomeFormから出力)';
             isValid = false;
         }
 
@@ -55,8 +55,8 @@ export function useExpenseFrom(props, emit) {
 
     watch(() => props.income, (newIncome) => {
         form.amount = newIncome.amount ?? '';
-        form.date = newIncome.date ?? '';
-        form.category_id = newIncome.incomeCategory_id ?? '';
+        form.income_date = newIncome.income_date ?? '';
+        form.income_category_id = newIncome.income_category_id ?? '';
     });
 
     const submit = async () => {
@@ -102,8 +102,8 @@ export function useExpenseFrom(props, emit) {
             if (props.method === 'post') {
                 console.log('Resetting form'); // デバッグログ
                 form.amount='';
-                form.date='';
-                form.incomeCategory_id='';
+                form.income_date='';
+                form.income_category_id='';
                 console.log('Form reset completed'); // デバッグログ
             }
         }   catch(error) {

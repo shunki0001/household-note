@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\Category;
+use App\Models\Income;
+use App\Models\IncomeCategory;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $userId = Auth::id();
         $categories = Category::all();
+        $income_categories = IncomeCategory::all();
 
         $expenses = $user->expenses()
             ->with('category')
@@ -30,13 +33,21 @@ class DashboardController extends Controller
         ->whereMonth('date', $now->month)
         ->sum('amount');
 
+        // 今月の合計収入
+        $totalIncome = Income::whereYear('income_date', $now->year)
+        ->where('user_id', $userId)
+        ->whereMonth('income_date', $now->month)
+        ->sum('amount');
+
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,
             'categories' => $categories,
+            'income_categories' => $income_categories,
             'flash' => [
                 'message' => session('message')
             ],
             'totalExpense' => $totalExpense,
+            'totalIncome' => $totalIncome,
         ]);
 
     }

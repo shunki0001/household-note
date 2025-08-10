@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class IncomeCategory extends Model
 {
-    protected $fillable = ('name');
+    protected $fillable = ['name'];
 
     public function incomes(): HasMany
     {

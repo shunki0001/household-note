@@ -17,6 +17,7 @@ import IncomeForm from '@/Components/IncomeForm.vue';
 const props = defineProps({
     expenses: Object,
     categories: Array,
+    income_categories: Array,
     totalExpense: {
         type: [Number, String],
         default: 0,
@@ -274,7 +275,12 @@ const reloadDashboard = () => {
                                     />
                                 </div>
                                 <div v-else-if="activeForm === 'income'">
-                                    <IncomeForm />
+                                    <IncomeForm
+                                        :income="{}"
+                                        :income_categories="props.income_categories"
+                                        :submitUrl="route('incomes.store')"
+                                        :method="'post'"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -286,7 +292,7 @@ const reloadDashboard = () => {
                                 <Link href="/list" class="btn-icon-text">一覧ページに移動</Link>
                                 <Link href="/graph/monthly" class="btn-icon-text">月別支出グラフ</Link>
                                 <Link href="/graph/category" class="btn-icon-text">カテゴリー別支出グラフ</Link>
-                                <Link href="#" class="btn-icon-text">月別支出グラフ</Link>
+                                <!-- <Link href="#" class="btn-icon-text">月別支出グラフ</Link> -->
                             </div>
                         </div>
                     </div>

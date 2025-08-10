@@ -4,14 +4,14 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { useExpenseFrom } from '@/composables/useExpenseForm';
+import { useIncomeForm } from '@/composables/useIncomeForm';
 
 const props = defineProps({
-    expense: {
+    income: {
         type: Object,
         default: () => ({})
     },
-    categories: {
+    income_categories: {
         type: Array,
         default: () => []
     },
@@ -29,8 +29,8 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['expense-added']);
-const { form, errors, submit } = useExpenseFrom(props, emit);
+const emit = defineEmits(['income-added']);
+const { form, errors, submit } = useIncomeForm(props, emit);
 </script>
 
 <template>
@@ -45,21 +45,21 @@ const { form, errors, submit } = useExpenseFrom(props, emit);
 
         <!-- 日付 -->
         <div>
-            <InputLabel for="date" value="日付"/>
-            <TextInput id="date" type="date" v-model="form.date"/>
-            <InputError class="mt-2" :message="errors.date"/>
+            <InputLabel for="income_date" value="日付"/>
+            <TextInput id="income_date" type="date" v-model="form.income_date"/>
+            <InputError class="mt-2" :message="errors.income_date"/>
         </div>
 
         <!-- カテゴリー -->
         <div>
-            <InputLabel for="category_id" value="カテゴリー"/>
-            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs dark:bg-gray-200">
+            <InputLabel for="income_category_id" value="カテゴリー"/>
+            <select v-model="form.income_category_id" class="w-full border p-2 rounded w-full max-w-xs dark:bg-gray-200">
                 <option disabled value="">カテゴリーを選択</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">
-                    {{ category.name }}
+                <option v-for="income_category in income_categories" :key="income_category.id" :value="income_category.id">
+                    {{ income_category.name }}
                 </option>
             </select>
-            <InputError class="mt-2" :message="errors.category_id"/>
+            <InputError class="mt-2" :message="errors.income_category_id"/>
         </div>
 
         <!-- ボタン -->

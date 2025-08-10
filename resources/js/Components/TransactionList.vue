@@ -113,7 +113,7 @@ defineExpose({ reloadTransactions });
                     <td class="border px-4 py-2">{{ transaction.category?.name ?? '未分類' }}</td>
                     <td class="border px-4 py-2">
                         <div class="flex space-x-2">
-                            <Link class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
+                            <Link href="#" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
                             <DeleteButton :transactionId="transaction.id" @deleted="handleTransactionDeleted" />
                         </div>
                     </td>
