@@ -4,7 +4,9 @@ use App\Http\Controllers\ChartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -53,6 +55,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/list', [PageController::class, 'list'])->name('list');
     Route::get('/graph/monthly', [PageController::class, 'monthlyGraph'])->name('graph.monthly');
     Route::get('/graph/category', [PageController::class, 'categoryGraph'])->name('graph.category');
+
+    // 収入関連ルート、API
+    Route::post('/incomes', [IncomeController::class, 'store'])->name('incomes.store'); // 登録
+    Route::put('/incomes/{income}', [IncomeController::class, 'update'])->name('incomes.update'); // 更新
+    Route::get('/incomes/{income}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
+    Route::delete('/incomes/{income}', [IncomeController::class, 'destroy'])->name('incomes.destroy'); // 削除
+    Route::get('/api/incomes/total-monthly-incomes', [IncomeController::class, 'getTotalMonthlyIncomes']); // 合計
+    Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson']); // 支出+支出一覧(5件)
+    Route::get('/api/report-data/monthly-transactions', [ReportController::class, 'getMonthlyTransactions']); // 支出+支出一覧(月別)
 });
 
 require __DIR__.'/auth.php';

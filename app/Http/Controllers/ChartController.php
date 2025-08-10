@@ -141,4 +141,35 @@ class ChartController extends Controller
         return response()->json($response);
     }
 
+    // 支出合計グラフ
+    public function getIncomeMonthlyTotals(Request $request)
+    {
+        $year = $request->query('year', Carbon::now()->year);
+        $userId = Auth::id();
+
+        $month = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $month[] = $i . '月';
+        }
+
+        $incomes = DB::table('incomes')
+            ->selectRaw('MONTH(date) as month, SUM(amount) as total')
+            ->where('user_id', $userId)
+            ->whereYear('income_date', $year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $data = array_fill(1, 12, 0);
+
+        foreach ($incomes as $income) {
+            $data[$income->month] = (int) $income->total;
+        }
+
+        return response()->json([
+            'labels' => $month,
+            'totals' => array_values($data),
+        ]);
+    }
+
 }
