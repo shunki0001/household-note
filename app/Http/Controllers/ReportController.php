@@ -15,33 +15,68 @@ class ReportController extends Controller
     // 日付順に並び替え
     public function latestJson()
     {
-        $transactions = DB::table('expenses')
-            ->join('categories', 'expenses.category_id', '=', 'categories.id')
+        // $transactions = DB::table('expenses')
+        //     ->join('categories', 'expenses.category_id', '=', 'categories.id')
+        //     ->select(
+        //         'expenses.id',
+        //         'expenses.amount',
+        //         'expenses.date',
+        //         'expenses.title',
+        //         DB::raw("JSON_OBJECT('name', categories.name) as category"),
+        //         DB::raw("'expense' as type")
+        //     )
+        //     ->unionAll(
+        //         DB::table('incomes')
+        //             ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
+        //             ->select(
+        //                 'incomes.id',
+        //                 'incomes.amount',
+        //                 'incomes.income_date as date',
+        //                 DB::raw("NULL as title"),
+        //                 DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
+        //                 DB::raw("'income' as type")
+        //             )
+        //     )
+        //     ->orderBy('date', 'desc')
+        //     ->paginate(5);
+
+        $userId = Auth::id();
+
+        // 支出クエリ
+        $expensesQuery = DB::table('expenses')
+            ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
+            ->where('expenses.user_id', $userId)
+            ->select('expenses.user_id', $userId)
             ->select(
                 'expenses.id',
                 'expenses.amount',
                 'expenses.date',
                 'expenses.title',
-                DB::raw("JSON_OBJECT('name', categories.name) as category"),
+                DB::raw("COALESCE(categories.name, '未分類') as category_name"),
                 DB::raw("'expense' as type")
-            )
-            ->unionAll(
-                DB::table('incomes')
-                    ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
-                    ->select(
-                        'incomes.id',
-                        'incomes.amount',
-                        'incomes.income_date as date',
-                        DB::raw("NULL as title"),
-                        DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
-                        DB::raw("'income' as type")
-                    )
-            )
+            );
+
+        // 収入クエリ
+        $incomesQuery = DB::table('incomes')
+            ->leftJoin('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
+            ->where('incomes.user_id', $userId)
+            ->select(
+                'incomes.id',
+                'incomes.amount',
+                'incomes.income_date as date',
+                DB::raw("'NULL as title'"),
+                DB::raw("COALESCE(income_categories.name, '未分類') as category_name"),
+                DB::raw("'income' as type")
+            );
+
+        // UNION + 並び替え + ページネーション
+        $transactions = $expensesQuery
+            ->unionAll($incomesQuery)
             ->orderBy('date', 'desc')
             ->paginate(5);
 
         return response()->json([
-            'transactions' => $transactions
+            'transactions' => $transactions,
         ]);
     }
 

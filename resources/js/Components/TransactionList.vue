@@ -11,11 +11,11 @@ const props = defineProps({
         type: Object,
         default: () => ({
             // data: [
-            //     { id: 1, amount: 5000, date: '2025-08-01', title: '給料', category: { name: '給与' }, type: 'income' },
-            //     { id: 2, amount: 1200, date: '2025-08-02', title: '昼ごはん', category: { name: '食費' }, type: 'expense' },
-            //     { id: 3, amount: 300,  date: '2025-08-02', title: 'お菓子', category: { name: '食費' }, type: 'expense' },
-            //     { id: 4, amount: 2000, date: '2025-08-03', title: '副業報酬', category: { name: '副業' }, type: 'income' },
-            //     { id: 5, amount: 1600, date: '2025-08-03', title: '交通費', category: { name: '交通' }, type: 'expense' },
+            //     { id: 1, amount: 5000, date: '2025-08-01', title: '給料', category_name: '給与', type: 'income' },
+            //     { id: 2, amount: 1200, date: '2025-08-02', title: '昼ごはん', category_name: '食費', type: 'expense' },
+            //     { id: 3, amount: 300,  date: '2025-08-02', title: 'お菓子', category_name: '食費', type: 'expense' },
+            //     { id: 4, amount: 2000, date: '2025-08-03', title: '副業報酬', category_name: '副業', type: 'income' },
+            //     { id: 5, amount: 1600, date: '2025-08-03', title: '交通費', category_name: '交通', type: 'expense' },
             // ],
             data: [],
             current_page: 1,
@@ -111,7 +111,7 @@ defineExpose({ reloadTransactions });
                     <td class="border px-4 py-2">{{ transaction.amount }}</td>
                     <td class="border px-4 py-2">{{ transaction.date }}</td>
                     <td class="border px-4 py-2">{{ transaction.title }}</td>
-                    <td class="border px-4 py-2">{{ transaction.category?.name ?? '未分類' }}</td>
+                    <td class="border px-4 py-2">{{ transaction.category_name ?? '未分類' }}</td>
                     <td class="border px-4 py-2">
                         <div class="flex space-x-2">
                             <Link href="#" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>

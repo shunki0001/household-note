@@ -49,7 +49,8 @@ class DashboardController extends Controller
                 'expenses.amount',
                 'expenses.date',
                 'expenses.title',
-                DB::raw("JSON_OBJECT('name', categories.name) as category"),
+                // DB::raw("JSON_OBJECT('name', categories.name) as category"),
+                DB::raw("categories.name as category_name"),
                 DB::raw("'expense' as type")
             );
 
@@ -62,7 +63,8 @@ class DashboardController extends Controller
                 'incomes.amount',
                 'incomes.income_date as date',
                 DB::raw("Null as title"),
-                DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
+                // DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
+                DB::raw("income_categories.name as category_name"),
                 DB::raw("'income' as type")
             );
 
