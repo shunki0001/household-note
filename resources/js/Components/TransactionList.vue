@@ -10,13 +10,14 @@ const props = defineProps({
     initialTransactions: {
         type: Object,
         default: () => ({
-            data: [
-                { id: 1, amount: 5000, date: '2025-08-01', title: '給料', category: { name: '給与' }, type: 'income' },
-                { id: 2, amount: 1200, date: '2025-08-02', title: '昼ごはん', category: { name: '食費' }, type: 'expense' },
-                { id: 3, amount: 300,  date: '2025-08-02', title: 'お菓子', category: { name: '食費' }, type: 'expense' },
-                { id: 4, amount: 2000, date: '2025-08-03', title: '副業報酬', category: { name: '副業' }, type: 'income' },
-                { id: 5, amount: 1600, date: '2025-08-03', title: '交通費', category: { name: '交通' }, type: 'expense' },
-            ],
+            // data: [
+            //     { id: 1, amount: 5000, date: '2025-08-01', title: '給料', category: { name: '給与' }, type: 'income' },
+            //     { id: 2, amount: 1200, date: '2025-08-02', title: '昼ごはん', category: { name: '食費' }, type: 'expense' },
+            //     { id: 3, amount: 300,  date: '2025-08-02', title: 'お菓子', category: { name: '食費' }, type: 'expense' },
+            //     { id: 4, amount: 2000, date: '2025-08-03', title: '副業報酬', category: { name: '副業' }, type: 'income' },
+            //     { id: 5, amount: 1600, date: '2025-08-03', title: '交通費', category: { name: '交通' }, type: 'expense' },
+            // ],
+            data: [],
             current_page: 1,
             links: []
         })

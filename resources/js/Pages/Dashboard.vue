@@ -25,7 +25,9 @@ const props = defineProps({
     totalIncome: {
         type: [Number, String],
         default: 0,
-    }
+    },
+    transactions: Object, // ページネーション形式
+    latestTransactions: Array, // 配列形式
 });
 
 // フォーム切り替え用の状態
@@ -64,6 +66,7 @@ const formattedBalance = computed(() => {
 const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0) // グラフ用のみに使用
 const expenseListRef = ref(null)
+const transactionListRef = ref(null)
 
 // 一覧データを直接管理
 const expenseList = ref(props.expenses?.data ?? []);
@@ -325,7 +328,11 @@ const reloadDashboard = () => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        <TransactionList />
+                        <TransactionList
+                            ref="transactionListRef"
+                            :initial-transactions="props.transactions"
+                            :transaction-list="props.latestTransactionList"
+                        />
                     </div>
                 </div>
             </div>

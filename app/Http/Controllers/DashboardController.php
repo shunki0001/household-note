@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -39,6 +40,38 @@ class DashboardController extends Controller
         ->whereMonth('income_date', $now->month)
         ->sum('amount');
 
+        // 支出
+        $expensesQuery = DB::table('expenses')
+            ->join('categories', 'expenses.category_id', '=', 'categories.id')
+            ->where('expenses.user_id', $userId)
+            ->select(
+                'expenses.id',
+                'expenses.amount',
+                'expenses.date',
+                'expenses.title',
+                DB::raw("JSON_OBJECT('name', categories.name) as category"),
+                DB::raw("'expense' as type")
+            );
+
+        // 収入
+        $incomesQuery = DB::table('incomes')
+            ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
+            ->where('incomes.user_id', $userId)
+            ->select(
+                'incomes.id',
+                'incomes.amount',
+                'incomes.income_date as date',
+                DB::raw("Null as title"),
+                DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
+                DB::raw("'income' as type")
+            );
+
+        // 支出と収入を合体して日付順
+        $transactions = $expensesQuery
+            ->unionAll($incomesQuery)
+            ->orderBy('date', 'desc')
+            ->paginate(5);
+
         return Inertia::render('Dashboard', [
             'expenses' => $expenses,
             'categories' => $categories,
@@ -48,6 +81,8 @@ class DashboardController extends Controller
             ],
             'totalExpense' => $totalExpense,
             'totalIncome' => $totalIncome,
+            'transactions' => $transactions,
+            'latestTransactions' => $transactions->items(),
         ]);
 
     }

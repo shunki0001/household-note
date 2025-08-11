@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 use function Laravel\Prompts\select;
 
@@ -41,6 +42,49 @@ class ReportController extends Controller
 
         return response()->json([
             'transactions' => $transactions
+        ]);
+    }
+
+    public function dashboard()
+    {
+        $userId = Auth::id();
+
+        // 支出
+        $expensesQuery = DB::table('expenses')
+            ->join('categories', 'expenses.category_id', '=', 'categories.id')
+            ->where('expenses.user_id', $userId)
+            ->select(
+                'expenses.id',
+                'expenses.amount',
+                'expenses.date',
+                'expenses.title',
+                DB::raw("JSON_OBJECT('name', categories.name) as category"),
+                DB::raw("'expense' as type")
+            );
+
+        // 収入
+        $incomesQuery = DB::table('incomes')
+            ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
+            ->where('incomes.user_id', $userId)
+            ->select(
+                'incomes.id',
+                'incomes.amount',
+                'incomes.income_date as date',
+                DB::raw("Null as title"),
+                DB::raw("JSON_OBJECT('name', income_categories.income) as category"),
+                DB::raw("'income' as type")
+            );
+
+        // 支出と収入うを合体して日付順
+        $transactions = $expensesQuery
+            ->unionAll($incomesQuery)
+            ->orderBy('date', 'desc')
+            ->paginate(5);
+
+        return Inertia::render('Dashboard', [
+            'transactions' => $transactions, // ページネーションオブジェクト
+            'latestTransactions' => $transactions->items(), // 配列のみ
+            // 他のprops(expenses, categories, totalIncome など)
         ]);
     }
 
