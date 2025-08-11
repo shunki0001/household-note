@@ -4,16 +4,40 @@ import { defineEmits } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    expenseId: Number,
+    // expenseId: Number,
+    transactionId: Number,
+    transactionType: String,
 });
 
 const emit = defineEmits(['deleted']); // 削除通知イベント
 
-const handleDelete = async () => {
+// const handleDelete = async () => {
+//     try {
+//         const confirmed = await Swal.fire({
+//             title: '本当に削除しますか？',
+//             text: 'この操作は取り消せません!',
+//             icon: 'warning',
+//             showCancelButton: true,
+//             confirmButtonColor: '#d33',
+//             cancelButtonColor: '#3085d6',
+//             confirmButtonText: '削除する',
+//             cancelButtonText: 'キャンセル',
+//         })
+
+//         if (confirmed.isConfirmed) {
+//             await axios.delete(`/expenses/${props.expenseId}`)
+//             emit('deleted')
+//             Swal.fire('削除しました', '', 'success')
+//         }
+//     } catch (e) {
+//         Swal.fire('エラー', '削除に失敗しました', 'error')
+//     }
+// }
+const deleteTransaction = async () => {
     try {
         const confirmed = await Swal.fire({
             title: '本当に削除しますか？',
-            text: 'この操作は取り消せません!',
+            text: 'この操作は取り消せません',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -23,7 +47,10 @@ const handleDelete = async () => {
         })
 
         if (confirmed.isConfirmed) {
-            await axios.delete(`/expenses/${props.expenseId}`)
+            await axios.delete(route('transaction.destroy', {
+                type: props.transactionType,
+                id: props.transactionId,
+            }))
             emit('deleted')
             Swal.fire('削除しました', '', 'success')
         }
@@ -37,7 +64,10 @@ const handleDelete = async () => {
 
 <template>
 
-    <button @click="handleDelete" class="inline-block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-sm">
+<!-- <button @click="handleDelete" class="inline-block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-sm">
+        削除
+    </button> -->
+    <button @click="deleteTransaction" class="inline-block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-sm">
         削除
     </button>
 </template>

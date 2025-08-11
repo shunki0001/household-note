@@ -69,15 +69,15 @@ class IncomeController extends Controller
     }
 
     // 削除処理
-    public function destroy(Income $income)
-    {
-        if(Auth::id() !== $income->user_id) {
-            abort(403);
-        }
+    // public function destroy(Income $income)
+    // {
+    //     if(Auth::id() !== $income->user_id) {
+    //         abort(403);
+    //     }
 
-        $income->delete();
-        return response()->json(['message' => '削除しました']);
-    }
+    //     $income->delete();
+    //     return response()->json(['message' => '削除しました']);
+    // }
 
     // 今月の合計を算出
     public function getTotalMonthlyIncomes()

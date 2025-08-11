@@ -115,7 +115,10 @@ defineExpose({ reloadTransactions });
                     <td class="border px-4 py-2">
                         <div class="flex space-x-2">
                             <Link href="#" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
-                            <DeleteButton :transactionId="transaction.id" @deleted="handleTransactionDeleted" />
+                            <DeleteButton
+                                :transactionId="transaction.id"
+                                :transactionType="transaction.type"
+                                @deleted="handleTransactionDeleted" />
                         </div>
                     </td>
                 </tr>

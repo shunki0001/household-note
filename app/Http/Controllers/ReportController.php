@@ -15,31 +15,6 @@ class ReportController extends Controller
     // 日付順に並び替え
     public function latestJson()
     {
-        // $transactions = DB::table('expenses')
-        //     ->join('categories', 'expenses.category_id', '=', 'categories.id')
-        //     ->select(
-        //         'expenses.id',
-        //         'expenses.amount',
-        //         'expenses.date',
-        //         'expenses.title',
-        //         DB::raw("JSON_OBJECT('name', categories.name) as category"),
-        //         DB::raw("'expense' as type")
-        //     )
-        //     ->unionAll(
-        //         DB::table('incomes')
-        //             ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
-        //             ->select(
-        //                 'incomes.id',
-        //                 'incomes.amount',
-        //                 'incomes.income_date as date',
-        //                 DB::raw("NULL as title"),
-        //                 DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
-        //                 DB::raw("'income' as type")
-        //             )
-        //     )
-        //     ->orderBy('date', 'desc')
-        //     ->paginate(5);
-
         $userId = Auth::id();
 
         // 支出クエリ
@@ -64,7 +39,7 @@ class ReportController extends Controller
                 'incomes.id',
                 'incomes.amount',
                 'incomes.income_date as date',
-                DB::raw("'NULL as title'"),
+                DB::raw("'収入' as title"),
                 DB::raw("COALESCE(income_categories.name, '未分類') as category_name"),
                 DB::raw("'income' as type")
             );
@@ -80,48 +55,48 @@ class ReportController extends Controller
         ]);
     }
 
-    public function dashboard()
-    {
-        $userId = Auth::id();
+    // public function dashboard()
+    // {
+    //     $userId = Auth::id();
 
-        // 支出
-        $expensesQuery = DB::table('expenses')
-            ->join('categories', 'expenses.category_id', '=', 'categories.id')
-            ->where('expenses.user_id', $userId)
-            ->select(
-                'expenses.id',
-                'expenses.amount',
-                'expenses.date',
-                'expenses.title',
-                DB::raw("JSON_OBJECT('name', categories.name) as category"),
-                DB::raw("'expense' as type")
-            );
+    //     // 支出
+    //     $expensesQuery = DB::table('expenses')
+    //         ->join('categories', 'expenses.category_id', '=', 'categories.id')
+    //         ->where('expenses.user_id', $userId)
+    //         ->select(
+    //             'expenses.id',
+    //             'expenses.amount',
+    //             'expenses.date',
+    //             'expenses.title',
+    //             DB::raw("JSON_OBJECT('name', categories.name) as category"),
+    //             DB::raw("'expense' as type")
+    //         );
 
-        // 収入
-        $incomesQuery = DB::table('incomes')
-            ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
-            ->where('incomes.user_id', $userId)
-            ->select(
-                'incomes.id',
-                'incomes.amount',
-                'incomes.income_date as date',
-                DB::raw("Null as title"),
-                DB::raw("JSON_OBJECT('name', income_categories.income) as category"),
-                DB::raw("'income' as type")
-            );
+    //     // 収入
+    //     $incomesQuery = DB::table('incomes')
+    //         ->join('income_categories', 'incomes.income_category_id', '=', 'income_categories.id')
+    //         ->where('incomes.user_id', $userId)
+    //         ->select(
+    //             'incomes.id',
+    //             'incomes.amount',
+    //             'incomes.income_date as date',
+    //             DB::raw("Null as title"),
+    //             DB::raw("JSON_OBJECT('name', income_categories.income) as category"),
+    //             DB::raw("'income' as type")
+    //         );
 
-        // 支出と収入うを合体して日付順
-        $transactions = $expensesQuery
-            ->unionAll($incomesQuery)
-            ->orderBy('date', 'desc')
-            ->paginate(5);
+    //     // 支出と収入うを合体して日付順
+    //     $transactions = $expensesQuery
+    //         ->unionAll($incomesQuery)
+    //         ->orderBy('date', 'desc')
+    //         ->paginate(5);
 
-        return Inertia::render('Dashboard', [
-            'transactions' => $transactions, // ページネーションオブジェクト
-            'latestTransactions' => $transactions->items(), // 配列のみ
-            // 他のprops(expenses, categories, totalIncome など)
-        ]);
-    }
+    //     return Inertia::render('Dashboard', [
+    //         'transactions' => $transactions, // ページネーションオブジェクト
+    //         'latestTransactions' => $transactions->items(), // 配列のみ
+    //         // 他のprops(expenses, categories, totalIncome など)
+    //     ]);
+    // }
 
     // 支出と収入を一覧表示
     // 月別に表示

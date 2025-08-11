@@ -304,7 +304,7 @@ const reloadDashboard = () => {
         </div>
 
         <!-- 最近の記録 -->
-        <div class="py-12">
+        <!-- <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 text-center">
@@ -318,7 +318,7 @@ const reloadDashboard = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- <TransactionList :transactions="latestTransactions"/> -->
         <!-- 仮で埋め込み -->
@@ -332,6 +332,7 @@ const reloadDashboard = () => {
                             ref="transactionListRef"
                             :initial-transactions="props.transactions"
                             :transaction-list="props.latestTransactionList"
+                            @income-deleted="handleExpenseDeleted"
                         />
                     </div>
                 </div>

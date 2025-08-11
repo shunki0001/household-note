@@ -7,6 +7,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -62,8 +63,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/incomes/{income}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
     Route::delete('/incomes/{income}', [IncomeController::class, 'destroy'])->name('incomes.destroy'); // 削除
     Route::get('/api/incomes/total-monthly-incomes', [IncomeController::class, 'getTotalMonthlyIncomes']); // 合計
-    Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson']); // 支出+支出一覧(5件)
+    Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson'])->name('transaction.latestJson'); // 支出+支出一覧(5件)
     Route::get('/api/report-data/monthly-transactions', [ReportController::class, 'getMonthlyTransactions']); // 支出+支出一覧(月別)
+
+    // transaction関連
+    Route::delete('/transactions/{type}/{id}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
 });
 
 require __DIR__.'/auth.php';
