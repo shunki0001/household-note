@@ -49,9 +49,9 @@ class DashboardController extends Controller
                 'expenses.amount',
                 'expenses.date',
                 'expenses.title',
-                // DB::raw("JSON_OBJECT('name', categories.name) as category"),
                 DB::raw("categories.name as category_name"),
-                DB::raw("'expense' as type")
+                DB::raw("'expense' as type"),
+                'expenses.created_at'
             );
 
         // 収入
@@ -62,16 +62,20 @@ class DashboardController extends Controller
                 'incomes.id',
                 'incomes.amount',
                 'incomes.income_date as date',
-                DB::raw("Null as title"),
-                // DB::raw("JSON_OBJECT('name', income_categories.name) as category"),
+                DB::raw("'収入' as title"),
+                // DB::raw("Null as title"),
                 DB::raw("income_categories.name as category_name"),
-                DB::raw("'income' as type")
+                DB::raw("'income' as type"),
+                'incomes.created_at'
             );
 
         // 支出と収入を合体して日付順
         $transactions = $expensesQuery
-            ->unionAll($incomesQuery)
-            ->orderBy('date', 'desc')
+            ->unionAll($incomesQuery);
+
+        $transactions = DB::query()
+            ->fromSub($transactions, 'sort')
+            ->orderBy('sort.created_at', 'desc')
             ->paginate(5);
 
         return Inertia::render('Dashboard', [
