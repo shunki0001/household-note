@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/expenses/{expense}', [DashboardController::class, 'destroy'])->name('expenses.destroy');
 
     Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
+    // Route::get('/expenses/{id}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     // Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     Route::get('/expenses/monthly', [ExpenseController::class, 'getMonthlyExpenses']);
@@ -60,7 +61,9 @@ Route::middleware(['auth'])->group(function () {
     // 収入関連ルート、API
     Route::post('/incomes', [IncomeController::class, 'store'])->name('incomes.store'); // 登録
     Route::put('/incomes/{income}', [IncomeController::class, 'update'])->name('incomes.update'); // 更新
+    // Route::put('/incomes/{id}', [IncomeController::class, 'update'])->name('incomes.update'); // 更新
     Route::get('/incomes/{income}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
+    // Route::get('/incomes/{id}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
     Route::delete('/incomes/{income}', [IncomeController::class, 'destroy'])->name('incomes.destroy'); // 削除
     Route::get('/api/incomes/total-monthly-incomes', [IncomeController::class, 'getTotalMonthlyIncomes']); // 合計
     Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson'])->name('transaction.latestJson'); // 支出+支出一覧(5件)

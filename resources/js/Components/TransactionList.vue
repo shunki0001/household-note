@@ -114,7 +114,14 @@ defineExpose({ reloadTransactions });
                     <td class="border px-4 py-2">{{ transaction.category_name ?? '未分類' }}</td>
                     <td class="border px-4 py-2">
                         <div class="flex space-x-2">
-                            <Link href="#" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
+                            <Link
+                                :href="transaction.type === 'income'
+                                    ? route('incomes.edit', { id: transaction.id })
+                                    : route('expenses.edit', { id: transaction.id})"
+                                class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
+                            >
+                                編集
+                            </Link>
                             <DeleteButton
                                 :transactionId="transaction.id"
                                 :transactionType="transaction.type"

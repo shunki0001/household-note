@@ -41,7 +41,11 @@ class IncomeController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $validated = $request->validate();
+        $validated = $request->validate([
+            'amount' => 'required|numeric',
+            'income_date' => 'required|date',
+            'income_category_id' => 'required',
+        ]);
 
         $income->update($validated);
 
