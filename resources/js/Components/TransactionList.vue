@@ -116,8 +116,8 @@ defineExpose({ reloadTransactions });
                         <div class="flex space-x-2">
                             <Link
                                 :href="transaction.type === 'income'
-                                    ? route('incomes.edit', { id: transaction.id })
-                                    : route('expenses.edit', { id: transaction.id})"
+                                    ? route('incomes.edit', { id: transaction.id, back: 'dashboard' })
+                                    : route('expenses.edit', { id: transaction.id, back: 'dashboard'})"
                                 class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
                             >
                                 編集

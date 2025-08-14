@@ -67,21 +67,35 @@ const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0) // グラフ用のみに使用
 const expenseListRef = ref(null)
 const transactionListRef = ref(null)
+const transactions = ref([])
 
 // 一覧データを直接管理
 const expenseList = ref(props.expenses?.data ?? []);
+const transactionList = ref(props.transactions?.data ?? []);
 
 // 現在のページのpropsを取得
 const page = usePage();
 const latestTransactions = page.props.latestTransactions;
 
-// 一覧データを更新する関数
+// 一覧データを更新する関数(支出のみ)
 const updateExpenseList = async () => {
     try {
         console.log('Dashboard: updateExpenseList called'); // デバッグログ
         const response = await axios.get(route('expenses.latestJson', { page: currentPage.value}));
         expenseList.value = response.data.expenses.data;
         console.log('Dashboard: expenseList updated with', expenseList.value.length, 'items'); // デバッグログ
+    } catch (e) {
+        console.error('Dashboard: 一覧更新エラー', e);
+    }
+}
+
+// 一覧データを更新する関数(収入 + 支出)
+const updateTransactionList = async () => {
+    try {
+        console.log('Dashboard: updateTransactionList called'); // デバック
+        const response = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
+        transactionList.value = response.data.transactions;
+        console.log('Dashboard: transactionList update with', transactionList.value.length, 'items'); // デバック
     } catch (e) {
         console.error('Dashboard: 一覧更新エラー', e);
     }
@@ -103,7 +117,7 @@ const updateTotalExpense = async () => {
 const updateTotalIncome = async () => {
     try {
         console.log('Dashboard: updateTotalIncome called'); // デバックログ
-        // const response = await axios.get(route('dashboard.totalExpense'));
+        const response = await axios.get(route('dashboard.totalIncome'));
         currentTotalIncome.value = Number(response.data.totalIncome) || 0;
         console.log('Dashboard: totalIncome updated to', currentTotalIncome.value); // デバックログ
     } catch (e) {
@@ -115,13 +129,14 @@ const handleExpenseAdded = () => {
     console.log('handleExpenseAdded called'); // デバッグログ
 
     // 一覧データを直接更新
-    updateExpenseList();
+    // updateExpenseList();
+    updateTransactionList();
 
     // 合計金額を更新
     updateTotalExpense();
 
     // 合計支出金額を更新
-    updateTotalIncome();
+    // updateTotalIncome();
 
     // ExpenseListコンポーネントのreloadExpensesも呼び出し
     if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
@@ -133,6 +148,24 @@ const handleExpenseAdded = () => {
 
     refreshKey.value++; // グラフ再取得
     console.log('refreshKey updated:', refreshKey.value); // デバッグログ
+}
+
+const handleIncomeAdded = () => {
+    console.log('handleIncomeAdded called'); // デバックログ
+
+    // 一覧データを直接更新
+    updateTransactionList();
+
+    // 合計支出金額を更新
+    updateTotalIncome();
+
+    // TransactionListコンポーネントのreloadIncomesも呼び出し
+    if (transactionListRef.value && typeof transactionListRef.value.reloadTransaction === 'function') {
+        console.log('Calling reloadTransactions on TransactionList'); // デバッグログ
+        transactionListRef.value.reloadTransactions();
+    } else {
+        console.log('TransactionList ref not available'); // デバッグログ
+    }
 }
 
 // 削除完了時の処理
@@ -283,6 +316,7 @@ const reloadDashboard = () => {
                                         :income_categories="props.income_categories"
                                         :submitUrl="route('incomes.store')"
                                         :method="'post'"
+                                        @income-added="handleIncomeAdded"
                                     />
                                 </div>
                             </div>
