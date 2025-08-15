@@ -94,7 +94,8 @@ export function useIncomeForm(props, emit) {
             // 新規登録時（POST）のみイベントを発火
             if (props.method === 'post') {
                 console.log('Emitting Income-added event'); // デバッグログ
-                emit('income-added');
+                emit('submitted');
+                // emit('income-added');
                 console.log('useIncomeForm: income-added event emitted'); // デバッグログ
             }
 

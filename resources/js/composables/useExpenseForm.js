@@ -103,7 +103,8 @@ export function useExpenseFrom(props, emit) {
             // 新規登録時（POST）のみイベントを発火
             if (props.method === 'post') {
                 console.log('Emitting expense-added event'); // デバッグログ
-                emit('expense-added');
+                emit('submitted');
+                // emit('expense-added');
                 console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
             }
 

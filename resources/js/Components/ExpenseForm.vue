@@ -29,7 +29,8 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['expense-added']);
+const emit = defineEmits(['submitted']);
+// const emit = defineEmits(['expense-added', 'transactionAdded']);
 const { form, errors, submit } = useExpenseFrom(props, emit);
 </script>
 

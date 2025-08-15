@@ -10,7 +10,7 @@ import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 // import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
-import ExpenseList from '@/Components/ExpenseList.vue';
+// import ExpenseList from '@/Components/ExpenseList.vue';
 import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
 
@@ -71,7 +71,9 @@ const transactions = ref([])
 
 // 一覧データを直接管理
 const expenseList = ref(props.expenses?.data ?? []);
+// props からローカル state にコピー
 const transactionList = ref(props.transactions?.data ?? []);
+// const transactionList = ref([...props.transactions?.data ?? []]);
 
 // 現在のページのpropsを取得
 const page = usePage();
@@ -94,7 +96,7 @@ const updateTransactionList = async () => {
     try {
         console.log('Dashboard: updateTransactionList called'); // デバック
         const response = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
-        transactionList.value = response.data.transactions;
+        transactionList.value = response.data.transactions.data;
         console.log('Dashboard: transactionList update with', transactionList.value.length, 'items'); // デバック
     } catch (e) {
         console.error('Dashboard: 一覧更新エラー', e);
@@ -125,48 +127,69 @@ const updateTotalIncome = async () => {
     }
 }
 
-const handleExpenseAdded = () => {
+const handleExpenseAdded = async () => {
     console.log('handleExpenseAdded called'); // デバッグログ
 
-    // 一覧データを直接更新
-    // updateExpenseList();
-    updateTransactionList();
+    // 合計支出更新 -> グラフ更新 -> 一覧更新
+    await updateTotalExpense();
+    await updateTransactionList();
+    refreshKey.value++;
 
-    // 合計金額を更新
-    updateTotalExpense();
+    // // 一覧データを直接更新
+    // // updateExpenseList();
+    // updateTransactionList();
 
-    // 合計支出金額を更新
-    // updateTotalIncome();
+    // // 合計金額を更新
+    // updateTotalExpense();
 
-    // ExpenseListコンポーネントのreloadExpensesも呼び出し
-    if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
-        console.log('Calling reloadExpenses on ExpenseList'); // デバッグログ
-        expenseListRef.value.reloadExpenses();
-    } else {
-        console.log('ExpenseList ref not available'); // デバッグログ
-    }
+    // // 合計支出金額を更新
+    // // updateTotalIncome();
 
-    refreshKey.value++; // グラフ再取得
-    console.log('refreshKey updated:', refreshKey.value); // デバッグログ
+    // // ExpenseListコンポーネントのreloadExpensesも呼び出し
+    // if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
+    //     console.log('Calling reloadExpenses on ExpenseList'); // デバッグログ
+    //     expenseListRef.value.reloadExpenses();
+    // } else {
+    //     console.log('ExpenseList ref not available'); // デバッグログ
+    // }
+
+    // refreshKey.value++; // グラフ再取得
+    // console.log('refreshKey updated:', refreshKey.value); // デバッグログ
 }
 
-const handleIncomeAdded = () => {
+const handleIncomeAdded = async () => {
     console.log('handleIncomeAdded called'); // デバックログ
 
-    // 一覧データを直接更新
-    updateTransactionList();
+    // 合計支出更新 -> グラフ更新 -> 一覧更新
+    await updateTotalIncome();
+    await updateTransactionList();
+    refreshKey.value++;
 
-    // 合計支出金額を更新
-    updateTotalIncome();
+    // // 一覧データを直接更新
+    // updateTransactionList();
 
-    // TransactionListコンポーネントのreloadIncomesも呼び出し
-    if (transactionListRef.value && typeof transactionListRef.value.reloadTransaction === 'function') {
-        console.log('Calling reloadTransactions on TransactionList'); // デバッグログ
-        transactionListRef.value.reloadTransactions();
-    } else {
-        console.log('TransactionList ref not available'); // デバッグログ
-    }
+    // // 合計支出金額を更新
+    // updateTotalIncome();
+
+    // // TransactionListコンポーネントのreloadIncomesも呼び出し
+    // if (transactionListRef.value && typeof transactionListRef.value.reloadTransaction === 'function') {
+    //     console.log('Calling reloadTransactions on TransactionList'); // デバッグログ
+    //     transactionListRef.value.reloadTransactions();
+    // } else {
+    //     console.log('TransactionList ref not available'); // デバッグログ
+    // }
 }
+
+const handleTransactionAdded = () => {
+    transactionListRef.value?.reloadTransactions();
+}
+
+const fetchTransactions = async () => {
+    const res = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
+    transactionList.value = res.data.transactions.data;
+}
+
+onMounted(fetchTransactions);
 
 // 削除完了時の処理
 const handleExpenseDeleted = () => {
@@ -213,8 +236,8 @@ onMounted(() => {
 });
 
 // グラフ設定
-const monthlyChartData = ref(null);
-const categoryChartData = ref(null);
+// const monthlyChartData = ref(null);
+// const categoryChartData = ref(null);
 
 const reloadDashboard = () => {
     router.visit(route('dashboard'), {
@@ -307,7 +330,7 @@ const reloadDashboard = () => {
                                         :categories="props.categories"
                                         :submitUrl="route('expenses.store')"
                                         :method="'post'"
-                                        @expense-added="handleExpenseAdded"
+                                        @submitted="handleExpenseAdded"
                                     />
                                 </div>
                                 <div v-else-if="activeForm === 'income'">
@@ -316,7 +339,7 @@ const reloadDashboard = () => {
                                         :income_categories="props.income_categories"
                                         :submitUrl="route('incomes.store')"
                                         :method="'post'"
-                                        @income-added="handleIncomeAdded"
+                                        @submitted="handleIncomeAdded"
                                     />
                                 </div>
                             </div>
@@ -362,10 +385,15 @@ const reloadDashboard = () => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        <TransactionList
-                            ref="transactionListRef"
+                        <!-- <TransactionList
                             :initial-transactions="props.transactions"
                             :transaction-list="props.latestTransactionList"
+                            @income-deleted="handleExpenseDeleted"
+                            :transactions="transactions"
+                        /> -->
+                        <TransactionList
+                            :initial-transactions="props.transactions"
+                            :transaction-list="transactionList"
                             @income-deleted="handleExpenseDeleted"
                         />
                     </div>

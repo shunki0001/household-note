@@ -29,7 +29,8 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['income-added']);
+const emit = defineEmits(['submitted']);
+// const emit = defineEmits(['income-added', 'transactionsAdded']);
 const { form, errors, submit } = useIncomeForm(props, emit);
 </script>
 
