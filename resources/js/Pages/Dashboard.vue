@@ -1,16 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
-// import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
-// import PrimaryButton from '@/Components/PrimaryButton.vue';
-import axios from 'axios';
-// import ExpenseList from '@/Components/ExpenseList.vue';
 import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
 
@@ -51,7 +46,7 @@ const currentBalance = computed(() => {
 const currentTotalExpense = ref(Number(props.totalExpense) || 0);
 const currentTotalIncome = ref(Number(props.totalIncome) || 0);
 
-const formattedTotal = computed(() => {
+const formattedTotalExpense = computed(() => {
     return currentTotalExpense.value.toLocaleString();
 });
 
@@ -65,31 +60,16 @@ const formattedBalance = computed(() => {
 
 const currentPage = ref(props.expenses.current_page || 1)
 const refreshKey = ref(0) // グラフ用のみに使用
-const expenseListRef = ref(null)
 const transactionListRef = ref(null)
 const transactions = ref([])
 
 // 一覧データを直接管理
-const expenseList = ref(props.expenses?.data ?? []);
 // props からローカル state にコピー
 const transactionList = ref(props.transactions?.data ?? []);
-// const transactionList = ref([...props.transactions?.data ?? []]);
 
 // 現在のページのpropsを取得
 const page = usePage();
 const latestTransactions = page.props.latestTransactions;
-
-// 一覧データを更新する関数(支出のみ)
-const updateExpenseList = async () => {
-    try {
-        console.log('Dashboard: updateExpenseList called'); // デバッグログ
-        const response = await axios.get(route('expenses.latestJson', { page: currentPage.value}));
-        expenseList.value = response.data.expenses.data;
-        console.log('Dashboard: expenseList updated with', expenseList.value.length, 'items'); // デバッグログ
-    } catch (e) {
-        console.error('Dashboard: 一覧更新エラー', e);
-    }
-}
 
 // 一覧データを更新する関数(収入 + 支出)
 const updateTransactionList = async () => {
@@ -134,27 +114,6 @@ const handleExpenseAdded = async () => {
     await updateTotalExpense();
     await updateTransactionList();
     refreshKey.value++;
-
-    // // 一覧データを直接更新
-    // // updateExpenseList();
-    // updateTransactionList();
-
-    // // 合計金額を更新
-    // updateTotalExpense();
-
-    // // 合計支出金額を更新
-    // // updateTotalIncome();
-
-    // // ExpenseListコンポーネントのreloadExpensesも呼び出し
-    // if (expenseListRef.value && typeof expenseListRef.value.reloadExpenses === 'function') {
-    //     console.log('Calling reloadExpenses on ExpenseList'); // デバッグログ
-    //     expenseListRef.value.reloadExpenses();
-    // } else {
-    //     console.log('ExpenseList ref not available'); // デバッグログ
-    // }
-
-    // refreshKey.value++; // グラフ再取得
-    // console.log('refreshKey updated:', refreshKey.value); // デバッグログ
 }
 
 const handleIncomeAdded = async () => {
@@ -164,24 +123,6 @@ const handleIncomeAdded = async () => {
     await updateTotalIncome();
     await updateTransactionList();
     refreshKey.value++;
-
-    // // 一覧データを直接更新
-    // updateTransactionList();
-
-    // // 合計支出金額を更新
-    // updateTotalIncome();
-
-    // // TransactionListコンポーネントのreloadIncomesも呼び出し
-    // if (transactionListRef.value && typeof transactionListRef.value.reloadTransaction === 'function') {
-    //     console.log('Calling reloadTransactions on TransactionList'); // デバッグログ
-    //     transactionListRef.value.reloadTransactions();
-    // } else {
-    //     console.log('TransactionList ref not available'); // デバッグログ
-    // }
-}
-
-const handleTransactionAdded = () => {
-    transactionListRef.value?.reloadTransactions();
 }
 
 const fetchTransactions = async () => {
@@ -235,17 +176,6 @@ onMounted(() => {
     }
 });
 
-// グラフ設定
-// const monthlyChartData = ref(null);
-// const categoryChartData = ref(null);
-
-const reloadDashboard = () => {
-    router.visit(route('dashboard'), {
-        preserveScroll: true, // スクロール位置を保持したい場合
-        preserveState: true, // ページ遷移アニメーションを防ぎたい場合(任意)
-    });
-}
-
 </script>
 
 <template>
@@ -285,7 +215,7 @@ const reloadDashboard = () => {
                     <DoughnutChart
                         :refresh-key="refreshKey"
                     />
-                    <p>今月の合計支出: {{ formattedTotal }}円</p>
+                    <p>今月の合計支出: {{ formattedTotalExpense }}円</p>
                     <p>今月の合計収入: {{ formattedTotalIncome }}円</p>
                     <p>収支: {{ formattedBalance }}円</p>
                     </div>
@@ -361,36 +291,12 @@ const reloadDashboard = () => {
         </div>
 
         <!-- 最近の記録 -->
-        <!-- <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 text-center">
-                        <ExpenseList
-                            ref="expenseListRef"
-                            :initial-expenses="props.expenses"
-                            :expense-list="expenseList"
-                            @expense-deleted="handleExpenseDeleted"
-                        />
-
-                    </div>
-                </div>
-            </div>
-        </div> -->
-
-        <!-- <TransactionList :transactions="latestTransactions"/> -->
-        <!-- 仮で埋め込み -->
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        <!-- <TransactionList
-                            :initial-transactions="props.transactions"
-                            :transaction-list="props.latestTransactionList"
-                            @income-deleted="handleExpenseDeleted"
-                            :transactions="transactions"
-                        /> -->
                         <TransactionList
                             :initial-transactions="props.transactions"
                             :transaction-list="transactionList"
@@ -400,9 +306,5 @@ const reloadDashboard = () => {
                 </div>
             </div>
         </div>
-
-
-
-
     </AuthenticatedLayout>
 </template>
