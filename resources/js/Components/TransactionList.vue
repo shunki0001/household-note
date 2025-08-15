@@ -51,9 +51,9 @@ const reloadTransactions = async () => {
     }
 };
 
-const handleTransactionDeleted = () => {
+const handleTransactionDeleted = (type) => {
     reloadTransactions();
-    emit('transaction-deleted');
+    emit('transaction-deleted', type);
 };
 
 watch(() => page.props.flash?.message, (message) => {
@@ -122,10 +122,16 @@ defineExpose({ reloadTransactions });
                             >
                                 編集
                             </Link>
+                            <!-- <DeleteButton
+                                :transactionId="transaction.id"
+                                :transactionType="transaction.type"
+                                @deleted="handleTransactionDeleted"
+                            /> -->
                             <DeleteButton
                                 :transactionId="transaction.id"
                                 :transactionType="transaction.type"
-                                @deleted="handleTransactionDeleted" />
+                                @deleted="() => handleTransactionDeleted(transaction.type)"
+                            />
                         </div>
                     </td>
                 </tr>

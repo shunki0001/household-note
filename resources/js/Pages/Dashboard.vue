@@ -133,14 +133,17 @@ const fetchTransactions = async () => {
 onMounted(fetchTransactions);
 
 // 削除完了時の処理
-const handleExpenseDeleted = () => {
-    console.log('Dashboard handleExpenseDeleted called'); // デバッグログ
+const handleTransactionDeleted = async (type) => {
+    console.log('Dashboard handleTransactionDeleted called for', type);
 
-    // 合計金額を更新
-    updateTotalExpense();
+    if(type === 'income') {
+        await updateTotalIncome();
+    } else if (type === 'expense') {
+        await updateTotalExpense();
+    }
 
-    refreshKey.value++; // グラフ再取得
-    console.log('refreshKey updated after delete:', refreshKey.value); // デバッグログ
+    await updateTransactionList();
+    refreshKey.value++;
 }
 
 // フラッシュメッセージの監視
@@ -300,7 +303,7 @@ onMounted(() => {
                         <TransactionList
                             :initial-transactions="props.transactions"
                             :transaction-list="transactionList"
-                            @income-deleted="handleExpenseDeleted"
+                            @transaction-deleted="handleTransactionDeleted"
                         />
                     </div>
                 </div>
