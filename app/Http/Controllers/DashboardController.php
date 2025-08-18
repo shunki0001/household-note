@@ -113,7 +113,7 @@ class DashboardController extends Controller
         }
 
         $categories = Category::all(); // 編集画面でカテゴリー一覧を渡す
-        $backRoute = $request->input('back', 'list'); // デフォルト：dashboard
+        $backRoute = $request->input('back', 'dashboard'); // デフォルト：dashboard
 
         return Inertia::render('Expenses/Edit', [
             'expense' => $expense,
