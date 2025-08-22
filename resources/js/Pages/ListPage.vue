@@ -10,26 +10,45 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 const page = usePage();
 
 const expenses = ref([]);
+const transactions = ref([]);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
 const year = ref(new Date().getFullYear());
 
-const fetchExpenses = async () => {
+// const fetchExpenses = async () => {
+//     try {
+//         const response =await axios.get('/api/report/data/monthly-trancsactions', {
+//             params: {
+//                 year: year.value,
+//                 month: month.value,
+//             },
+//         });
+//         expenses.value = response.data;
+//     } catch (error) {
+//         console.log('データ取得失敗', error);
+//     }
+// };
+
+
+const fetchTransactions = async () => {
     try {
-        const response =await axios.get('/api/chart-data/monthly-expenses', {
+        const response = await axios.get('/api/report-data/monthly-transactions', {
             params: {
                 year: year.value,
                 month: month.value,
             },
         });
-        expenses.value = response.data;
+        console.log('取得データ:' , response.data)
+        // transactions.value = response.data;
+        transactions.value = response.data.transactions;
     } catch (error) {
-        console.log('データ取得失敗', error);
+        console.error('データ取得失敗', error);
     }
 };
 
 // ページ読み込み時に実行
 onMounted(() => {
-    fetchExpenses();
+    //    fetchExpenses();
+    fetchTransactions();
     const message = page.props.flash?.message;
     if(message) {
         Swal.fire({
@@ -56,7 +75,8 @@ const changeMonth = (delta) => {
         year.value -= 1;
     }
 
-    fetchExpenses();
+//    fetchExpenses();
+    fetchTransactions();
 }
 </script>
 
@@ -83,20 +103,38 @@ const changeMonth = (delta) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="expense in expenses" :key="expense.id">
-                                <td class="border px-4 py-2">{{ expense.date }}</td>
-                                <td class="border px-4 py-2">{{ expense.amount.toLocaleString() }}円</td>
-                                <td class="border px-4 py-2">{{ expense.category?.name || '未分類' }}</td>
-                                <td class="border px-4 py-2">{{ expense.title }}</td>
+                            <tr v-for="transaction in transactions" :key="transaction.id">
+                                <td class="border px-4 py-2">{{ transaction.date }}</td>
+                                <td class="border px-4 py-2">{{ transaction.amount ? transaction.amount.toLocaleString() : '0' }}円</td>
+                                <td class="border px-4 py-2">{{ transaction.category_name || '未分類' }}</td>
+                                <td class="border px-4 py-2">{{ transaction.title }}</td>
 
-                                <td class="border px-4 py-2">
+                                <!-- <td class="border px-4 py-2">
                                     <div class="flex space-x-2 justify-end">
                                         <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
                                         <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
                                     </div>
+                                </td> -->
+                                <td class="border px-4 py-2">
+                                    <div class="flex space-x-2 justify-end">
+                                        <Link
+                                            :href="transaction.type === 'income'
+                                                ? route('incomes.edit', { id: transaction.id, back: 'list' })
+                                                : route('expenses.edit', { id: transaction.id, back: 'list' })
+                                            "
+                                            class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
+                                        >
+                                            編集
+                                        </Link>
+                                        <DeleteButton
+                                            :transactionId="transaction.id"
+                                            :transactionType="transaction.type"
+                                            @deleted="() => handleTransactionDeleted(transaction.type)"
+                                        />
+                                    </div>
                                 </td>
                             </tr>
-                            <tr v-if="expenses.length === 0">
+                            <tr v-if="transactions.length === 0">
                                 <td colspan="5" class="text-center py-4 text-gray-500">データがありません</td>
                             </tr>
                         </tbody>
