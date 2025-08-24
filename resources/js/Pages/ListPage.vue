@@ -6,13 +6,40 @@ import Swal from 'sweetalert2';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 
+const props = defineProps({
+    // initialTransactions: {
+    //     type: Object,
+    //     default: () => ({
+    //         data: [],
+    //         current_page: 1,
+    //         links: []
+    //     })
+    // },
+    transactions: {
+        type: Object,
+        default: () => ({
+            data: [],
+            current_page: 1,
+            links: []
+        })
+    },
+    transactionList: {
+        type: Array,
+        default: () => []
+    },
+})
+
 // フラッシュメッセージの取得
 const page = usePage();
 
 const expenses = ref([]);
-const transactions = ref([]);
+// const transactions = ref([]);
+// const transactions = ref([props.initialTransactions]);
+const transactions = ref(props.transactions);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
 const year = ref(new Date().getFullYear());
+const localTransactionList = ref(props.transactions.data ?? []);
+
 
 // const fetchExpenses = async () => {
 //     try {
@@ -28,6 +55,23 @@ const year = ref(new Date().getFullYear());
 //     }
 // };
 
+const emit = defineEmits(['transaction-update', 'transaction-deleted']);
+
+const handleTransactionDeleted = (type) => {
+    // reloadTransactions();
+    fetchTransactions();
+    emit('transaction-deleted', type);
+}
+
+const reloadTransactions = async () => {
+    // ここに更新時際描画する処理
+}
+
+watch(() => props.transactionList, (newTransactionList) => {
+    if (newTransactionList && newTransactionList.length > 0) {
+        localTransactionList.value = newTransactionList;
+    }
+}, { deep: true });
 
 const fetchTransactions = async () => {
     try {
@@ -39,7 +83,8 @@ const fetchTransactions = async () => {
         });
         console.log('取得データ:' , response.data)
         // transactions.value = response.data;
-        transactions.value = response.data.transactions;
+        // transactions.value = response.data.transactions;
+        localTransactionList.value = response.data.transactions.data ?? response.data.transactions ?? [];
     } catch (error) {
         console.error('データ取得失敗', error);
     }
@@ -95,6 +140,7 @@ const changeMonth = (delta) => {
                     <table class="min-w-full table-auto border border-gray-300 text-right">
                         <thead class="bg-gray-300">
                             <tr>
+                                <th class="border px-4 py-2 w-36">種別</th>
                                 <th class="border px-4 py-2 w-36">日付</th>
                                 <th class="border px-4 py-2 w-40">金額</th>
                                 <th class="border px-4 py-2 w-36">カテゴリ</th>
@@ -103,11 +149,16 @@ const changeMonth = (delta) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="transaction in transactions" :key="transaction.id">
+                            <tr v-for="transaction in localTransactionList" :key="transaction.type + '-' + transaction.id">
+                                <td class="border px-4 py-2">
+                                    <span :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                                        {{  transaction.type === 'income' ? '収入' : '支出' }}
+                                    </span>
+                                </td>
                                 <td class="border px-4 py-2">{{ transaction.date }}</td>
                                 <td class="border px-4 py-2">{{ transaction.amount ? transaction.amount.toLocaleString() : '0' }}円</td>
-                                <td class="border px-4 py-2">{{ transaction.category_name || '未分類' }}</td>
                                 <td class="border px-4 py-2">{{ transaction.title }}</td>
+                                <td class="border px-4 py-2">{{ transaction.category_name || '未分類' }}</td>
 
                                 <!-- <td class="border px-4 py-2">
                                     <div class="flex space-x-2 justify-end">
@@ -134,7 +185,7 @@ const changeMonth = (delta) => {
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="transactions.length === 0">
+                            <tr v-if="localTransactionList.length === 0">
                                 <td colspan="5" class="text-center py-4 text-gray-500">データがありません</td>
                             </tr>
                         </tbody>
