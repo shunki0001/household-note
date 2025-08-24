@@ -7,14 +7,6 @@ import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
-    // initialTransactions: {
-    //     type: Object,
-    //     default: () => ({
-    //         data: [],
-    //         current_page: 1,
-    //         links: []
-    //     })
-    // },
     transactions: {
         type: Object,
         default: () => ({
@@ -33,38 +25,15 @@ const props = defineProps({
 const page = usePage();
 
 const expenses = ref([]);
-// const transactions = ref([]);
-// const transactions = ref([props.initialTransactions]);
-const transactions = ref(props.transactions);
 const month = ref(new Date().getMonth() + 1); // JSは0始まり
 const year = ref(new Date().getFullYear());
 const localTransactionList = ref(props.transactions.data ?? []);
 
-
-// const fetchExpenses = async () => {
-//     try {
-//         const response =await axios.get('/api/report/data/monthly-trancsactions', {
-//             params: {
-//                 year: year.value,
-//                 month: month.value,
-//             },
-//         });
-//         expenses.value = response.data;
-//     } catch (error) {
-//         console.log('データ取得失敗', error);
-//     }
-// };
-
 const emit = defineEmits(['transaction-update', 'transaction-deleted']);
 
 const handleTransactionDeleted = (type) => {
-    // reloadTransactions();
     fetchTransactions();
     emit('transaction-deleted', type);
-}
-
-const reloadTransactions = async () => {
-    // ここに更新時際描画する処理
 }
 
 watch(() => props.transactionList, (newTransactionList) => {
@@ -82,8 +51,6 @@ const fetchTransactions = async () => {
             },
         });
         console.log('取得データ:' , response.data)
-        // transactions.value = response.data;
-        // transactions.value = response.data.transactions;
         localTransactionList.value = response.data.transactions.data ?? response.data.transactions ?? [];
     } catch (error) {
         console.error('データ取得失敗', error);
@@ -92,7 +59,6 @@ const fetchTransactions = async () => {
 
 // ページ読み込み時に実行
 onMounted(() => {
-    //    fetchExpenses();
     fetchTransactions();
     const message = page.props.flash?.message;
     if(message) {
@@ -120,7 +86,6 @@ const changeMonth = (delta) => {
         year.value -= 1;
     }
 
-//    fetchExpenses();
     fetchTransactions();
 }
 </script>
@@ -160,12 +125,6 @@ const changeMonth = (delta) => {
                                 <td class="border px-4 py-2">{{ transaction.title }}</td>
                                 <td class="border px-4 py-2">{{ transaction.category_name || '未分類' }}</td>
 
-                                <!-- <td class="border px-4 py-2">
-                                    <div class="flex space-x-2 justify-end">
-                                        <Link :href="route('expenses.edit', {expense: expense.id, back: 'list'})" class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm">編集</Link>
-                                        <DeleteButton :expenseId="expense.id" @deleted="fetchExpenses"/>
-                                    </div>
-                                </td> -->
                                 <td class="border px-4 py-2">
                                     <div class="flex space-x-2 justify-end">
                                         <Link

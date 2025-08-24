@@ -31,22 +31,22 @@ export function useIncomeForm(props, emit) {
 
         // 金額のバリデーション
         if (!form.amount || form.amount.toString().trim() === '') {
-            errors.amount = '金額を入力して下さい(useIncomeFormから出力)';
+            errors.amount = '金額を入力して下さい';
             isValid = false;
         } else if (parseFloat(form.amount) < 0) {
-            errors.amount = '金額は0以上の値を入力して下さい(useIncomeFormから出力)';
+            errors.amount = '金額は0以上の値を入力して下さい';
             isValid = false;
         }
 
         // 日付のバリデーション
         if (!form.income_date || form.income_date.toString().trim() === '') {
-            errors.income_date = '日付を入力して下さい(useIncomeFormから出力)';
+            errors.income_date = '日付を入力して下さい';
             isValid = false;
         }
 
         // カテゴリーのバリデーション
         if (!form.income_category_id || form.income_category_id.toString().trim() === '') {
-            errors.income_category_id = 'カテゴリーを選択して下さい(useIncomeFormから出力)';
+            errors.income_category_id = 'カテゴリーを選択して下さい';
             isValid = false;
         }
 
