@@ -12,7 +12,6 @@ class AuthTest extends TestCase
     use RefreshDatabase;
 
     // 正しいユーザー情報でログインできること
-    /* @test */
     public function test_registered_user_can_login(): void
     {
         // 1. テスト用のユーザーを作成
