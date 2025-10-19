@@ -14,6 +14,7 @@ class ExpenseTest extends TestCase
 {
     use RefreshDatabase;
 
+    // 追加テスト
     public function test_expense_can_be_stored()
     {
         // ユーザーを作成して認証
@@ -45,16 +46,49 @@ class ExpenseTest extends TestCase
             'amount' => 1000,
         ]);
     }
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
+
+    // 編集テスト
+    public function test_expense_can_be_updated(): void
     {
-        $response = $this->get('/');
+        // ユーザー作成
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // カテゴリー作成
+        $category = Category::factory()->create([
+            'name' => '食費',
+        ]);
+
+        // 既存データを作成
+        $expense = Expense::factory()->create([
+            'user_id' => $user->id,
+            'category_id' => $category->id,
+            'amount' => 1000,
+            'title' => 'ランチ',
+            'date' => '2025-10-15',
+        ]);
+
+        // PUTリクエストで更新
+        $response = $this->put("expenses/{$expense->id}", [
+            'amount' => 1500,
+            'title' => 'ディナー',
+            'date' => '2025-10-16',
+            'category_id' => $category->id,
+        ]);
 
         $response->assertStatus(200);
+
+        // データベースに更新後のデータがあるか確認
+        $this->assertDatabaseHas('expenses', [
+            'id' => $expense->id,
+            'amount' => 1500,
+            'title' => 'ディナー',
+            'date' => '2025-10-16',
+            'category_id' => $category->id,
+        ]);
     }
 
+    // データベース接続テスト
     public function test_database_connection()
     {
         dump(\DB::connection()->getDatabaseName()); // 接続DBを確認
