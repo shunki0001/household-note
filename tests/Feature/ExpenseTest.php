@@ -88,6 +88,38 @@ class ExpenseTest extends TestCase
         ]);
     }
 
+    // 削除テスト
+    public function test_expense_can_be_deleted(): void
+    {
+        // ユーザー作成
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // カテゴリー作成
+        $category = Category::factory()->create([
+            'name' => '食費',
+        ]);
+
+        // 既存データを作成
+        $expense = Expense::factory()->create([
+            'user_id' => $user->id,
+            'category_id' => $category->id,
+            'amount' => 1000,
+            'title' => 'ランチ',
+            'date' => '2025-10-15',
+        ]);
+
+        // 既存データを削除
+        $response = $this->delete("/expenses/{$expense->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('expenses', [
+            'id' => $expense->id,
+        ]);
+    }
+
+
     // データベース接続テスト
     public function test_database_connection()
     {
