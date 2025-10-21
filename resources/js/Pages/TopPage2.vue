@@ -15,19 +15,24 @@ import { Head } from '@inertiajs/vue3';
                 <img
                     src="/images/toppagelogo.png"
                     alt="アプリロゴ"
-                    class="mx-auto w-full max-w-full h-[700px] object-cover mb-8"
+                    class="mx-auto w-full max-w-full h-[400px] sm:h-[500px] md:h-[700px] object-cover mb-8"
                 />
 
                 <!-- h1を画像の上に重ねる -->
                 <h1
-                    class="absolute top-4 left-1/2 -translate-x-1/2 text-8xl font-extrabold text-gray-800 px-4 py-2 rounded-lg font-zen"
+                    class="absolute top-4 left-1/2 -translate-x-1/2
+                    text-4xl sm:tex-6xl md:text-8xl font-extrabold text-gray-800
+                    px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-zen text-center leading-tight
+                    whitespace-nowrap"
                 >
                     カケボノート
                 </h1>
 
                 <!-- pを画像の下部に重ねる -->
                 <p
-                    class="absolute bottom-6 left-1/2 -translate-x-1/2 text-2xl text-gray-700 px-4 py-2 rounded-lg leading-relaxed font-zen"
+                    class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2
+                    text-base sm:text-xl md:text-2xl text-gray-700
+                    px-3 py-1 rounded-lg leading-relaxed font-zen text-center"
                 >
                     面倒くさがりでも続く<br /> シンプルな家計簿
                 </p>
@@ -35,9 +40,11 @@ import { Head } from '@inertiajs/vue3';
         </section>
 
         <!-- アプリの特徴 -->
-        <section class="py-16 px-4 mx-auto text-center bg-gray-100">
-            <h2 class="text-3xl font-semibold mb-10 tracking max-w-md mx-auto sub-title">特徴</h2>
-            <ul class="space-y-6 text-2xl text-gray-700">
+        <section class="py-12 sm:py-16 px-4 mx-auto text-center bg-gray-100">
+            <h2 class="text-2xl sm:text-3xl font-semibold mb-8 sm:mb-10 tracking max-w-md mx-auto sub-title">
+                特徴
+            </h2>
+            <ul class="space-y-4 sm:space-y-6 text-base sm:text-xl md:text-2xl text-gray-700">
                 <li>支出・収入の管理がかんたん</li>
                 <li>グラフで支出の傾向がすぐわかる</li>
                 <li>セキュリティ重視</li>
@@ -45,10 +52,10 @@ import { Head } from '@inertiajs/vue3';
         </section>
 
         <!-- デモ画像 -->
-        <section class="py-16 bg-gray-100">
-            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 text-2xl text-center">
+        <section class="py-12 sm:py-16 bg-gray-100">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 px-4 text-base sm:text-xl md:text-2xl text-center">
                 <div>
-                    <p>今月の収支が一目でわかる！</p>
+                    <p class="mb-4">今月の収支が一目でわかる！</p>
                     <img
                         src="/images/demo05.jpg"
                         alt="デモ画像1"
@@ -57,7 +64,7 @@ import { Head } from '@inertiajs/vue3';
                 </div>
 
                 <div>
-                    <p>グラフで分析も!</p>
+                    <p class="mb-4">グラフで分析も!</p>
                     <img
                         src="/images/demo06.jpg"
                         alt="デモ画像2"
