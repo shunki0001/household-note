@@ -21,7 +21,7 @@ import Footer from '@/Layouts/Footer.vue';
         </div>
     </div> -->
     <nav
-        class="border-b border-gray-100 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+        class="border-b border-gray-100 bg-gray-100"
     >
         <!-- Primary Navigation Menu -->
         <div class="px-4 sm:px-6 lg:px-8">
@@ -31,7 +31,7 @@ import Footer from '@/Layouts/Footer.vue';
                 <div class="flex items-center">
                         <Link :href="route('dashboard')">
                             <ApplicationLogo
-                                class="block h-11 w-auto fill-current text-gray-800 dark:text-gray-200"
+                                class="block h-11 w-auto fill-current text-gray-800"
                             />
                         </Link>
                 </div>

@@ -54,7 +54,7 @@ const { form, errors, submit } = useIncomeForm(props, emit);
         <!-- カテゴリー -->
         <div>
             <InputLabel for="income_category_id" value="カテゴリー"/>
-            <select v-model="form.income_category_id" class="w-full border p-2 rounded w-full max-w-xs dark:bg-gray-200">
+            <select v-model="form.income_category_id" class="w-full border p-2 rounded w-full max-w-xs">
                 <option disabled value="">カテゴリーを選択</option>
                 <option v-for="income_category in income_categories" :key="income_category.id" :value="income_category.id">
                     {{ income_category.name }}
