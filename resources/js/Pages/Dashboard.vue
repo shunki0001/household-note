@@ -208,8 +208,8 @@ onMounted(() => {
         </div> -->
 
         <!-- ドーナツグラフ&今月の収支状況 -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="py-12 px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
                 <div class="flex flex-wrap lg:flex-nowrap gap-6">
                     <!-- 左：今月の家計状況 -->
                     <div class="w-full lg:w-3/5 bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
@@ -294,8 +294,8 @@ onMounted(() => {
         </div>
 
         <!-- 最近の記録 -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="py-12 px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >

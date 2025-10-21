@@ -90,53 +90,61 @@ defineExpose({ reloadTransactions });
 <template>
     <div>
         <h2 class="text-lg font-bold mb-4">最近の収支（直近5件）</h2>
-        <table class="table-auto w-full text-left">
-            <thead class="bg-gray-300">
-                <tr>
-                    <th class="px-4 py-2">種別</th>
-                    <th class="px-4 py-2">金額</th>
-                    <th class="px-4 py-2">日付</th>
-                    <th class="px-4 py-2">費用名</th>
-                    <th class="px-4 py-2">カテゴリー</th>
-                    <th class="px-4 py-2">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="transaction in localTransactionList" :key="transaction.type + '-' + transaction.id">
-                    <td class="border px-4 py-2">
-                        <span :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
-                            {{ transaction.type === 'income' ? '収入' : '支出' }}
-                        </span>
-                    </td>
-                    <td class="border px-4 py-2">{{ transaction.amount }}</td>
-                    <td class="border px-4 py-2">{{ transaction.date }}</td>
-                    <td class="border px-4 py-2">{{ transaction.title }}</td>
-                    <td class="border px-4 py-2">{{ transaction.category_name ?? '未分類' }}</td>
-                    <td class="border px-4 py-2">
-                        <div class="flex space-x-2">
-                            <Link
-                                :href="transaction.type === 'income'
-                                    ? route('incomes.edit', { id: transaction.id, back: 'dashboard' })
-                                    : route('expenses.edit', { id: transaction.id, back: 'dashboard'})"
-                                class="inline-block px-4 py-2 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
-                            >
-                                編集
-                            </Link>
-                            <!-- <DeleteButton
-                                :transactionId="transaction.id"
-                                :transactionType="transaction.type"
-                                @deleted="handleTransactionDeleted"
-                            /> -->
-                            <DeleteButton
-                                :transactionId="transaction.id"
-                                :transactionType="transaction.type"
-                                @deleted="() => handleTransactionDeleted(transaction.type)"
-                            />
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto text-left border-collapse">
+                <thead class="bg-gray-300 text-gray-700">
+                    <tr>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">種別</th>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">金額</th>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">日付</th>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">費用名</th>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">カテゴリー</th>
+                        <th class="px-3 py-2 whitespace-nowrap text-sm">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        v-for="transaction in localTransactionList"
+                        :key="transaction.type + '-' + transaction.id"
+                        class="border-b hover:bg-gray-50"
+                    >
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            <span :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                                {{ transaction.type === 'income' ? '収入' : '支出' }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap">{{ transaction.amount }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap">{{ transaction.date }}</td>
+                        <td class="px-3 py-2 truncate max-w-[120px]" :title="transaction.title">{{ transaction.title }}</td>
+                        <td class="px-3 py-2 truncate max-w-[100px]" :title="transaction.category_name">{{ transaction.category_name ?? '未分類' }}</td>
+                        <td class="px-3 py-2">
+                            <div class="flex flex-wrap gap-2">
+                                <Link
+                                    :href="transaction.type === 'income'
+                                        ? route('incomes.edit', { id: transaction.id, back: 'dashboard' })
+                                        : route('expenses.edit', { id: transaction.id, back: 'dashboard'})"
+                                    class="inline-block px-3 py-1 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
+                                >
+                                    編集
+                                </Link>
+                                <!-- <DeleteButton
+                                    :transactionId="transaction.id"
+                                    :transactionType="transaction.type"
+                                    @deleted="handleTransactionDeleted"
+                                /> -->
+                                <DeleteButton
+                                    :transactionId="transaction.id"
+                                    :transactionType="transaction.type"
+                                    @deleted="() => handleTransactionDeleted(transaction.type)"
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <Pagination :links="transactions.links" />
     </div>
 </template>

@@ -168,6 +168,24 @@ const showingNavigationDropdown = ref(false);
                         >
                             Topページ
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('list')"
+                            :active="route().current('list')"
+                        >
+                            一覧ページへ
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('graph.monthly')"
+                            :active="route().current('graph.monthly')"
+                        >
+                            月別支出グラフ
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('graph.category')"
+                            :active="route().current('graph.category')"
+                        >
+                            カテゴリー別支出グラフ
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
