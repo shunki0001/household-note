@@ -65,7 +65,7 @@ const renderChart = (labels, datasets) => {
             plugins: {
                 title: {
                     display: true,
-                    text: `${props.year}年${props.month}月`,
+                    // text: `${props.year}年${props.month}月`,
                     font: { size: 18 },
                 },
                 legend: { display: false },

@@ -21,6 +21,32 @@ const changeYear = (year) => {
 const changeMonths = (month) => {
     currentMonth.value = month;
 }
+
+// 次の月
+const nextMonth = () => {
+    if (currentMonth.value < 12) {
+        currentMonth.value++;
+    } else {
+        // 12月->翌年1月
+        currentMonth.value = 1;
+        if (availableYears.value.includes(currentYear.value + 1)) {
+            currentYear.value++;
+        }
+    }
+};
+
+// 前の月
+const prevMonth = () => {
+    if (currentMonth.value > 1) {
+        currentMonth.value--;
+    } else {
+        // 1月->前年12月
+        currentMonth.value = 12;
+        if (availableYears.value.includes(currentYear.value - 1)) {
+            currentYear.value--;
+        }
+    }
+};
 </script>
 
 <template>
@@ -33,6 +59,48 @@ const changeMonths = (month) => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
+
+                        <!-- ページネーション -->
+
+                        <!-- PC表示 -->
+                        <div class="hidden md:block">
+                            <div class="mt-4 flex justify-center space-x-2">
+                                <button
+                                    v-for="year in availableYears"
+                                    :key="year"
+                                    class="mx-1 px-3 py-1 border rounded hover:bg-blue-100"
+                                    :class="{
+                                        'bg-blue-500 text-white': currentYear === year ,
+                                        'bg-white text-black': currentYear !== year
+                                    }"
+                                    @click="changeYear(year)"
+                                >
+                                    {{ year }}年
+                                </button>
+                            </div>
+                            <div class="mt-4 flex justify-center space-x-2">
+                                <button
+                                    v-for="month in 12"
+                                    :key="month"
+                                    class="px-3 py-1 border rounded hover:bg-blue-100"
+                                    :class="{
+                                        'bg-blue-500 text-white': currentMonth === month,
+                                        'bg-white text-black': currentMonth !== month
+                                    }"
+                                    @click="changeMonths(month)"
+                                >
+                                    {{ month }}月
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- スマホ表示 -->
+                        <div class="flex md:hidden items-center justify-between mb-4">
+                            <button @click="prevMonth" class="px-2 py-1 border rounded text-sm">◀︎</button>
+                            <span class="font-bold text-lg">{{ currentYear }}年 {{ currentMonth }}月</span>
+                            <button @click="nextMonth" class="px-2 py-1 border rounded text-sm">▶︎</button>
+                        </div>
+
                         <!-- <h2>{{ currentMonth }}月のカテゴリー別</h2> -->
                         <BarChart2
                             label="カテゴリー別"
@@ -44,36 +112,6 @@ const changeMonths = (month) => {
                                 '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
                             ]"
                         />
-
-                        <!-- ページネーション -->
-                        <div class="mt-4 flex justify-center space-x-2">
-                            <button
-                                v-for="month in 12"
-                                :key="month"
-                                class="px-3 py-1 border rounded hover:bg-blue-100"
-                                :class="{
-                                    'bg-blue-500 text-white': currentMonth === month,
-                                    'bg-white text-black': currentMonth !== month
-                                }"
-                                @click="changeMonths(month)"
-                            >
-                                {{ month }}月
-                            </button>
-                        </div>
-                        <div class="mt-4 flex justify-center space-x-2">
-                            <button
-                                v-for="year in availableYears"
-                                :key="year"
-                                class="mx-1 px-3 py-1 border rounded hover:bg-blue-100"
-                                :class="{
-                                    'bg-blue-500 text-white': currentYear === year ,
-                                    'bg-white text-black': currentYear !== year
-                                }"
-                                @click="changeYear(year)"
-                            >
-                                {{ year }}年
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
