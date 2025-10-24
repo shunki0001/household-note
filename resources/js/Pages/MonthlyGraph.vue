@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import BarChart from '@/Components/BarChart.vue';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, onUnmounted, watch } from 'vue';
 import { Head } from '@inertiajs/vue3';
 
 const currentYear = ref(new Date().getFullYear());
@@ -25,17 +25,65 @@ const quarters = [
 const currentQuarterLabel = computed(() => quarters[currentQuarter.value - 1].label);
 const currentRange = computed(() => quarters[currentQuarter.value - 1]);
 
+// 画面サイズ監視
+const isMobile = ref(window.innerWidth < 768);
+const handleResize = () => {
+    isMobile.value = window.innerWidth < 768;
+};
+
+// mount時とunmount時にイベント設定
+onMounted(() => {
+    window.addEventListener('resize', handleResize);
+});
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+});
+
 const nextQuarter = () => {
-    if (currentQuarter.value < 4) currentQuarter.value++;
+    if (currentQuarter.value < 4)
+        currentQuarter.value++;
+    else if (currentYear.value < availableYears.value[availableYears.value.length - 1]) {
+        currentYear.value++;
+        currentQuarter.value = 1;
+    }
 };
 const prevQuarter = () => {
-    if (currentQuarter.value > 1) currentQuarter.value--;
+    if (currentQuarter.value > 1)
+        currentQuarter.value--;
+    else if (currentYear.value > availableYears.value[0]) {
+        currentYear.value--;
+        currentQuarter.value = 4;
+    }
 };
 
 const changeYear = (year) => {
     currentYear.value = year;
     currentQuarter.value = getQuarter(currentMonth);
 };
+
+// グラフに渡す動的な期間
+const chartRange = computed(() => {
+    // スマホ → 四半期ごと
+    if (isMobile.value) {
+        return {
+            startMonth: currentRange.value.start,
+            endMonth: currentRange.value.end
+        };
+    }
+    // PC → 年間
+    return {
+        startMonth: 1,
+        endMonth: 12
+    };
+});
+
+// スマホ↔︎PC切り替え時に四半期や年を再計算
+watch(isMobile, (newVal) => {
+    if (!newVal) {
+        // PC画面に戻った時
+        currentQuarter.value = getQuarter(currentMonth);
+    }
+});
 </script>
 
 <template>
@@ -53,44 +101,34 @@ const changeYear = (year) => {
             overflow-x-auto
         "
         >
-        <!-- 年度切り替え -->
-        <div class="mb-4 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
-            <span class="font-bold text-lg">年別表示：</span>
-            <button
-            v-for="year in availableYears"
-            :key="year"
-            class="px-3 py-1 border rounded"
-            :class="{ 'bg-blue-500 text-white': currentYear === year }"
-            @click="changeYear(year)"
-            >
-            {{ year }}年
-            </button>
+        <!-- PC表示(年度切り替え) -->
+        <div class="hidden md:block">
+            <div class="mb-4 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                <span class="font-bold text-lg">年別表示：</span>
+                <button
+                    v-for="year in availableYears"
+                    :key="year"
+                    class="px-3 py-1 border rounded"
+                    :class="{ 'bg-blue-500 text-white': currentYear === year }"
+                    @click="changeYear(year)"
+                    >
+                    {{ year }}年
+                </button>
+            </div>
+
         </div>
 
-        <!-- 四半期ページネーション -->
-        <div class="mb-4 flex items-center justify-between sm:justify-center gap-4">
-            <button
-                @click="prevQuarter"
-                :disabled="currentQuarter === 1"
-                class="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                ◀︎
-            </button>
-
-            <span class="font-bold text-lg">{{ currentQuarterLabel }}</span>
-
-            <button
-                @click="nextQuarter"
-                :disabled="currentQuarter === 4"
-                class="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                ▶︎
-            </button>
+        <!-- スマホ表示(年 + 四半期まとめ) -->
+        <div class="flex md:hidden items-center justify-between mb-4">
+            <button @click="prevQuarter" class="px-2 py-1 border rounded text-sm">◀︎</button>
+            <span class="font-bold text-lg">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
+            <button @click="nextQuarter" class="px-2 py-1 border rounded text-sm">▶︎</button>
         </div>
 
         <!-- グラフ -->
         <div class="w-full">
             <BarChart
+            :key="isMobile + '-' + currentYear + '-' + currentQuarter"
             :year="currentYear"
             :startMonth="currentRange.start"
             :endMonth="currentRange.end"
