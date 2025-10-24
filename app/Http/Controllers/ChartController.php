@@ -86,6 +86,7 @@ class ChartController extends Controller
     public function getCategoryTotals(Request $request) {
         $now = Carbon::now();
         $month = (int) $request->query('month', now()->month); // 月指定、デフォルトは今月
+        $year = (int) $request->query('year', now()->year); // 年指定、デフォルトは今年
         $userId = Auth::id(); // ログインユーザーID
 
         // $labels = [ "{$month}月" ];
@@ -98,7 +99,7 @@ class ChartController extends Controller
         // 指定月のカテゴリー別合計取得
         $expenses = Expense::selectRaw('category_id, SUM(amount) as total')
             ->where('user_id', $userId)
-            ->whereYear('date', 2025)
+            ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->groupBy('category_id')
             ->get();

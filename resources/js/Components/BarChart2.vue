@@ -25,6 +25,10 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    year: {
+        type: Number,
+        default: new Date().getFullYear(),
+    }
 })
 
 const chartRef = ref(null)
@@ -61,7 +65,7 @@ const renderChart = (labels, datasets) => {
             plugins: {
                 title: {
                     display: true,
-                    text: `${props.month}月の${props.label}`,
+                    text: `${props.year}年${props.month}月`,
                     font: { size: 18 },
                 },
                 legend: { display: false },
@@ -98,7 +102,13 @@ const renderChart = (labels, datasets) => {
 // データ取得
 const fetchChartData = async () => {
     try {
-        const response = await axios.get(`${props.apiUrl}?month=${props.month}`)
+        // const response = await axios.get(`${props.apiUrl}?month=${props.month}`)
+        const response = await axios.get(props.apiUrl, {
+            params: {
+                month: props.month,
+                year: props.year,
+            },
+        });
         const { labels, datasets } = response.data
 
         // 🎨 カテゴリーごとに色と絵文字を付与
@@ -121,7 +131,8 @@ const fetchChartData = async () => {
 }
 
 onMounted(fetchChartData)
-watch(() => props.month, fetchChartData)
+// watch(() => [props.month, props.year], fetchChartData)
+watch([() => props.month, () => props.year], fetchChartData)
 </script>
 
 <template>

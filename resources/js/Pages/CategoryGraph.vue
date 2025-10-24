@@ -5,9 +5,20 @@ import { ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 
 // const currentMonth = ref(1);
+// 現在の月と年を取得
 const currentMonth = ref(new Date().getMonth() + 1);
+const currentYear = ref(new Date().getFullYear());
 
-const changePage = (month) => {
+// 選択可能な年度リスト
+const availableYears = ref([2023, 2024, 2025, 2026, 2027]);
+
+// 年度の変更
+const changeYear = (year) => {
+    currentYear.value = year;
+}
+
+// 月の変更
+const changeMonths = (month) => {
     currentMonth.value = month;
 }
 </script>
@@ -27,6 +38,7 @@ const changePage = (month) => {
                             label="カテゴリー別"
                             apiUrl="/api/chart-data/category-monthly-single"
                             :month="currentMonth"
+                            :year="currentYear"
                             :colors="[
                                 '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
                                 '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
@@ -43,9 +55,23 @@ const changePage = (month) => {
                                     'bg-blue-500 text-white': currentMonth === month,
                                     'bg-white text-black': currentMonth !== month
                                 }"
-                                @click="changePage(month)"
+                                @click="changeMonths(month)"
                             >
                                 {{ month }}月
+                            </button>
+                        </div>
+                        <div class="mt-4 flex justify-center space-x-2">
+                            <button
+                                v-for="year in availableYears"
+                                :key="year"
+                                class="mx-1 px-3 py-1 border rounded hover:bg-blue-100"
+                                :class="{
+                                    'bg-blue-500 text-white': currentYear === year ,
+                                    'bg-white text-black': currentYear !== year
+                                }"
+                                @click="changeYear(year)"
+                            >
+                                {{ year }}年
                             </button>
                         </div>
                     </div>
