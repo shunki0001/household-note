@@ -88,10 +88,14 @@ class ChartController extends Controller
         $month = (int) $request->query('month', now()->month); // 月指定、デフォルトは今月
         $userId = Auth::id(); // ログインユーザーID
 
-        $labels = [ "{$month}月" ];
+        // $labels = [ "{$month}月" ];
 
+        // カテゴリー名一覧
         $categories = Category::pluck('name', 'id');
 
+        // $labels = $categories->map(fn($name) => "{$name}")->values();
+
+        // 指定月のカテゴリー別合計取得
         $expenses = Expense::selectRaw('category_id, SUM(amount) as total')
             ->where('user_id', $userId)
             ->whereYear('date', 2025)
@@ -99,21 +103,39 @@ class ChartController extends Controller
             ->groupBy('category_id')
             ->get();
 
-        $datasets = [];
+        // ラベル(カテゴリー名)
+        $labels = $categories->values();
 
-        foreach ($categories as $categoryId => $categoryName) {
-            $total = $expenses->firstWhere('category_id', $categoryId)?->total ?? 0;
-
-            $datasets[] = [
-                'label' => $categoryName,
-                'data' => [ (int) $total ],
-            ];
-        }
+        // 各カテゴリーの金額を配列か(存在しないカテゴリーは0)
+        $totals = $categories->map(function($name, $categoryId) use ($expenses) {
+            return (int) ($expenses->firstWhere('category_id', $categoryId)?->total ?? 0);
+        })->values();
 
         return response()->json([
             'labels' => $labels,
-            'datasets' => $datasets,
+            'datasets' => [
+                [
+                    'label' => "{$month}月のカテゴリー別支出",
+                    'data' => $totals,
+                ],
+            ],
         ]);
+
+        // $datasets = [];
+
+        // foreach ($categories as $categoryId => $categoryName) {
+        //     $total = $expenses->firstWhere('category_id', $categoryId)?->total ?? 0;
+
+        //     $datasets[] = [
+        //         'label' => $categoryName,
+        //         'data' => [ (int) $total ],
+        //     ];
+        // }
+
+        // return response()->json([
+        //     'labels' => $labels,
+        //     'datasets' => $datasets,
+        // ]);
     }
 
     // ドーナツグラフ用のグラフデータ取得

@@ -22,11 +22,15 @@ const changePage = (month) => {
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        カテゴリー別合計グラフ ({{ currentMonth }}月)
+                        <!-- <h2>{{ currentMonth }}月のカテゴリー別</h2> -->
                         <BarChart2
                             label="カテゴリー別"
                             apiUrl="/api/chart-data/category-monthly-single"
                             :month="currentMonth"
+                            :colors="[
+                                '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
+                                '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
+                            ]"
                         />
 
                         <!-- ページネーション -->
