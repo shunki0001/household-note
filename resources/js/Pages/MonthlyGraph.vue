@@ -90,6 +90,13 @@ watch(isMobile, (newVal) => {
 <Head title="月別グラフ" />
 
 <AuthenticatedLayout>
+    <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                月別支出グラフ
+            </h2>
+        </template>
 <div class="py-8 sm:py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="bg-white shadow-sm rounded-lg w-full">
@@ -119,9 +126,9 @@ watch(isMobile, (newVal) => {
         </div>
 
         <!-- スマホ表示(年 + 四半期まとめ) -->
-        <div class="flex md:hidden items-center justify-between mb-4">
+        <div class="flex justify-end w-full max-w-xl mx-auto px-4 sm:px-0">
             <button @click="prevQuarter" class="px-2 py-1 border rounded text-sm">◀︎</button>
-            <span class="font-bold text-lg">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
+            <span class="font-bold text-lg mx-auto">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
             <button @click="nextQuarter" class="px-2 py-1 border rounded text-sm">▶︎</button>
         </div>
 

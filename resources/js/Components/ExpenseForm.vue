@@ -35,44 +35,61 @@ const { form, errors, submit } = useExpenseFrom(props, emit);
 </script>
 
 <template>
-    <form @submit.prevent="submit">
+    <form @submit.prevent="submit" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md space-y-6">
         <!-- 金額 -->
         <div>
-            <InputLabel for="amount" value="金額"/>
-            <!-- <TextInput id="amount" type="number" min="0" v-model="form.amount"/> -->
-            <TextInput id="amount" type="number" v-model="form.amount"/>
-            <InputError class="mt-2" :message="errors.amount"/>
+            <InputLabel for="amount" value="金額" class="text-gray-700 text-base font-semibold mb-1" />
+            <TextInput
+                id="amount"
+                type="number"
+                v-model="form.amount"
+                class="w-full border border-gray-300 rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            />
+            <InputError class="mt-1 text-sm text-red-500" :message="errors.amount" />
         </div>
 
         <!-- 日付 -->
         <div>
-            <InputLabel for="date" value="日付"/>
-            <TextInput id="date" type="date" v-model="form.date"/>
-            <InputError class="mt-2" :message="errors.date"/>
+            <InputLabel for="date" value="日付" class="text-gray-700 text-base font-semibold mb-1" />
+            <TextInput
+                id="date"
+                type="date"
+                v-model="form.date"
+                class="w-full border border-gray-300 rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            />
+            <InputError class="mt-1 text-sm text-red-500" :message="errors.date" />
         </div>
 
         <!-- 費用名 -->
         <div>
-            <InputLabel for="title" value="費用名"/>
-            <TextInput id="title" type="text"v-model="form.title"/>
-            <InputError class="mt-2" :message="errors.title"/>
+            <InputLabel for="title" value="費用名" class="text-gray-700 text-base font-semibold mb-1" />
+            <TextInput
+                id="title"
+                type="text"
+                v-model="form.title"
+                class="w-full border border-gray-300 rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            />
+            <InputError class="mt-1 text-sm text-red-500" :message="errors.title" />
         </div>
 
         <!-- カテゴリー -->
         <div>
-            <InputLabel for="category_id" value="カテゴリー"/>
-            <select v-model="form.category_id" class="w-full border p-2 rounded w-full max-w-xs">
+            <InputLabel for="category_id" value="カテゴリー" class="text-gray-700 text-base font-semibold mb-1" />
+            <select
+                v-model="form.category_id"
+                class="w-full border border-gray-300 rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            >
                 <option disabled value="">カテゴリーを選択</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
             </select>
-            <InputError class="mt-2" :message="errors.category_id"/>
+            <InputError class="mt-1 text-sm text-red-500" :message="errors.category_id" />
         </div>
 
-        <!-- ボタン -->
-        <div class="mt-4 flex items-center">
-            <PrimaryButton class="ms-4">
+        <!-- ボタン（右端に寄せる） -->
+        <div class="flex justify-end pt-2">
+            <PrimaryButton class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition">
                 {{ props.method === 'post' ? '登録' : '更新' }}
             </PrimaryButton>
         </div>

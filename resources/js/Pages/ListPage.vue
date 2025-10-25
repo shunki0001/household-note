@@ -94,30 +94,38 @@ const changeMonth = (delta) => {
     <Head title="一覧ページ" />
 
     <AuthenticatedLayout>
+        <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                一覧ページ
+            </h2>
+        </template>
         <div class="py-6 sm:py-12 px-2 sm:px-0">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg p-4 sm:p-6">
 
                     <!-- 月切り替えボタン -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 mb-6 space-y-2 sm:space-y-0">
+                    <div class="flex flex-row items-center justify-center space-x-3 mb-6">
                         <button
                             @click="changeMonth(-1)"
-                            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm w-full sm:w-auto"
+                            class="w-10 h-8 bg-gray-200 rounded hover:bg-gray-300 text-xs flex items-center justify-center"
                         >
-                            前月
+                            ◀︎
                         </button>
 
-                        <h2 class="text-lg sm:text-xl font-bold text-center w-full sm:w-60">
+                        <h2 class="text-base font-bold text-center w-60 sm:w-80 truncate">
                             {{ year }}年{{ month }}月の支出一覧
                         </h2>
 
                         <button
                             @click="changeMonth(1)"
-                            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm w-full sm:w-auto"
+                            class="w-10 h-8 bg-gray-200 rounded hover:bg-gray-300 text-xs flex items-center justify-center"
                         >
-                            次月
+                            ▶︎
                         </button>
                     </div>
+
 
                     <!-- ✅ PC表示（表形式） -->
                     <div class="hidden sm:block overflow-x-auto">

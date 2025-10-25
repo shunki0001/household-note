@@ -95,11 +95,11 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-gray-900">
                 パスワード変更
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-600">
                 パスワードは８文字以上で設定して下さい
             </p>
         </header>
@@ -158,7 +158,8 @@ const updatePassword = () => {
                 />
             </div>
 
-            <div class="flex items-center gap-4">
+            <!-- <div class="flex items-center gap-4 justify-end sm:justify-start max-w-xl mr-8"> -->
+            <div class="flex justify-end sm:justify-start max-w-xl">
                 <PrimaryButton :disabled="form.processing">保存</PrimaryButton>
 
                 <Transition
@@ -169,9 +170,9 @@ const updatePassword = () => {
                 >
                     <p
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600 dark:text-gray-400"
+                        class="text-sm text-gray-600"
                     >
-                        Saved.
+                        保存中...
                     </p>
                 </Transition>
             </div>

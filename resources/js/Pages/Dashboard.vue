@@ -185,16 +185,14 @@ onMounted(() => {
     <Head title="アカウントトップページ" />
 
     <AuthenticatedLayout>
-        <!-- SPA構成では動作しない -->
-        <Toast/>
-        <!-- <template #header>
+        <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
             >
-                Dashboard
+                Topページ
             </h2>
-        </template> -->
-
+        </template>
+        <Toast/>
         <!-- <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
@@ -213,15 +211,30 @@ onMounted(() => {
                 <div class="flex flex-wrap lg:flex-nowrap gap-6">
                     <!-- 左：今月の家計状況 -->
                     <div class="w-full lg:w-3/5 bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
-                    <!-- 今月の家計状況 -->
-                    <h2 class="text-lg font-bold mb-4">今月の家計状況</h2>
-                    <DoughnutChart
-                        :refresh-key="refreshKey"
-                    />
-                    <p>今月の合計支出: {{ formattedTotalExpense }}円</p>
-                    <p>今月の合計収入: {{ formattedTotalIncome }}円</p>
-                    <p>収支: {{ formattedBalance }}円</p>
+                        <h2 class="text-xl font-bold mb-6 text-center">今月の家計状況</h2>
+
+                        <DoughnutChart :refresh-key="refreshKey" class="mb-6" />
+
+                        <div class="space-y-2 text-center">
+                            <p class="text-lg font-semibold">
+                                今月の合計支出：
+                                <span class="text-red-500 text-xl font-bold">{{ formattedTotalExpense }}円</span>
+                            </p>
+
+                            <p class="text-lg font-semibold">
+                                今月の合計収入：
+                                <span class="text-green-500 text-xl font-bold">{{ formattedTotalIncome }}円</span>
+                            </p>
+
+                            <p
+                                class="text-2xl font-extrabold mt-4"
+                                :class="parseInt(formattedBalance.replace(/,/g, '')) < 0 ? 'text-red-600' : 'text-green-600'"
+                            >
+                                収支：{{ formattedBalance }}円
+                            </p>
+                        </div>
                     </div>
+
 
                     <!-- 右：かんたん入力&グラフ確認 -->
                     <div class="w-full lg:w-2/5 flex flex-col gap-6">

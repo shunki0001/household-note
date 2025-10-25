@@ -53,6 +53,13 @@ const prevMonth = () => {
     <Head title="カテゴリー別グラフ" />
 
     <AuthenticatedLayout>
+        <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                カテゴリー別グラフ
+            </h2>
+        </template>
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div
