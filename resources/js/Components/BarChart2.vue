@@ -34,24 +34,32 @@ const props = defineProps({
 const chartRef = ref(null)
 let chartInstance = null
 
-// カテゴリー名 → 絵文字
-const categoryIcons = {
-    '食費': '🍎',
-    '日用品費': '🧴',
-    '交通費': '🚌',
-    '住居費': '🏠',
-    '水道・光熱費': '💡',
-    '通信費': '📱',
-    '医療・保険': '💊',
-    '娯楽・交通費': '🎮',
-    '教育費': '🎓',
-    'その他': '🛍️',
-
-}
-
 // Chart.jsで描画
-const renderChart = (labels, datasets) => {
+const renderChart = (labels, datasets, icons) => {
     if (chartInstance) chartInstance.destroy()
+
+    // カスタムプラグインでアイコンを描画
+    const iconPlugin = {
+        id: 'categoryIcons',
+        afterDraw: chart => {
+            const { ctx, chartArea, scales } = chart
+            const xAxis = scales.x
+            const yButton = chartArea.bottom + 1
+
+            // 画面幅に応じてアイコンサイズを変更
+            const isMobile = window.innerWidth < 640 // Tailwindのsmサイズ基準
+            const iconSize = isMobile ? 16 : 24
+
+            labels.forEach((label, index) => {
+                const x = xAxis.getPixelForTick(index)
+                const img = new Image()
+                img.src = icons[index]
+                img.onload = () => {
+                    ctx.drawImage(img, x - 7, yButton, iconSize, iconSize)
+                }
+            })
+        }
+    }
 
     chartInstance = new Chart(chartRef.value, {
         type: 'bar',
@@ -65,7 +73,6 @@ const renderChart = (labels, datasets) => {
             plugins: {
                 title: {
                     display: true,
-                    // text: `${props.year}年${props.month}月`,
                     font: { size: 18 },
                 },
                 legend: { display: false },
@@ -89,30 +96,28 @@ const renderChart = (labels, datasets) => {
                     },
                 },
                 x: {
+                    ticks: { display: false },
                     title: {
                         display: true,
-                        text: 'カテゴリー',
+                        text: ' ',
                     },
                 },
             },
         },
+        plugins: [iconPlugin],
     })
 }
 
 // データ取得
 const fetchChartData = async () => {
     try {
-        // const response = await axios.get(`${props.apiUrl}?month=${props.month}`)
         const response = await axios.get(props.apiUrl, {
             params: {
                 month: props.month,
                 year: props.year,
             },
         });
-        const { labels, datasets } = response.data
-
-        // 🎨 カテゴリーごとに色と絵文字を付与
-        const iconLabels = labels.map(label => categoryIcons[label] || label)
+        const { labels, datasets, icons } = response.data
 
         // 各データポイントに個別の色を設定
         const coloredDatasets = datasets.map((d, i) => {
@@ -124,14 +129,13 @@ const fetchChartData = async () => {
             };
         })
 
-        renderChart(iconLabels, coloredDatasets)
+        renderChart(labels, coloredDatasets, icons)
     } catch (error) {
         console.error('グラフデータの取得に失敗しました:', error)
     }
 }
 
 onMounted(fetchChartData)
-// watch(() => [props.month, props.year], fetchChartData)
 watch([() => props.month, () => props.year], fetchChartData)
 </script>
 

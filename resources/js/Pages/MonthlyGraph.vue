@@ -126,7 +126,7 @@ watch(isMobile, (newVal) => {
         </div>
 
         <!-- スマホ表示(年 + 四半期まとめ) -->
-        <div class="flex justify-end w-full max-w-xl mx-auto px-4 sm:px-0">
+        <div class="flex justify-end w-full max-w-xl mx-auto px-4 sm:px-0 md:hidden">
             <button @click="prevQuarter" class="px-2 py-1 border rounded text-sm">◀︎</button>
             <span class="font-bold text-lg mx-auto">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
             <button @click="nextQuarter" class="px-2 py-1 border rounded text-sm">▶︎</button>

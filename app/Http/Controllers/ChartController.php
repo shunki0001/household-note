@@ -52,36 +52,6 @@ class ChartController extends Controller
         ]);
     }
 
-    // public function getMonthlyTotals()
-    // {
-    //     // 月ラベル作成
-    //     $month = [];
-    //     for ($month = 1; $month <=12; $month++) {
-    //         $months[] = $month . '月';
-    //     }
-
-    //     // SQL 1回で月毎の合計を取得
-    //     $expenses = DB::table('expenses')
-    //         ->selectRaw('MONTH(date) as month, SUM(amount) as total')
-    //         ->whereYear('date', 2025)
-    //         ->groupBy('month')
-    //         ->orderBy('month')
-    //         ->get();
-
-    //     // 月別合計を0で初期化
-    //     $data = array_fill(1, 12, 0);
-
-    //     // 集計結果を反映
-    //     foreach ($expenses as $expense) {
-    //         $data[$expense->month] = (int) $expense->total;
-    //     }
-
-    //     return response()->json([
-    //         'labels' => $months,
-    //         'totals' => array_values($data), // ０始まりにする
-    //     ]);
-    // }
-
     // 1~12月毎に分けたカテゴリー別合計金額
     public function getCategoryTotals(Request $request) {
         $now = Carbon::now();
@@ -89,12 +59,23 @@ class ChartController extends Controller
         $year = (int) $request->query('year', now()->year); // 年指定、デフォルトは今年
         $userId = Auth::id(); // ログインユーザーID
 
-        // $labels = [ "{$month}月" ];
-
         // カテゴリー名一覧
-        $categories = Category::pluck('name', 'id');
+        $categories = Category::select('name', 'icon_path', 'sort_order')
+            ->withSum(['expenses' => function($query) use ($month, $year) {
+                $query->whereMonth('date', $month)
+                        ->whereYear('date', $year);
+            }], 'amount')
+            ->orderBy('sort_order', 'asc')
+            ->get();
 
-        // $labels = $categories->map(fn($name) => "{$name}")->values();
+        $labels = $categories->pluck('name');
+        $icons = $categories->pluck('icon_path')->map(fn($path) => asset($path));
+        $datasets = [
+            [
+                'label' => '支出合計',
+                'data' => $categories->pluck('expenses_sum_amount'),
+            ]
+            ];
 
         // 指定月のカテゴリー別合計取得
         $expenses = Expense::selectRaw('category_id, SUM(amount) as total')
@@ -104,9 +85,6 @@ class ChartController extends Controller
             ->groupBy('category_id')
             ->get();
 
-        // ラベル(カテゴリー名)
-        $labels = $categories->values();
-
         // 各カテゴリーの金額を配列か(存在しないカテゴリーは0)
         $totals = $categories->map(function($name, $categoryId) use ($expenses) {
             return (int) ($expenses->firstWhere('category_id', $categoryId)?->total ?? 0);
@@ -114,29 +92,10 @@ class ChartController extends Controller
 
         return response()->json([
             'labels' => $labels,
-            'datasets' => [
-                [
-                    'label' => "{$month}月のカテゴリー別支出",
-                    'data' => $totals,
-                ],
-            ],
+            'icons' => $icons,
+            'datasets' => $datasets,
         ]);
 
-        // $datasets = [];
-
-        // foreach ($categories as $categoryId => $categoryName) {
-        //     $total = $expenses->firstWhere('category_id', $categoryId)?->total ?? 0;
-
-        //     $datasets[] = [
-        //         'label' => $categoryName,
-        //         'data' => [ (int) $total ],
-        //     ];
-        // }
-
-        // return response()->json([
-        //     'labels' => $labels,
-        //     'datasets' => $datasets,
-        // ]);
     }
 
     // ドーナツグラフ用のグラフデータ取得

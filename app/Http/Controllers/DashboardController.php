@@ -28,6 +28,9 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc') // 入力日から最新の５件表示
             ->paginate(5);
 
+        // 入力フォームのカテゴリーをsort_orderで並び替え
+        $categories = Category::orderBy('sort_order', 'asc')->get();
+
         // 今月の合計支出
         $totalExpense = Expense::whereYear('date', $now->year)
         ->where('user_id', $userId)

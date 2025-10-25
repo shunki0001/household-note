@@ -298,7 +298,6 @@ onMounted(() => {
                                 <Link href="/list" class="btn-icon-text">一覧ページに移動</Link>
                                 <Link href="/graph/monthly" class="btn-icon-text">月別支出グラフ</Link>
                                 <Link href="/graph/category" class="btn-icon-text">カテゴリー別支出グラフ</Link>
-                                <!-- <Link href="#" class="btn-icon-text">月別支出グラフ</Link> -->
                             </div>
                         </div>
                     </div>
