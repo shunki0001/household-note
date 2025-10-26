@@ -14,16 +14,16 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => '食費', 'icon_path' => 'images/icons/FoodExpenses32px.svg', 'sort_order' => 1],
-            ['name' => '日用品費', 'icon_path' => 'images/icons/DailyGoods32px.svg', 'sort_order' => 2],
-            ['name' => '交通費', 'icon_path' => 'images/icons/TransportationExpenses32px.svg', 'sort_order' => 3],
-            ['name' => '住居費', 'icon_path' => 'images/icons/HousingExpenses32px.svg', 'sort_order' => 4],
-            ['name' => '水道・光熱費', 'icon_path' => 'images/icons/UtilitiesExpenses32px.svg', 'sort_order' => 5],
-            ['name' => '通信費', 'icon_path' => 'images/icons/CommunicationExpenses32px.svg', 'sort_order' => 6],
-            ['name' => '医療・保険', 'icon_path' => 'images/icons/MedicalInsuranceExpenses32px.svg', 'sort_order' => 7],
-            ['name' => '娯楽・交際費', 'icon_path' => 'images/icons/EntertainmentExpenses32px.svg', 'sort_order' => 8],
-            ['name' => '教育費', 'icon_path' => 'images/icons/EducationExpenses32px.svg', 'sort_order' => 9],
-            ['name' => 'その他', 'icon_path' => 'images/icons/OtherExpenses32px.svg', 'sort_order' => 10],
+            ['name' => '食費', 'icon_path' => 'images/icons/FoodExpenses32px.svg', 'sort_order' => 1, 'color' => '#fbf8cc'],
+            ['name' => '日用品費', 'icon_path' => 'images/icons/DailyGoods32px.svg', 'sort_order' => 2,'color' => '#fde4cf'],
+            ['name' => '交通費', 'icon_path' => 'images/icons/TransportationExpenses32px.svg', 'sort_order' => 3,'color' => '#ffcfd2'],
+            ['name' => '住居費', 'icon_path' => 'images/icons/HousingExpenses32px.svg', 'sort_order' => 4,'color' => '#f1c0e8'],
+            ['name' => '水道・光熱費', 'icon_path' => 'images/icons/UtilitiesExpenses32px.svg', 'sort_order' => 5,'color' => '#cfbaf0'],
+            ['name' => '通信費', 'icon_path' => 'images/icons/CommunicationExpenses32px.svg', 'sort_order' => 6,'color' => '#a3c4f3'],
+            ['name' => '医療・保険', 'icon_path' => 'images/icons/MedicalInsuranceExpenses32px.svg', 'sort_order' => 7,'color' => '#90dbf4'],
+            ['name' => '娯楽・交際費', 'icon_path' => 'images/icons/EntertainmentExpenses32px.svg', 'sort_order' => 8,'color' => '#8eecf5'],
+            ['name' => '教育費', 'icon_path' => 'images/icons/EducationExpenses32px.svg', 'sort_order' => 9,'color' => '#98f5e1'],
+            ['name' => 'その他', 'icon_path' => 'images/icons/OtherExpenses32px.svg', 'sort_order' => 10,'color' => '#b9fbc0'],
         ];
 
         foreach($categories as $category) {
@@ -36,6 +36,7 @@ class CategorySeeder extends Seeder
             ], [
                 'icon_path' => $category['icon_path'],
                 'sort_order' => $category['sort_order'],
+                'color' => $category['color'],
             ]);
         }
     }

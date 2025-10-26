@@ -15,17 +15,6 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels)
 const props = defineProps({
     label: { type: String, default: 'カテゴリー別支出合計' },
     apiUrl: { type: String, default: 'api/chart-data/doughnut' },
-    colors: {
-        type: Array,
-        // default: () => [
-        //     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        //     '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
-        // ]
-        default: () => [
-            '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
-            '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
-        ]
-    },
     chartData: Object,
     chartOptions: Object,
     refreshKey: { type: Number, default: 0 },
@@ -88,9 +77,13 @@ async function fetchChartData() {
     try {
         const response = await fetch(props.apiUrl)
         const json = await response.json()
-        const totals = json.totals.map(t => Number(t))
 
         console.log('API response:', json);
+
+        const totals = json.totals.map(t => Number(t))
+        const colors = json.colors && json.colors.length > 0
+            ? json.colors
+            : ['#cccccc'] // fallback 色未設定時
 
         chartData.value = {
             labels: json.labels,
@@ -98,8 +91,9 @@ async function fetchChartData() {
                 {
                     labels: props.label,
                     data: totals,
-                    backgroundColor: props.colors.slice(0, json.labels.length)
-
+                    backgroundColor: colors.slice(0, json.labels.length),
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
                 }
             ]
         }

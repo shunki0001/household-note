@@ -14,13 +14,6 @@ const props = defineProps({
         type: String,
         default: 'カテゴリー別支出',
     },
-    colors: {
-        type: Array,
-        default: () => [
-            '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
-            '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
-        ],
-    },
     month: {
         type: Number,
         required: true,
@@ -117,14 +110,14 @@ const fetchChartData = async () => {
                 year: props.year,
             },
         });
-        const { labels, datasets, icons } = response.data
+        const { labels, datasets, icons, colors } = response.data
 
         // 各データポイントに個別の色を設定
         const coloredDatasets = datasets.map((d, i) => {
             return {
                 ...d,
-                backgroundColor: Array.isArray(d.data) ? d.data.map((_, dataIndex) => props.colors[dataIndex % props.colors.length]) : props.colors[i % props.colors.length],
-                borderColor: Array.isArray(d.data) ? d.data.map((_, dataIndex) => props.colors[dataIndex % props.colors.length]) : props.colors[i % props.colors.length],
+                backgroundColor: colors,
+                borderColor: colors,
                 borderWidth: 1,
             };
         })

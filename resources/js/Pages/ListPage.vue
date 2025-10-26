@@ -135,8 +135,8 @@ const changeMonth = (delta) => {
                                     <th class="border px-3 py-2 w-28 sm:w-36">種別</th>
                                     <th class="border px-3 py-2 w-28 sm:w-36">日付</th>
                                     <th class="border px-3 py-2 w-32 sm:w-40">金額</th>
-                                    <th class="border px-3 py-2 w-32 sm:w-36">カテゴリ</th>
                                     <th class="border px-3 py-2 w-36 sm:w-40">費用名</th>
+                                    <th class="border px-3 py-2 w-32 sm:w-36">カテゴリ</th>
                                     <th class="border px-3 py-2 text-center w-28 sm:w-32">操作</th>
                                 </tr>
                             </thead>

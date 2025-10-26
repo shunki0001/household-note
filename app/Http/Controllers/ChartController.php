@@ -11,16 +11,6 @@ use Carbon\Carbon;
 
 class ChartController extends Controller
 {
-    // 1~12月の月別支出合計データ
-    // public function getMonthlyExpenses()
-    // {
-    //     $data = Expense::selectRaw('MONTH(date) as month, SUM(amount as total)')
-    //         ->groupBy('month')
-    //         ->orderBy('month')
-    //         ->get();
-
-    //         return response()->json($data);
-    // }
 
     public function getMonthlyTotals(Request $request)
     {
@@ -60,7 +50,7 @@ class ChartController extends Controller
         $userId = Auth::id(); // ログインユーザーID
 
         // カテゴリー名一覧
-        $categories = Category::select('name', 'icon_path', 'sort_order')
+        $categories = Category::select('name', 'icon_path', 'sort_order', 'color')
             ->withSum(['expenses' => function($query) use ($month, $year) {
                 $query->whereMonth('date', $month)
                         ->whereYear('date', $year);
@@ -70,6 +60,8 @@ class ChartController extends Controller
 
         $labels = $categories->pluck('name');
         $icons = $categories->pluck('icon_path')->map(fn($path) => asset($path));
+        $color = $categories->pluck('color')->map(fn($color) => $color ?? '#000000');
+
         $datasets = [
             [
                 'label' => '支出合計',
@@ -93,6 +85,7 @@ class ChartController extends Controller
         return response()->json([
             'labels' => $labels,
             'icons' => $icons,
+            'colors' => $color,
             'datasets' => $datasets,
         ]);
 
@@ -103,23 +96,27 @@ class ChartController extends Controller
         $now = Carbon::now(); // 現在日時
         $userId = Auth::id(); // ログインユーザーID
 
-        $data = Expense::select('category_id', DB::raw('SUM(amount) as total'))
-            ->where('user_id', $userId)
-            ->whereYear('date', $now->year) // 今年
-            ->whereMonth('date', $now->month) // 今月
-            ->groupBy('category_id')
-            ->with('category')
+        // カテゴリーごとに支出合計と色をまとめて取得
+        $categories = Category::select('name', 'color')
+            ->withSum(['expenses' => function($query) use ($now, $userId) {
+                $query->where('user_id', $userId)
+                    ->whereYear('date', $now->year)
+                    ->whereMonth('date', $now->month);
+            }], 'amount')
+            ->orderBy('sort_order', 'asc')
             ->get();
 
-        // カテゴリー名の配列を生成
-        $labels = $data->map(function($item) {
-            return optional($item->category)->name ?? '未分類';
-        });
+        // labels, totals, colors配列を生成
+        $labels = $categories->pluck('name');
+        $totals = $categories->pluck('expenses_sum_amount')->map(fn($value) => (int) $value);
+        $colors = $categories->pluck('color')->map(fn($color) => $color ?? '#000000');
 
         $response = [
-            'labels' => $data->pluck('category.name'), // カテゴリー名
-            'totals' => $data->pluck('total') // 合計金額
+            'labels' => $labels,
+            'totals' => $totals,
+            'colors' => $colors,
         ];
+
         return response()->json($response);
     }
 
