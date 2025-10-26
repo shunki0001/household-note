@@ -48,9 +48,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/api/expenses/latest-json', [ExpenseController::class, 'latestJson'])->name('expenses.latestJson');
     Route::get('/api/dashboard/total-expense', [DashboardController::class, 'getTotalExpense'])->name('dashboard.totalExpense');
-    Route::get('/api/chart-data', [ChartController::class, 'getMonthlyTotals']);
-    Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryTotals']);
-    Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryTotals']);
+    Route::get('/api/chart-data', [ChartController::class, 'getMonthlyExpenseTotals']);
+    Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryExpenseTotals']);
+    Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryExpenseTotals']);
     Route::get('/api/chart-data/monthly-expenses', [ExpenseController::class, 'getMonthlyExpenses']);
 
     // ページ移動

@@ -123,7 +123,7 @@ class ChartController extends Controller
     /**
      * 月別支出合計グラフ
      */
-    public function getMonthlyTotals(Request $request)
+    public function getMonthlyExpenseTotals(Request $request)
     {
         $year = $request->query('year', Carbon::now()->year);
         $userId = Auth::id();
@@ -155,7 +155,7 @@ class ChartController extends Controller
     /**
      * カテゴリー別の月次支出合計グラフ
      */
-    public function getCategoryTotals(Request $request) {
+    public function getCategoryExpenseTotals(Request $request) {
 
         [$year, $month, $userId] = $this->getQueryParams($request);
 
@@ -175,7 +175,7 @@ class ChartController extends Controller
     /**
      * ドーナツグラフ用カテゴリー別支出データ
      */
-    public function doughnutGetCategoryTotals() {
+    public function doughnutGetCategoryExpenseTotals() {
         $now = Carbon::now(); // 現在日時
         $userId = Auth::id(); // ログインユーザーID
 
