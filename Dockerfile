@@ -28,6 +28,13 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 # ===============================
 RUN composer install --no-dev --optimize-autoloader
 
+# APP_KEYの自動生成とキャッシュクリア
+RUN php artisan key:generate --force
+RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+
+RUN php artisan migrate --force
+
 # Laravelキャッシュを生成
 RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
