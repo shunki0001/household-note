@@ -14,9 +14,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-RUN chmod -R 775 storage bootstrap/cache
+# Laravel関連ディレクトリに正しい権限を付与
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 依存関係インストール
 RUN composer install --no-dev --optimize-autoloader
 
 # DocumentRootをpublicに変更
@@ -25,6 +26,6 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 
 EXPOSE 8080
 
-# CMDで起動。key:generate は不要
-CMD ["bash", "-c", "php artisan config:clear && php artisan migrate --force && apache2-foreground"]
+# キャッシュクリア後に起動
+CMD ["bash", "-c", "php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force && apache2-foreground"]
 
