@@ -11,6 +11,7 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return Inertia::render('TopPage', [
@@ -19,6 +20,11 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::get('/run-seeder', function () {
+    Artisan::call('db:seed', ['--force' => true]);
+    return 'Seeder executed successfully.';
 });
 
 // Route::get('/dashboard', function () {
