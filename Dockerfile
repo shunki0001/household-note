@@ -1,31 +1,35 @@
-# ベースイメージとしてPHPとApacheを使用
+# ベースイメージとしてPHPとApacheを使用# ベースイメージ
 FROM php:8.2-apache
 
-# 作業ディレクトリ
-WORKDIR /var/www/html
+# システム依存パッケージ + PostgreSQL拡張をインストール
+RUN apt-get update && apt-get install -y libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql
 
-# システムパッケージインストール
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    && docker-php-ext-install pdo_mysql zip mbstring
+# Apacheのmod_rewriteを有効化
+RUN a2enmod rewrite
 
-# Composerインストール
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Composerをインストール
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# プロジェクトファイルをコピー
-COPY . .
+# Laravelアプリをコピー
+COPY . /var/www/html
 
-# Laravelの依存関係をインストール
+# 権限設定
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Composerで依存関係インストール
 RUN composer install --no-dev --optimize-autoloader
 
-# パーミッション調整（storageとbootstrap/cache）
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Laravelキャッシュを生成
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
-# ApacheのドキュメントルートをLaravelのpublicに設定
+# DocumentRootをpublicに変更
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN a2enmod rewrite
+
+# ポート公開
+EXPOSE 8080
+
+# サーバー起動
+CMD ["apache2-foreground"]
 
