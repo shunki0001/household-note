@@ -26,17 +26,8 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 # ===============================
 # 2️⃣ Composer install（依存関係）
 # ===============================
+WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
-
-# APP_KEYの自動生成とキャッシュクリア
-RUN php artisan key:generate --force
-RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
-
-RUN php artisan migrate --force
-
-# Laravelキャッシュを生成
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 # ===============================
 # 3️⃣ DocumentRootをpublicに変更
@@ -44,11 +35,11 @@ RUN php artisan config:cache && php artisan route:cache && php artisan view:cach
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
-# ポート公開
+# ===============================
+# 4️⃣ 起動設定
+# ===============================
 EXPOSE 8080
 
-# ===============================
-# 4️⃣ Apache起動
-# ===============================
-CMD ["apache2-foreground"]
+# ※ key:generate や migrate はビルド時ではなく実行時（Render起動後）に行う
+CMD ["bash", "-c", "php artisan config:clear && php artisan key:generate --force && php artisan migrate --force && apache2-foreground"]
 
