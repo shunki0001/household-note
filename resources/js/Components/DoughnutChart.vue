@@ -39,9 +39,15 @@ function createChartOptions() {
                     // 💡 context.dataset.data を参照（Chart.js公式推奨）
                     const data = context.dataset?.data || [];
                     const total = data.reduce((a, b) => a + b, 0) || 1; // 万が一0でもエラー防止
-                    if (!total || isNaN(total)) return '0%';
-                    const percentage = (value / total * 100).toFixed(1);
-                    return isNaN(percentage) ? '0%' : `${percentage}%`;
+                    if (!total || isNaN(total)) return ' ';
+
+                    const percentage = (value / total * 100);
+                    // 0%の場合は非表示にする
+                    if(percentage === 0) return '';
+
+                    // 小数1桁で表示
+                    const formatted = percentage.toFixed(1);
+                    return `${formatted}%`;
                 }
             },
             legend: {
