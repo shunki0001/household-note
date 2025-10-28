@@ -129,7 +129,7 @@ defineExpose({ reloadTransactions });
                                     :href="transaction.type === 'income'
                                         ? route('incomes.edit', { id: transaction.id, back: 'dashboard' })
                                         : route('expenses.edit', { id: transaction.id, back: 'dashboard'})"
-                                    class="inline-block px-3 py-1 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
+                                    class="inline-flex items-center justify-center px-3 py-1 text-white bg-green-400 rounded hover:bg-green-500 text-sm"
                                 >
                                     編集
                                 </Link>
