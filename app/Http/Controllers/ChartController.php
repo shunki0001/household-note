@@ -49,8 +49,20 @@ class ChartController extends Controller
         \Log::info('fetchMonthlyData called', ['table' => $table, 'dateColumn' => $dateColumn, 'userId' => $userId, 'year' => $year]);
 
         try {
+            // データベースドライバーを取得
+            $driverName = DB::connection()->getDriverName();
+
+            // PostgreSQLとMySQL/SQLiteで異なるSQLを使用
+            if ($driverName === 'pgsql') {
+                // PostgreSQL用
+                $monthColumn = "EXTRACT(MONTH FROM {$dateColumn})";
+            } else {
+                // MySQL, SQLite用
+                $monthColumn = "MONTH({$dateColumn})";
+            }
+
             $records = DB::table($table)
-                ->selectRaw("MONTH({$dateColumn}) as month, SUM(amount) as total")
+                ->selectRaw("{$monthColumn} as month, SUM(amount) as total")
                 ->where('user_id', $userId)
                 ->whereYear($dateColumn, $year)
                 ->groupBy('month')
