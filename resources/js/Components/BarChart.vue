@@ -42,6 +42,8 @@ const fetchData = async () => {
         const response = await fetch(`${props.apiUrl}?year=${props.year}`)
         const json = await response.json()
 
+        console.log('月別グラフデータ:' , json);
+
         // 四半期のみ抽出
         const labels = isMobile.value
             ? json.labels.slice(props.startMonth -1, props.endMonth)

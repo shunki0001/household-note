@@ -125,15 +125,24 @@ class ChartController extends Controller
      */
     public function getMonthlyExpenseTotals(Request $request)
     {
-        $year = $request->query('year', Carbon::now()->year);
-        $userId = Auth::id();
+        try {
+            $year = (int) $request->query('year', Carbon::now()->year);
+            $userId = Auth::id();
 
-        $totals = $this->fetchMonthlyData(self::TABLE_EXPENSES, self::COLUMN_DATE, $userId, $year);
+            if (!$userId) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
 
-        return $this->jsonResponse([
-            'labels' => $this->generateMonthLabels(),
-            'totals' => $totals,
-        ]);
+            $totals = $this->fetchMonthlyData(self::TABLE_EXPENSES, self::COLUMN_DATE, $userId, $year);
+
+            return $this->jsonResponse([
+                'labels' => $this->generateMonthLabels(),
+                'totals' => $totals,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('getMonthlyExpenseTotals error: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal server error'], 500);
+        }
     }
 
     /**
@@ -144,7 +153,7 @@ class ChartController extends Controller
         $year = (int) $request->query('year', Carbon::now()->year);
         $userId = Auth::id();
 
-        $totals = $this->fetchMonthlyData(self::TABLE_INCOMES, self::COLUMN_DATE, $userId, $year);
+        $totals = $this->fetchMonthlyData(self::TABLE_INCOMES, self::COLUMN_INCOME_DATE, $userId, $year);
 
         return $this->jsonResponse([
             'labels' => $this->generateMonthLabels(),

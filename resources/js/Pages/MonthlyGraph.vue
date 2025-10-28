@@ -135,10 +135,10 @@ watch(isMobile, (newVal) => {
         <!-- グラフ -->
         <div class="w-full">
             <BarChart
-            :key="isMobile + '-' + currentYear + '-' + currentQuarter"
+            :key="`${isMobile}-${currentYear}-${isMobile ? currentQuarter : 'year'}`"
             :year="currentYear"
-            :startMonth="currentRange.start"
-            :endMonth="currentRange.end"
+            :startMonth="chartRange.startMonth"
+            :endMonth="chartRange.endMonth"
             label="月別支出合計"
             apiUrl="/api/chart-data"
             />
