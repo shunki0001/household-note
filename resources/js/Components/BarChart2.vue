@@ -37,7 +37,7 @@ const renderChart = (labels, datasets, icons) => {
         afterDraw: chart => {
             const { ctx, chartArea, scales } = chart
             const xAxis = scales.x
-            const yButton = chartArea.bottom + 1
+            const yButton = chartArea.bottom + 5
 
             // 画面幅に応じてアイコンサイズを変更
             const isMobile = window.innerWidth < 640 // Tailwindのsmサイズ基準
@@ -48,7 +48,11 @@ const renderChart = (labels, datasets, icons) => {
                 const img = new Image()
                 img.src = icons[index]
                 img.onload = () => {
-                    ctx.drawImage(img, x - 7, yButton, iconSize, iconSize)
+                    if(isMobile) {
+                        ctx.drawImage(img, x - 7, yButton, iconSize, iconSize)
+                    } else {
+                        ctx.drawImage(img, x - 11, yButton, iconSize, iconSize)
+                    }
                 }
             })
         }
