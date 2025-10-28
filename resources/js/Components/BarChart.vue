@@ -40,9 +40,27 @@ window.addEventListener('resize', () => {
 const fetchData = async () => {
     try {
         const response = await fetch(`${props.apiUrl}?year=${props.year}`)
+
+        if (!response.ok) {
+            console.error('HTTP error:', response.status, response.statusText);
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
         const json = await response.json()
 
-        console.log('月別グラフデータ:' , json);
+        console.log('月別グラフデータ:', json);
+
+        // エラーがある場合は処理を停止
+        if (json.error) {
+            console.error('API error:', json.error, json.message);
+            throw new Error(json.message || json.error);
+        }
+
+        // labels と totals が存在するか確認
+        if (!json.labels || !json.totals) {
+            console.error('Missing required data:', json);
+            throw new Error('Missing labels or totals in response');
+        }
 
         // 四半期のみ抽出
         const labels = isMobile.value

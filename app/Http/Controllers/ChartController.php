@@ -46,21 +46,34 @@ class ChartController extends Controller
     // (テーブル名, 日付カラム名, ユーザーID, 年度)
     private function fetchMonthlyData(string $table, string $dateColumn, int $userId, int $year): array
     {
-        $records = DB::table($table)
-            ->selectRaw("MONTH({$dateColumn}) as month, SUM(amount) as total")
-            ->where('user_id', $userId)
-            ->whereYear($dateColumn, $year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        \Log::info('fetchMonthlyData called', ['table' => $table, 'dateColumn' => $dateColumn, 'userId' => $userId, 'year' => $year]);
 
-        $monthlyData = array_fill(1, self::MONTHS_IN_YEAR, 0);
+        try {
+            $records = DB::table($table)
+                ->selectRaw("MONTH({$dateColumn}) as month, SUM(amount) as total")
+                ->where('user_id', $userId)
+                ->whereYear($dateColumn, $year)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
 
-        foreach($records as $record) {
-            $monthlyData[$record->month] = (int) $record->total;
+            \Log::info('fetchMonthlyData records', ['count' => $records->count()]);
+
+            $monthlyData = array_fill(1, self::MONTHS_IN_YEAR, 0);
+
+            foreach($records as $record) {
+                $monthlyData[$record->month] = (int) $record->total;
+            }
+
+            \Log::info('fetchMonthlyData completed successfully');
+            return array_values($monthlyData);
+        } catch (\Exception $e) {
+            \Log::error('fetchMonthlyData error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
-
-        return array_values($monthlyData);
     }
 
     /**
@@ -129,7 +142,10 @@ class ChartController extends Controller
             $year = (int) $request->query('year', Carbon::now()->year);
             $userId = Auth::id();
 
+            \Log::info('getMonthlyExpenseTotals called', ['year' => $year, 'userId' => $userId]);
+
             if (!$userId) {
+                \Log::warning('getMonthlyExpenseTotals: No user ID');
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
@@ -140,8 +156,14 @@ class ChartController extends Controller
                 'totals' => $totals,
             ]);
         } catch (\Exception $e) {
-            \Log::error('getMonthlyExpenseTotals error: ' . $e->getMessage());
-            return response()->json(['error' => 'Internal server error'], 500);
+            \Log::error('getMonthlyExpenseTotals error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'error' => 'Internal server error',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
