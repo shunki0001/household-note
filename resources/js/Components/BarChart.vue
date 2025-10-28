@@ -32,12 +32,14 @@ const props = defineProps({
 const chartData = ref({ labels: [], datasets: [] })
 const chartOptions = ref({})
 const isMobile = ref(window.innerWidth < 768)
+const errorMessage = ref('')
 
 window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth < 768
 })
 
 const fetchData = async () => {
+    errorMessage.value = '' // エラーメッセージをリセット
     try {
         const response = await fetch(`${props.apiUrl}?year=${props.year}`)
 
@@ -117,6 +119,9 @@ const fetchData = async () => {
         }
     } catch (err) {
         console.error('データ取得エラー:', err)
+        errorMessage.value = err.message || 'データの取得に失敗しました'
+        // エラー時は空のデータを設定
+        chartData.value = { labels: [], datasets: [] }
     }
 }
 
@@ -129,7 +134,12 @@ watch(() => [props.year, props.startMonth, props.endMonth],
 
 <template>
     <div style="height: 400px;">
+        <div v-if="errorMessage" class="text-red-600 text-center p-4">
+            <p class="font-bold">エラーが発生しました</p>
+            <p class="text-sm">{{ errorMessage }}</p>
+        </div>
         <Bar
+            v-else
             :data="chartData"
             :options="{...chartOptions, responsive: true, maintainAspectRatio: false}"
             height="400"

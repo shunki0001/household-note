@@ -68,6 +68,10 @@ class ChartController extends Controller
             \Log::info('fetchMonthlyData completed successfully');
             return array_values($monthlyData);
         } catch (\Exception $e) {
+            // Render用にstdoutに出力
+            error_log('fetchMonthlyData error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+
             \Log::error('fetchMonthlyData error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -156,13 +160,20 @@ class ChartController extends Controller
                 'totals' => $totals,
             ]);
         } catch (\Exception $e) {
+            // Render用にstdoutに出力
+            error_log('getMonthlyExpenseTotals error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+
             \Log::error('getMonthlyExpenseTotals error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+
             return response()->json([
                 'error' => 'Internal server error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
