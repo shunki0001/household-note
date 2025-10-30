@@ -40,28 +40,6 @@ class ProfileController extends Controller
 
         return Redirect::route('profile.edit');
 
-        // $user = $request->user();
-
-        // // バリデーション済みデータを取得
-        // $data = $request->validated();
-
-        // // パスワードが入力されている場合のみ更新処理
-        // if (!empty($data['password'])) {
-        //     $data['password'] = bcrypt($data['password']);
-        // } else {
-        //     // 空ならパスワードを除外(現状維持)
-        //     unset($data['password']);
-        // }
-
-        // $user->fill($data);
-
-        // if ($user->isDirty('email')) {
-        //     $user->email_verified_at = null;
-        // }
-
-        // $user->save();
-
-        // return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -69,13 +47,6 @@ class ProfileController extends Controller
      * */
     public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {
-        // $request->validate([
-        //     'password' => ['required', 'current_password'],
-        // ]);
-
-        // バリデーション処理をRequestsに分離
-        // $validated = $request->validate();
-
         $user = $request->user();
 
         Auth::logout();

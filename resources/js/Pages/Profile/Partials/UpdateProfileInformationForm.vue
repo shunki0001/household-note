@@ -28,51 +28,10 @@ const customErrors = reactive({
     email: ''
 });
 
-// バリデーション関数
-// const validateForm = () => {
-//     let isValid = true;
-
-//     // エラーメッセージをリセット
-//     customErrors.name = '';
-//     customErrors.email = '';
-
-//     // 名前のバリデーション
-//     if (!form.name || form.name.toString().trim() === '') {
-//         customErrors.name = '名前を入力して下さい';
-//         isValid = false;
-//     }
-
-//     // メールアドレスのバリデーション
-//     if (!form.email || form.email.toString().trim() === '') {
-//         customErrors.email = 'メールアドレスを入力して下さい';
-//         isValid = false;
-//     } else {
-//         // メールアドレスの形式チェック
-//         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//         if (!emailRegex.test(form.email)) {
-//             customErrors.email = '正しいメールアドレスの形式で入力して下さい';
-//             isValid = false;
-//         }
-//     }
-
-//     return isValid;
-// };
-
 const updateProfile = () => {
-    // カスタムバリデーションを実行
-    // if (!validateForm()) {
-    //     return; // バリデーションエラーがある場合は送信を中止
-    // }
 
     form.patch(route('profile.update'), {
         onError: (errors) => {
-            // サーバーからのエラーをカスタムエラーに設定
-            // if (errors.name) {
-            //     customErrors.name = errors.name;
-            // }
-            // if (errors.email) {
-            //     customErrors.email = errors.email;
-            // }
             console.log(errors);
         },
     });

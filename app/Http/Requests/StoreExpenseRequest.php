@@ -32,15 +32,7 @@ class StoreExpenseRequest extends FormRequest
     public function messages(): array
     {
         return [
-        //     'amount.required' => '金額は必須です',
-        //     'amount.numeric' => '金額は数値で入力してください',
-        //     'amount.min' => '金額は0以上の値を入力してください',
-        //     'date.required' => '日付は必須です',
-        //     'date.date' => '日付はYYYY-MM-DDの形式で入力してください',
-        //     'title.required' => '費用名は必須です',
-        //     'title.max' => '費用名は255文字以内で入力してください',
-        //     'category_id.required' => 'カテゴリーは必須です',
-        //     'category_id.exists' => 'カテゴリーが存在しません',
+
         ];
     }
 }

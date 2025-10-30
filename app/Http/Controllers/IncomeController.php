@@ -12,7 +12,7 @@ use App\Http\Requests\StoreIncomeRequest;
 
 class IncomeController extends Controller
 {
-    // 収入のみ一覧表示(デバック用)
+    // 収入のみ一覧表示
     public function index()
     {
 
@@ -21,15 +21,7 @@ class IncomeController extends Controller
     // 登録処理(ログインユーザーに紐付けて保存)
     public function store(StoreIncomeRequest $request)
     {
-        // $validated = $request->validate([
-        //     'amount' => 'required|numeric',
-        //     'income_date' => 'required|date',
-        //     'income_category_id' => 'required',
-        // ]);
-
         $validated = $request->validated();
-
-        // $request->user()->incomes()->create($validated);
 
         // ログインユーザーに紐づけて保存
         Income::create([

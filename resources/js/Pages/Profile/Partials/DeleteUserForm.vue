@@ -63,11 +63,6 @@ const closeModal = () => {
                     本当にアカウントを削除してもよろしいですか？
                 </h2>
 
-                <!-- <p class="mt-1 text-sm text-gray-600">
-                    Once your account is deleted, all of its resources and data
-                    will be permanently deleted. Please enter your password to
-                    confirm you would like to permanently delete your account.
-                </p> -->
                 <p class="mt-1 text-sm text-gray-600">
                     アカウントが削除されると、データは全て削除されます。<br>
                     削除されたアカウントは元に戻せません。<br>

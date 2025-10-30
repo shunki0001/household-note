@@ -31,13 +31,7 @@ class StoreIncomeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            // 'amount.required' => '金額は必須です',
-            // 'amount.numeric' => '金額は数値で入力してください',
-            // 'amount.min' => '金額は0以上の値を入力してください',
-            // 'income_date.required' => '日付は必須です',
-            // 'income_date.date' => '日付はYYYY-MM-DDの形式で入力してください',
-            // 'income_category_id.required' => 'カテゴリーは必須です',
-            // 'income_category_id.exists' => 'カテゴリーが存在しません',
+
         ];
     }
 }
