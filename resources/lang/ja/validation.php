@@ -111,9 +111,9 @@ return [
     'not_regex'              => ':attributeの形式が正しくありません。',
     'numeric'                => ':attributeには、数値を指定してください。',
     'password'               => [
-        'letters'       => ':attributeは文字を1文字以上含める必要があります。',
+        'letters'       => ':attributeは英数字を含む8文字以上で入力して下さい。',
         'mixed'         => ':attributeは大文字と小文字をそれぞれ1文字以上含める必要があります。',
-        'numbers'       => ':attributeは数字を1文字以上含める必要があります。',
+        'numbers'       => ':attributeは英数字を含む8文字以上で入力して下さい。',
         'symbols'       => ':attributeは記号を1文字以上含める必要があります。',
         'uncompromised' => ':attributeは情報漏洩した可能性があります。他の:attributeを選択してください。',
     ],
@@ -129,7 +129,7 @@ return [
     'prohibited_unless'      => ':otherが:valuesでない限り、:attributeの入力は禁止されています。',
     'prohibits'              => ':otherが存在している場合、:attributeの入力は禁止されています。',
     'regex'                  => ':attributeには、正しい形式を指定してください。',
-    'required'               => ':attributeは必須項目です。',
+    'required'               => ':attributeを入力して下さい。(バックエンドから出力)',
     'required_array_keys'    => ':attributeには、:valuesのエントリを含める必要があります。',
     'required_if'            => ':otherが:valueの場合、:attributeを指定してください。',
     'required_if_accepted'   => ':otherを承認した場合、:attributeは必須項目です。',
@@ -284,7 +284,7 @@ return [
     ],
     'custom' => [
         'password' => [
-            'regex' => 'パスワードは英字と数字を含めて入力して下さい。',
+            'regex' => 'パスワードは英字と数字を含た8文字以上で入力して下さい。',
             'required' => 'パスワードを入力して下さい。(バックエンドから出力)'
         ],
         'email' => [

@@ -101,7 +101,7 @@ const updatePassword = () => {
             </h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                パスワードは８文字以上で設定して下さい
+                パスワードは英数字含む8文字以上で設定して下さい
             </p>
         </header>
 
