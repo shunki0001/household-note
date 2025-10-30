@@ -23,43 +23,43 @@ export function useExpenseFrom(props, emit) {
     });
 
     // バリデーション関数
-    const validateForm = () => {
-        let isValid = true;
+    // const validateForm = () => {
+    //     let isValid = true;
 
-        // エラーメッセージをリセット
-        Object.keys(errors).forEach(key => {
-            errors[key] = '';
-        });
+    //     // エラーメッセージをリセット
+    //     Object.keys(errors).forEach(key => {
+    //         errors[key] = '';
+    //     });
 
-        // 金額のバリデーション
-        if (!form.amount || form.amount.toString().trim() === '') {
-            errors.amount = '金額を入力して下さい';
-            isValid = false;
-        } else if (parseFloat(form.amount) < 0) {
-            errors.amount = '金額は0以上の値を入力して下さい';
-            isValid = false;
-        }
+    //     // 金額のバリデーション
+    //     if (!form.amount || form.amount.toString().trim() === '') {
+    //         errors.amount = '金額を入力して下さい(Vue)';
+    //         isValid = false;
+    //     } else if (parseFloat(form.amount) < 0) {
+    //         errors.amount = '金額は0以上の値を入力して下さい(Vue)';
+    //         isValid = false;
+    //     }
 
-        // 日付のバリデーション
-        if (!form.date || form.date.toString().trim() === '') {
-            errors.date = '日付を入力して下さい';
-            isValid = false;
-        }
+    //     // 日付のバリデーション
+    //     if (!form.date || form.date.toString().trim() === '') {
+    //         errors.date = '日付を入力して下さい(Vue)';
+    //         isValid = false;
+    //     }
 
-        // 費用名のバリデーション
-        if (!form.title || form.title.toString().trim() === '') {
-            errors.title = '費用名を入力して下さい';
-            isValid = false;
-        }
+    //     // 費用名のバリデーション
+    //     if (!form.title || form.title.toString().trim() === '') {
+    //         errors.title = '費用名を入力して下さい(Vue)';
+    //         isValid = false;
+    //     }
 
-        // カテゴリーのバリデーション
-        if (!form.category_id || form.category_id.toString().trim() === '') {
-            errors.category_id = 'カテゴリーを選択して下さい';
-            isValid = false;
-        }
+    //     // カテゴリーのバリデーション
+    //     if (!form.category_id || form.category_id.toString().trim() === '') {
+    //         errors.category_id = 'カテゴリーを選択して下さい(Vue)';
+    //         isValid = false;
+    //     }
 
-        return isValid;
-    };
+    //     return isValid;
+    // };
 
     watch(() => props.expanse, (newExpense) => {
         form.amount = newExpense.amount ?? '';
@@ -70,9 +70,12 @@ export function useExpenseFrom(props, emit) {
 
     const submit = async () => {
         // バリデーションを実行
-        if (!validateForm()) {
-            return; // バリデーションエラーがある場合は送信を中止
-        }
+        // if (!validateForm()) {
+        //     return; // バリデーションエラーがある場合は送信を中止
+        // }
+
+        // 送信前にエラーリセット
+        Object.keys(errors).forEach(key => (errors[key] = ''));
 
         try {
             console.log('useExpenseForm submit started'); // デバッグログ
@@ -100,35 +103,57 @@ export function useExpenseFrom(props, emit) {
                 }
             });
 
-            // 新規登録時（POST）のみイベントを発火
-            if (props.method === 'post') {
-                console.log('Emitting expense-added event'); // デバッグログ
-                emit('submitted');
-                // emit('expense-added');
-                console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
-            }
+            // // 新規登録時（POST）のみイベントを発火
+            // if (props.method === 'post') {
+            //     console.log('Emitting expense-added event'); // デバッグログ
+            //     emit('submitted');
+            //     // emit('expense-added');
+            //     console.log('useExpenseForm: expense-added event emitted'); // デバッグログ
+            // }
 
-            // 新規登録時（POST）のみフォームをリセット
-            if (props.method === 'post') {
-                console.log('Resetting form'); // デバッグログ
-                form.amount='';
-                form.date='';
-                form.title='';
-                form.category_id='';
-                console.log('Form reset completed'); // デバッグログ
-            }
+            // // 新規登録時（POST）のみフォームをリセット
+            // if (props.method === 'post') {
+            //     console.log('Resetting form'); // デバッグログ
+            //     form.amount='';
+            //     form.date='';
+            //     form.title='';
+            //     form.category_id='';
+            //     console.log('Form reset completed'); // デバッグログ
+            // }
         }   catch(error) {
             console.error('Submit error:', error); // デバッグログ
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: '登録失敗しました',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            });
-            console.error('登録失敗', error);
+
+            // Laravelの422バリデーションエラー対応
+            if (error.response && error.response.status == 422) {
+                const validationErrors = error.response.data.errors;
+                for (const key in validationErrors) {
+                    if (errors.hasOwnProperty(key)) {
+                        errors[key] = validationErrors[key][0];
+                    }
+                }
+            } else {
+                // 通信エラー・サバーエラー時
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: '登録失敗しました',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+                console.error('登録失敗', error);
+            }
+            // Swal.fire({
+            //     toast: true,
+            //     position: 'top-end',
+            //     icon: 'error',
+            //     title: '登録失敗しました',
+            //     showConfirmButton: false,
+            //     timer: 2000,
+            //     timerProgressBar: true,
+            // });
+            // console.error('登録失敗', error);
         }
     };
 

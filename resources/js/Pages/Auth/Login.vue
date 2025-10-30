@@ -29,55 +29,12 @@ const customErrors = reactive({
     password: ''
 });
 
-// バリデーション関数
-const validateForm = () => {
-    let isValid = true;
-
-    // エラーメッセージをリセット
-    customErrors.email = '';
-    customErrors.password = '';
-
-    // メールアドレスのバリデーション
-    if (!form.email || form.email.toString().trim() === '') {
-        customErrors.email = 'メールアドレスを入力して下さい';
-        isValid = false;
-    } else {
-        // メールアドレスの形式チェック
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.email)) {
-            customErrors.email = 'メールアドレスまたはパスワードが間違っています';
-            isValid = false;
-        }
-    }
-
-    // パスワードのバリデーション
-    if (!form.password || form.password.toString().trim() === '') {
-        customErrors.password = 'パスワードを入力して下さい';
-        isValid = false;
-    } else if (form.password.length < 8) {
-        customErrors.password = 'メールアドレスまたはパスワードが間違っています';
-        isValid = false;
-    }
-
-    return isValid;
-};
 
 const submit = () => {
-    // カスタムバリデーションを実行
-    if (!validateForm()) {
-        return; // バリデーションエラーがある場合は送信を中止
-    }
-
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
         onError: (errors) => {
-            // サーバーからのエラーをカスタムエラーに設定
-            if (errors.email) {
-                customErrors.email = errors.email;
-            }
-            if (errors.password) {
-                customErrors.password = errors.password;
-            }
+            console.log(errors);
         },
     });
 };
