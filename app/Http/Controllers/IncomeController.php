@@ -8,6 +8,7 @@ use App\Models\Income;
 use App\Models\IncomeCategory;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use App\Http\Requests\StoreIncomeRequest;
 
 class IncomeController extends Controller
 {
@@ -18,15 +19,23 @@ class IncomeController extends Controller
     }
 
     // 登録処理(ログインユーザーに紐付けて保存)
-    public function store(Request $request)
+    public function store(StoreIncomeRequest $request)
     {
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'income_date' => 'required|date',
-            'income_category_id' => 'required',
-        ]);
+        // $validated = $request->validate([
+        //     'amount' => 'required|numeric',
+        //     'income_date' => 'required|date',
+        //     'income_category_id' => 'required',
+        // ]);
 
-        $request->user()->incomes()->create($validated);
+        $validated = $request->validated();
+
+        // $request->user()->incomes()->create($validated);
+
+        // ログインユーザーに紐づけて保存
+        Income::create([
+            ...$validated,
+            'user_id' => $request->user()->id,
+        ]);
 
         return response()->json([
             'message' => '登録しました',
