@@ -7,8 +7,8 @@
             v-if="link.url"
             :href="link.url"
             preserve-scroll
-            class="w-10 h-10 flex items-center justify-center rounded-md border border-gray-400 text-gray-700 bg-white transition"
-            :class="{ 'bg-indigo-500 hover:bg-indigo-600 text-white': link.active }"
+            class="w-10 h-10 flex items-center justify-center rounded-md border border-gray-400 text-gray-700 transition hover:bg-blue-500"
+            :class="{ 'bg-blue-300 hover:bg-blue-500 text-black': link.active }"
             >
             <span v-if="link.label === 'pagination.previous'">◀︎</span>
             <span v-else-if="link.label === 'pagination.next'">▶︎</span>
