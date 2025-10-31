@@ -182,14 +182,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="アカウントトップページ" />
+    <Head title="マイページ" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
             >
-                Topページ
+                マイページ
             </h2>
         </template>
         <Toast/>

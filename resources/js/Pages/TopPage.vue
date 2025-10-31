@@ -47,7 +47,7 @@ import { Head } from '@inertiajs/vue3';
             <ul class="space-y-4 sm:space-y-6 text-base sm:text-xl md:text-2xl text-gray-700">
                 <li>支出・収入の管理がかんたん</li>
                 <li>グラフで支出の傾向がすぐわかる</li>
-                <li>セキュリティ重視</li>
+                <!-- <li>セキュリティ重視</li> -->
             </ul>
         </section>
 
@@ -57,7 +57,7 @@ import { Head } from '@inertiajs/vue3';
                 <div>
                     <p class="mb-4">今月の収支が一目でわかる！</p>
                     <img
-                        src="/images/demo05.jpg"
+                        src="/images/demo01.png"
                         alt="デモ画像1"
                         class="rounded-xl shadow-lg object-cover w-full"
                     />
@@ -66,7 +66,7 @@ import { Head } from '@inertiajs/vue3';
                 <div>
                     <p class="mb-4">グラフで分析も!</p>
                     <img
-                        src="/images/demo06.jpg"
+                        src="/images/demo02.png"
                         alt="デモ画像2"
                         class="rounded-xl shadow-lg object-cover w-full"
                     />
@@ -78,4 +78,3 @@ import { Head } from '@inertiajs/vue3';
 
 </GuestWideLayout>
 </template>
-
