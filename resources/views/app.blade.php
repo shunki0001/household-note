@@ -14,6 +14,7 @@
             href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"
             rel="stylesheet"
         />
+        <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
 
         <!-- Scripts -->
