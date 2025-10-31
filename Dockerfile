@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nodejs \
     npm \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-install pdo pdo_pgsql bcmath
 
 # Apache設定
 RUN a2enmod rewrite
@@ -47,4 +47,3 @@ EXPOSE 8080
 # 5.起動時コマンド
 # ===============================
 CMD ["bash", "-c", "php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force && apache2-foreground"]
-
