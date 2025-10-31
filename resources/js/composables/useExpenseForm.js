@@ -57,6 +57,14 @@ export function useExpenseFrom(props, emit) {
                     window.location.href = window.location.origin + '/' + form.back;
                 } else if (props.method === 'put') {
                     window.location.href = '/dashboard';
+                } else if (props.method === 'post') {
+                    // 新規登録時はフォームをリセット
+                    form.amount = '';
+                    form.date = '';
+                    form.title = '';
+                    form.category_id = '';
+                    // 親コンポーネントに登録完了を通知
+                    emit('submitted');
                 }
             });
         }   catch(error) {
