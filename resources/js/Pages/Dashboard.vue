@@ -58,7 +58,8 @@ const formattedBalance = computed(() => {
     return currentBalance.value.toLocaleString();
 });
 
-const currentPage = ref(props.expenses.current_page || 1)
+// const currentPage = ref(props.expenses.current_page || 1)
+const currentPage = ref(props.transactions || 1)
 const refreshKey = ref(0) // グラフ用のみに使用
 const transactionListRef = ref(null)
 const transactions = ref([])

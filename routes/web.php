@@ -12,6 +12,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Artisan;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::get('/', function () {
     return Inertia::render('TopPage', [
@@ -71,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/incomes/{income}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
     // Route::get('/incomes/{id}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
     Route::delete('/incomes/{income}', [IncomeController::class, 'destroy'])->name('incomes.destroy'); // 削除
-    Route::get('/api/incomes/total-monthly-incomes', [IncomeController::class, 'getTotalMonthlyIncomes'])->name('dashboard.totalIncome'); // 合計
+    Route::get('/api/incomes/total-monthly-incomes', [DashboardController::class, 'getTotalMonthlyIncomes'])->name('dashboard.totalIncome'); // 合計
     Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson'])->name('transaction.latestJson'); // 支出+支出一覧(5件)
     Route::get('/api/report-data/monthly-transactions', [ReportController::class, 'getMonthlyTransactions']); // 支出+支出一覧(月別)
 

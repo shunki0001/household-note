@@ -85,18 +85,18 @@ class IncomeController extends Controller
     // }
 
     // 今月の合計を算出
-    public function getTotalMonthlyIncomes()
-    {
-        $now = Carbon::now();
-        $userId = Auth::id();
+    // public function getTotalMonthlyIncomes()
+    // {
+    //     $now = Carbon::now();
+    //     $userId = Auth::id();
 
-        $totalIncome = Income::whereYear('income_date', $now->year)
-            ->where('user_id', $userId)
-            ->whereMonth('income_date', $now->month)
-            ->sum('amount');
+    //     $totalIncome = Income::whereYear('income_date', $now->year)
+    //         ->where('user_id', $userId)
+    //         ->whereMonth('income_date', $now->month)
+    //         ->sum('amount');
 
-        return response()->json([
-            'totalIncome' => $totalIncome,
-        ]);
-    }
+    //     return response()->json([
+    //         'totalIncome' => $totalIncome,
+    //     ]);
+    // }
 }
