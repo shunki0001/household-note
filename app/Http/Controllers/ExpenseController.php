@@ -22,26 +22,18 @@ class ExpenseController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        return response()->json([
-            'message' => '登録しました',
-        ]);
+        return $this->jsonResponse('登録しました');
     }
 
     // 更新処理
     public function update(StoreExpenseRequest $request, Expense $expense)
     {
-        // ログインユーザーのデータのみ更新許可
-        if ($expense->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorizeExpenseOwner($expense);
 
         $validated = $request->validated();
-
         $expense->update($validated);
 
-        return response()->json([
-            'message' => '更新しました',
-        ]);
+        return $this->jsonResponse('更新しました');
     }
 
     // 削除処理
@@ -50,7 +42,7 @@ class ExpenseController extends Controller
         $this->authorizeExpenseOwner($expense);
 
         $expense->delete();
-        return response()->json(['message' => '削除しました']);
+        return $this->jsonResponse('削除しました');
     }
 
     // 編集処理
@@ -58,7 +50,7 @@ class ExpenseController extends Controller
     {
         $this->authorizeExpenseOwner($expense);
 
-        $categories = Category::all();
+        $categories = Category::orderBy('sort_order')->get();
         $backRoute = $request->input('back', 'dashboard');
 
         return Inertia::render('Expenses/Edit', [
@@ -77,5 +69,13 @@ class ExpenseController extends Controller
         if(Auth::id() !== $expense->user_id) {
             abort(403, 'この操作は許可されていません。');
         }
+    }
+
+    /**
+     * JSONレスポンス共通化
+     */
+    private function jsonResponse(string $message, int $status = 200)
+    {
+        return response()->json(['message' => $message], $status, [], JSON_UNESCAPED_UNICODE);
     }
 }
