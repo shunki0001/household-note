@@ -78,9 +78,10 @@ class ExpenseController extends Controller
     public function destroy(Expense $expense)
     {
         // 自分のデータだけ削除可能にする
-        if (Auth::id() !== $expense->user_id) {
-            abort(403);
-        }
+        // if (Auth::id() !== $expense->user_id) {
+        //     abort(403);
+        // }
+        $this->authorizeExpenseOwner($expense);
 
         $expense->delete();
         return response()->json(['message' => '削除しました']);
@@ -89,9 +90,10 @@ class ExpenseController extends Controller
     // 編集処理
     public function edit(Expense $expense, Request $request)
     {
-        if (Auth::id() !== $expense->user_id) {
-            abort(403);
-        }
+        // if (Auth::id() !== $expense->user_id) {
+        //     abort(403);
+        // }
+        $this->authorizeExpenseOwner($expense);
 
         $categories = Category::all();
         $backRoute = $request->input('back', 'dashboard');
