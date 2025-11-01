@@ -45,9 +45,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
-    Route::delete('/expenses/{expense}', [DashboardController::class, 'destroy'])->name('expenses.destroy');
+    // Route::delete('/expenses/{expense}', [DashboardController::class, 'destroy'])->name('expenses.destroy');
+    Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
-    Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
+    // Route::get('/expenses/{expense}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
+    Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
     // Route::get('/expenses/{id}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     // Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');

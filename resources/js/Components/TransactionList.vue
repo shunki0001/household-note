@@ -200,8 +200,8 @@ defineExpose({ reloadTransactions });
         </div>
 
         <!-- ページネーション -->
-        <div class="mt-4">
+        <!-- <div class="mt-4">
             <Pagination :links="transactions.links" />
-        </div>
+        </div> -->
     </div>
 </template>

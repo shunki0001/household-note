@@ -103,38 +103,40 @@ class DashboardController extends Controller
 
     }
 
-    public function destroy(Expense $expense)
-    {
-        // 自分のデータだけ削除可能にする
-        if(Auth::id() !== $expense->user_id) {
-            abort(403);
-        }
+    // ExpenseControllerに移動
+    // public function destroy(Expense $expense)
+    // {
+    //     // 自分のデータだけ削除可能にする
+    //     if(Auth::id() !== $expense->user_id) {
+    //         abort(403);
+    //     }
 
-        $expense->delete();
-        // ページリダイレクトではなく、JSONを返す(Inertia用)
-        // return response()->json(['message' => '削除しました']);
-        return $this->jsonResponse([
-            'message' => '削除しました'
-        ]);
-    }
+    //     $expense->delete();
+    //     // ページリダイレクトではなく、JSONを返す(Inertia用)
+    //     // return response()->json(['message' => '削除しました']);
+    //     return $this->jsonResponse([
+    //         'message' => '削除しました'
+    //     ]);
+    // }
 
+    // ExpenseControllerに移動
     // 編集ページ表示
-    public function edit(Expense $expense, Request $request)
-    {
-        if(Auth::id() !== $expense->user_id) {
-            abort(403);
-        }
+    // public function edit(Expense $expense, Request $request)
+    // {
+    //     if(Auth::id() !== $expense->user_id) {
+    //         abort(403);
+    //     }
 
-        $categories = Category::all(); // 編集画面でカテゴリー一覧を渡す
-        $backRoute = $request->input('back', 'dashboard'); // デフォルト：dashboard
+    //     $categories = Category::all(); // 編集画面でカテゴリー一覧を渡す
+    //     $backRoute = $request->input('back', 'dashboard'); // デフォルト：dashboard
 
-        return Inertia::render('Expenses/Edit', [
-            'expense' => $expense,
-            'categories' => $categories,
-            'back' => $backRoute,
-            'submitUrl' => route('expenses.update', $expense->id),
-        ]);
-    }
+    //     return Inertia::render('Expenses/Edit', [
+    //         'expense' => $expense,
+    //         'categories' => $categories,
+    //         'back' => $backRoute,
+    //         'submitUrl' => route('expenses.update', $expense->id),
+    //     ]);
+    // }
 
     // 今月の合計支出を取得するAPI(リアルタイム更新用)
     public function getTotalExpense()
@@ -220,4 +222,13 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * アクセス制限
+     */
+    // private function authorizeExpenseOwner(Expense $expense): void
+    // {
+    //     if(Auth::id() !== $expense->user_id) {
+    //         abort(403, 'この操作は許可されていません。');
+    //     }
+    // }
 }

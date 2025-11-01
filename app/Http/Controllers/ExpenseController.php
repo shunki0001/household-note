@@ -73,4 +73,44 @@ class ExpenseController extends Controller
             'message' => '更新しました',
         ]);
     }
+
+    // 削除処理
+    public function destroy(Expense $expense)
+    {
+        // 自分のデータだけ削除可能にする
+        if (Auth::id() !== $expense->user_id) {
+            abort(403);
+        }
+
+        $expense->delete();
+        return response()->json(['message' => '削除しました']);
+    }
+
+    // 編集処理
+    public function edit(Expense $expense, Request $request)
+    {
+        if (Auth::id() !== $expense->user_id) {
+            abort(403);
+        }
+
+        $categories = Category::all();
+        $backRoute = $request->input('back', 'dashboard');
+
+        return Inertia::render('Expenses/Edit', [
+            'expense' => $expense,
+            'categories' => $categories,
+            'back' => $backRoute,
+            'submitUrl' => route('expenses.update', $expense->id),
+        ]);
+    }
+
+    /**
+     * アクセス制限
+     */
+    private function authorizeExpenseOwner(Expense $expense): void
+    {
+        if(Auth::id() !== $expense->user_id) {
+            abort(403, 'この操作は許可されていません。');
+        }
+    }
 }
