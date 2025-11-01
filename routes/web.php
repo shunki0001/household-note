@@ -53,14 +53,14 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/expenses/{id}/edit', [DashboardController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     // Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
-    Route::get('/expenses/monthly', [ExpenseController::class, 'getMonthlyExpenses']);
+    // Route::get('/expenses/monthly', [ExpenseController::class, 'getMonthlyExpenses']);
 
-    Route::get('/api/expenses/latest-json', [ExpenseController::class, 'latestJson'])->name('expenses.latestJson');
+    // Route::get('/api/expenses/latest-json', [ExpenseController::class, 'latestJson'])->name('expenses.latestJson');
     Route::get('/api/dashboard/total-expense', [DashboardController::class, 'getTotalExpense'])->name('dashboard.totalExpense');
     Route::get('/api/chart-data', [ChartController::class, 'getMonthlyExpenseTotals']);
     Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryExpenseTotals']);
     Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryExpenseTotals']);
-    Route::get('/api/chart-data/monthly-expenses', [ExpenseController::class, 'getMonthlyExpenses']);
+    // Route::get('/api/chart-data/monthly-expenses', [ExpenseController::class, 'getMonthlyExpenses']);
 
     // ページ移動
     Route::get('/list', [PageController::class, 'list'])->name('list');
