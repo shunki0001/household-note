@@ -70,12 +70,4 @@ class ExpenseController extends Controller
             abort(403, 'この操作は許可されていません。');
         }
     }
-
-    /**
-     * JSONレスポンス共通化
-     */
-    private function jsonResponse(string $message, int $status = 200)
-    {
-        return response()->json(['message' => $message], $status, [], JSON_UNESCAPED_UNICODE);
-    }
 }

@@ -71,13 +71,6 @@ class DashboardController extends Controller
     // ============================
 
     /**
-     * JSONレスポンス生成
-     */
-    private function jsonResponse(array $data)
-    {
-        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
-    }
-    /**
      * 今月の支出合計を計算
      */
     private function calculateTotalExpense($userId, $now)

@@ -19,6 +19,6 @@ class TransactionController extends Controller
             abort(400, 'Invalid transaction type');
         }
 
-        return response()->json(['message' => '削除しました']);
+        return $this->jsonResponse('削除しました');
     }
 }

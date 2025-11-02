@@ -98,12 +98,4 @@ class ReportController extends Controller
         ];
     }
 
-    /**
-     * JSONレスポンス共通処理
-     */
-    private function jsonResponse(array $data, int $status = 200): JsonResponse
-    {
-        return response()->json($data, $status, [], JSON_UNESCAPED_UNICODE);
-    }
-
 }
