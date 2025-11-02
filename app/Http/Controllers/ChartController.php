@@ -27,9 +27,9 @@ class ChartController extends Controller
     /**
      * 共通: JSONレスポンス生成
      */
-    private function jsonResponse(array $data)
+    private function jsonResponse(array $data, int $status = 200)
     {
-        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json($data, $status, [], JSON_UNESCAPED_UNICODE);
     }
 
     /**

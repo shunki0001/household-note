@@ -21,4 +21,9 @@ class TransactionController extends Controller
 
         return $this->jsonResponse('削除しました');
     }
+
+    private function jsonResponse(string $message, int $status = 200)
+    {
+        return response()->json(['message' => $message], $status, [], JSON_UNESCAPED_UNICODE);
+    }
 }

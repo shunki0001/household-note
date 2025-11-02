@@ -15,7 +15,7 @@ class ReportController extends Controller
     /**
      * 最新の支出・収入を5件取得
      */
-    public function latestJson(): JsonResponse
+    public function latestJson()
     {
         $userId = Auth::id();
 
@@ -96,6 +96,11 @@ class ReportController extends Controller
             (int) $request->query('year', now()->year),
             (int) $request->query('month', now()->month),
         ];
+    }
+
+    private function jsonResponse(array $data)
+    {
+        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
 }

@@ -66,4 +66,9 @@ class IncomeController extends Controller
         }
     }
 
+    private function jsonResponse(string $message, int $status = 200)
+    {
+        return response()->json(['message' => $message], $status, [], JSON_UNESCAPED_UNICODE);
+    }
+
 }

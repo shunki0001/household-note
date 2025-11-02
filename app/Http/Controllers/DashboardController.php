@@ -48,9 +48,12 @@ class DashboardController extends Controller
 
         $totalExpense = $this->calculateTotalExpense($userId, $now);
 
-        return $this->jsonResponse([
+        return response()->json([
             'totalExpense' => $totalExpense,
         ]);
+        // return $this->jsonResponse([
+        //     'totalExpense' => $totalExpense,
+        // ]);
     }
 
     // 今月の合計収入を取得するAPI(リアルタイム更新用)
@@ -61,9 +64,12 @@ class DashboardController extends Controller
 
         $totalIncome = $this->calculateTotalIncome($userId, $now);
 
-        return $this->jsonResponse([
+        return response()->json([
             'totalIncome' => $totalIncome,
         ]);
+        // return $this->jsonResponse([
+        //     'totalIncome' => $totalIncome,
+        // ]);
     }
 
     // ============================
@@ -103,4 +109,8 @@ class DashboardController extends Controller
         ];
     }
 
+    private function jsonResponse(array $data, int $status)
+    {
+        return response()->json($data, $status, [], JSON_UNESCAPED_UNICODE);
+    }
 }
