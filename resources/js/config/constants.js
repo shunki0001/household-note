@@ -39,3 +39,5 @@ export const DEFAULT_ALERT_CONFIG = {
     showConfirmButton: false,
     timerProgressBar: true,
 };
+
+export const VALIDATE_ERROR_STATUS = 422;

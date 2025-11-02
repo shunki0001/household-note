@@ -2,6 +2,7 @@ import { reactive, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useForm } from '@inertiajs/vue3';
+import { SWEET_ALERT2_TIMER, VALIDATE_ERROR_STATUS } from '@/config/constants';
 
 
 export function useExpenseFrom(props, emit) {
@@ -49,7 +50,7 @@ export function useExpenseFrom(props, emit) {
                 icon: 'success',
                 title: response.data.message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: SWEET_ALERT2_TIMER,
                 timerProgressBar: true,
             }).then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
@@ -71,7 +72,7 @@ export function useExpenseFrom(props, emit) {
             console.error('Submit error:', error); // デバッグログ
 
             // Laravelの422バリデーションエラー対応
-            if (error.response && error.response.status == 422) {
+            if (error.response && error.response.status == VALIDATE_ERROR_STATUS) {
                 const validationErrors = error.response.data.errors;
                 for (const key in validationErrors) {
                     if (errors.hasOwnProperty(key)) {
@@ -86,7 +87,7 @@ export function useExpenseFrom(props, emit) {
                     icon: 'error',
                     title: '登録失敗しました',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: SWEET_ALERT2_TIMER,
                     timerProgressBar: true,
                 });
                 console.error('登録失敗', error);
