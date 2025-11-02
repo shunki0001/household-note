@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import BarChart2 from '@/Components/BarChart2.vue';
 import { ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
+import { YEAR_START_MONTH, YEAR_END_MONTH } from '@/config/constants';
 
 // const currentMonth = ref(1);
 // 現在の月と年を取得
@@ -24,11 +25,11 @@ const changeMonths = (month) => {
 
 // 次の月
 const nextMonth = () => {
-    if (currentMonth.value < 12) {
+    if (currentMonth.value < YEAR_END_MONTH) {
         currentMonth.value++;
     } else {
         // 12月->翌年1月
-        currentMonth.value = 1;
+        currentMonth.value = YEAR_START_MONTH;
         if (availableYears.value.includes(currentYear.value + 1)) {
             currentYear.value++;
         }
@@ -37,11 +38,11 @@ const nextMonth = () => {
 
 // 前の月
 const prevMonth = () => {
-    if (currentMonth.value > 1) {
+    if (currentMonth.value > YEAR_START_MONTH) {
         currentMonth.value--;
     } else {
         // 1月->前年12月
-        currentMonth.value = 12;
+        currentMonth.value = YEAR_END_MONTH;
         if (availableYears.value.includes(currentYear.value - 1)) {
             currentYear.value--;
         }

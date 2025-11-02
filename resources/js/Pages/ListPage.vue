@@ -5,13 +5,14 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { YEAR_START_MONTH, YEAR_END_MONTH, DEFAULT_CURRENT_PAGE, SWEET_ALERT2_TIMER } from '@/config/constants';
 
 const props = defineProps({
     transactions: {
         type: Object,
         default: () => ({
             data: [],
-            current_page: 1,
+            current_page: DEFAULT_CURRENT_PAGE,
             links: []
         })
     },
@@ -68,7 +69,7 @@ onMounted(() => {
             icon: 'success',
             title: message,
             showConfirmButton: false,
-            timer: 2000,
+            timer: SWEET_ALERT2_TIMER,
             timerProgressBar: true,
         });
     }
@@ -78,11 +79,11 @@ onMounted(() => {
 const changeMonth = (delta) => {
     month.value += delta;
 
-    if(month.value > 12) {
-        month.value = 1;
+    if(month.value > YEAR_END_MONTH) {
+        month.value = YEAR_START_MONTH;
         year.value += 1;
-    } else if (month.value < 1) {
-        month.value = 12;
+    } else if (month.value < YEAR_START_MONTH) {
+        month.value = YEAR_END_MONTH;
         year.value -= 1;
     }
 

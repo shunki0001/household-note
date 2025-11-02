@@ -8,6 +8,7 @@ import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_TOTAL_EXPENSE, DEFAULT_TOTAL_INCOME, INITIAL_TOTAL_VALUE, SWEET_ALERT2_TIMER } from '@/config/constants';
 
 const props = defineProps({
     expenses: Object,
@@ -15,11 +16,11 @@ const props = defineProps({
     income_categories: Array,
     totalExpense: {
         type: [Number, String],
-        default: 0,
+        default: DEFAULT_TOTAL_EXPENSE,
     },
     totalIncome: {
         type: [Number, String],
-        default: 0,
+        default: DEFAULT_TOTAL_INCOME,
     },
     transactions: Object, // ページネーション形式
     latestTransactions: Array, // 配列形式
@@ -43,8 +44,8 @@ const currentBalance = computed(() => {
 });
 
 // 合計金額をリアルタイムで管理
-const currentTotalExpense = ref(Number(props.totalExpense) || 0);
-const currentTotalIncome = ref(Number(props.totalIncome) || 0);
+const currentTotalExpense = ref(Number(props.totalExpense) || INITIAL_TOTAL_VALUE);
+const currentTotalIncome = ref(Number(props.totalIncome) || INITIAL_TOTAL_VALUE);
 
 const formattedTotalExpense = computed(() => {
     return currentTotalExpense.value.toLocaleString();
@@ -59,7 +60,7 @@ const formattedBalance = computed(() => {
 });
 
 // const currentPage = ref(props.expenses.current_page || 1)
-const currentPage = ref(props.transactions || 1)
+const currentPage = ref(props.transactions || DEFAULT_PAGE_NUMBER)
 const refreshKey = ref(0) // グラフ用のみに使用
 const transactionListRef = ref(null)
 const transactions = ref([])
@@ -89,7 +90,7 @@ const updateTotalExpense = async () => {
     try {
         console.log('Dashboard: updateTotalExpense called'); // デバッグログ
         const response = await axios.get(route('dashboard.totalExpense'));
-        currentTotalExpense.value = Number(response.data.totalExpense) || 0;
+        currentTotalExpense.value = Number(response.data.totalExpense) || INITIAL_TOTAL_VALUE;
         console.log('Dashboard: totalExpense updated to', currentTotalExpense.value); // デバッグログ
     } catch (e) {
         console.error('Dashboard: 合計金額更新エラー', e);
@@ -101,7 +102,7 @@ const updateTotalIncome = async () => {
     try {
         console.log('Dashboard: updateTotalIncome called'); // デバックログ
         const response = await axios.get(route('dashboard.totalIncome'));
-        currentTotalIncome.value = Number(response.data.totalIncome) || 0;
+        currentTotalIncome.value = Number(response.data.totalIncome) || INITIAL_TOTAL_VALUE;
         console.log('Dashboard: totalIncome updated to', currentTotalIncome.value); // デバックログ
     } catch (e) {
         console.error('Dashboard: 合計収入金額更新エラー', e);
@@ -158,7 +159,7 @@ watch(
                 icon: 'success',
                 title: message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: SWEET_ALERT2_TIMER,
                 timerProgressBar: true,
             });
         }
@@ -174,7 +175,7 @@ onMounted(() => {
             icon: 'success',
             title: page.props.flash.message,
             showConfirmButton: false,
-            timer: 2000,
+            timer: SWEET_ALERT2_TIMER,
             timerProgressBar: true,
         });
     }
