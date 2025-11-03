@@ -1,12 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { ref, onMounted, watch } from 'vue';
-import axios from 'axios';
-// import Swal from 'sweetalert2';
+import { watch } from 'vue';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { YEAR_START_MONTH, YEAR_END_MONTH, DEFAULT_CURRENT_PAGE, SWEET_ALERT2_TIMER } from '@/config/constants';
-import { showAlert } from '@/utils/alert';
+import { DEFAULT_CURRENT_PAGE } from '@/config/constants';
+import { useTransactions } from '@/composables/useTransactions';
 
 const props = defineProps({
     transactions: {
@@ -23,74 +21,27 @@ const props = defineProps({
     },
 })
 
-// フラッシュメッセージの取得
-const page = usePage();
-
-const expenses = ref([]);
-const month = ref(new Date().getMonth() + 1); // JSは0始まり
-const year = ref(new Date().getFullYear());
-const localTransactionList = ref(props.transactions.data ?? []);
-
 const emit = defineEmits(['transaction-update', 'transaction-deleted']);
 
+const {
+    transactions,
+    month,
+    year,
+    changeMonth,
+    fetchTransactions,
+    updateTransactions,
+} = useTransactions(props.transactions.data ?? []);
+
+// 削除処理
 const handleTransactionDeleted = (type) => {
     fetchTransactions();
     emit('transaction-deleted', type);
 }
 
-watch(() => props.transactionList, (newTransactionList) => {
-    if (newTransactionList && newTransactionList.length > 0) {
-        localTransactionList.value = newTransactionList;
-    }
-}, { deep: true });
-
-const fetchTransactions = async () => {
-    try {
-        const response = await axios.get('/api/report-data/monthly-transactions', {
-            params: {
-                year: year.value,
-                month: month.value,
-            },
-        });
-        console.log('取得データ:' , response.data)
-        localTransactionList.value = response.data.transactions.data ?? response.data.transactions ?? [];
-    } catch (error) {
-        console.error('データ取得失敗', error);
-    }
-};
-
-// ページ読み込み時に実行
-onMounted(() => {
-    fetchTransactions();
-    const message = page.props.flash?.message;
-    if(message) {
-        // Swal.fire({
-        //     toast: true,
-        //     position: 'top-end',
-        //     icon: 'success',
-        //     title: message,
-        //     showConfirmButton: false,
-        //     timer: SWEET_ALERT2_TIMER,
-        //     timerProgressBar: true,
-        // });
-        showAlert(message, 'success');
-    }
-});
-
-// 月変更ロジック
-const changeMonth = (delta) => {
-    month.value += delta;
-
-    if(month.value > YEAR_END_MONTH) {
-        month.value = YEAR_START_MONTH;
-        year.value += 1;
-    } else if (month.value < YEAR_START_MONTH) {
-        month.value = YEAR_END_MONTH;
-        year.value -= 1;
-    }
-
-    fetchTransactions();
-}
+watch(
+    () => props.transactionList,
+    (newList) => updateTransactions(newList),
+);
 </script>
 
 <template>
@@ -145,7 +96,7 @@ const changeMonth = (delta) => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="transaction in localTransactionList"
+                                    v-for="transaction in transactions"
                                     :key="transaction.type + '-' + transaction.id"
                                     class="hover:bg-gray-50"
                                 >
@@ -185,7 +136,7 @@ const changeMonth = (delta) => {
                     <!-- ✅ スマホ表示（カード型） -->
                     <div class="sm:hidden space-y-4">
                         <div
-                            v-for="transaction in localTransactionList"
+                            v-for="transaction in transactions"
                             :key="transaction.type + '-' + transaction.id"
                             class="border rounded-lg shadow-sm p-4 bg-white"
                         >
@@ -234,7 +185,7 @@ const changeMonth = (delta) => {
                             </div>
                         </div>
 
-                        <div v-if="localTransactionList.length === 0" class="text-center py-4 text-gray-500">
+                        <div v-if="transactions.length === 0" class="text-center py-4 text-gray-500">
                             データがありません
                         </div>
                     </div>
