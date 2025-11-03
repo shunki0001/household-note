@@ -1,9 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-// import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
-import Toast from '@/Components/Toast.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 import TransactionList from '@/Components/TransactionList.vue';
@@ -154,15 +152,6 @@ watch(
     () => page.props.flash?.message,
     (message) => {
         if (message) {
-            // Swal.fire({
-            //     toast: true,
-            //     position: 'top-end',
-            //     icon: 'success',
-            //     title: message,
-            //     showConfirmButton: false,
-            //     timer: SWEET_ALERT2_TIMER,
-            //     timerProgressBar: true,
-            // });
             showAlert(message, 'success');
         }
     }
@@ -171,15 +160,6 @@ watch(
 // onMountedを追加（ページ遷移時に即チェック）
 onMounted(() => {
     if (page.props.flash?.message) {
-        // Swal.fire({
-        //     toast: true,
-        //     position: 'top-end',
-        //     icon: 'success',
-        //     title: page.props.flash.message,
-        //     showConfirmButton: false,
-        //     timer: SWEET_ALERT2_TIMER,
-        //     timerProgressBar: true,
-        // });
         showAlert(page.props.flash.message, 'success');
     }
 });
@@ -197,7 +177,6 @@ onMounted(() => {
                 マイページ
             </h2>
         </template>
-        <Toast/>
         <!-- <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div

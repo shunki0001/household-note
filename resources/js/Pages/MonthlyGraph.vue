@@ -1,73 +1,20 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import BarChart from '@/Components/BarChart.vue';
-import { computed, onMounted, ref, onUnmounted, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import { MOBILE_BREAKPOINT, MONTH_PER_QUARTER, TOTAL_QUARTER, YEAR_START_MONTH, YEAR_END_MONTH, QUARTERS } from '@/config/constants';
+import { YEAR_START_MONTH, YEAR_END_MONTH } from '@/config/constants';
+import { useQuarter } from '@/composables/useQuarter';
+import { useResponsive } from '@/composables/useResponsive';
 
 // =============================
 // 動的データ
 // =============================
-const currentYear = ref(new Date().getFullYear());
 const availableYears = ref([2023, 2024, 2025, 2026, 2027]);
 
-// 今月の月を取得
-const currentMonth = new Date().getMonth() + 1;
-const getQuarter = (month) => Math.ceil(month / MONTH_PER_QUARTER);
-const currentQuarter = ref(getQuarter(currentMonth));
-const currentQuarterLabel = computed(() => QUARTERS[currentQuarter.value - 1].label);
-const currentRange = computed(() => QUARTERS[currentQuarter.value - 1]);
-
-// 四半期の定義
-// const quarters = [
-//     { start: 1, end: 3, label: '1~3月' },
-//     { start: 4, end: 6, label: '4~6月' },
-//     { start: 7, end: 9, label: '7~9月' },
-//     { start: 10, end: 12, label: '10~12月' },
-// ];
-
-
-// =============================
-// 画像サイズ管理
-// =============================
-const isMobile = ref(window.innerWidth < MOBILE_BREAKPOINT);
-const handleResize = () => {
-    isMobile.value = window.innerWidth < MOBILE_BREAKPOINT;
-};
-
-onMounted(() => {
-    window.addEventListener('resize', handleResize);
-});
-onUnmounted(() => {
-    window.removeEventListener('resize', handleResize);
-});
-
-// =============================
-// 四半期切り替え
-// =============================
-const nextQuarter = () => {
-    if (currentQuarter.value < TOTAL_QUARTER)
-        currentQuarter.value++;
-    else if (currentYear.value < availableYears.value[availableYears.value.length - 1]) {
-        currentYear.value++;
-        currentQuarter.value = 1;
-    }
-};
-
-const prevQuarter = () => {
-    if (currentQuarter.value > 1)
-        currentQuarter.value--;
-    else if (currentYear.value > availableYears.value[0]) {
-        currentYear.value--;
-        currentQuarter.value = TOTAL_QUARTER;
-    }
-};
-
-// 年変更
-const changeYear = (year) => {
-    currentYear.value = year;
-    currentQuarter.value = getQuarter(currentMonth);
-};
+const {currentYear, currentQuarter, currentQuarterLabel ,currentRange, nextQuarter, prevQuarter, changeYear, resetQuarterToCurrentMonth } =
+    useQuarter(availableYears);
+const { isMobile } = useResponsive();
 
 // =============================
 // グラフ期間
@@ -91,7 +38,7 @@ const chartRange = computed(() => {
 watch(isMobile, (newVal) => {
     if (!newVal) {
         // PC画面に戻った時
-        currentQuarter.value = getQuarter(currentMonth);
+        resetQuarterToCurrentMonth();
     }
 });
 </script>
