@@ -1,8 +1,6 @@
 import { reactive, watch } from 'vue';
 import axios from 'axios';
-// import Swal from 'sweetalert2';
-// import { useForm } from '@inertiajs/vue3';
-import { SWEET_ALERT2_TIMER, VALIDATE_ERROR_STATUS } from '@/config/constants';
+import { VALIDATE_ERROR_STATUS } from '@/config/constants';
 import { showAlert } from '@/utils/alert';
 
 
@@ -42,15 +40,6 @@ export function useIncomeForm(props, emit) {
                 : await axios.put(props.submitUrl, form);
             console.log('API response:', response.data); // デバッグログ
 
-            // Swal.fire({
-            //     toast: true,
-            //     position: 'top-end',
-            //     icon: 'success',
-            //     title: response.data.message,
-            //     showConfirmButton: false,
-            //     timer: SWEET_ALERT2_TIMER,
-            //     timerProgressBar: true,
-            // }).then(() => {
             showAlert(response.data.message, 'success').then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
                 if (props.method === 'put' && form.back) {
@@ -63,7 +52,7 @@ export function useIncomeForm(props, emit) {
                     form.income_date = '';
                     form.income_category_id = '';
                     // 親コンポーネントに登録完了を通知
-                    emit('submitted');
+                    emit('submitted', 'income');
                 }
             });
         }   catch(error) {
@@ -78,16 +67,6 @@ export function useIncomeForm(props, emit) {
                     }
                 }
             } else {
-                // 通信エラー・サーバーエラー時
-                // Swal.fire({
-                //     toast: true,
-                //     position: 'top-end',
-                //     icon: 'error',
-                //     title: '登録失敗しました',
-                //     showConfirmButton: false,
-                //     timer: SWEET_ALERT2_TIMER,
-                //     timerProgressBar: true,
-                // });
                 showAlert('登録失敗しました', 'success');
                 console.error('登録失敗', error);
             }

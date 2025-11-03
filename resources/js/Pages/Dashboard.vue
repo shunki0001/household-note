@@ -8,43 +8,65 @@ import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_TOTAL_EXPENSE, DEFAULT_TOTAL_INCOME, INITIAL_TOTAL_VALUE, SWEET_ALERT2_TIMER } from '@/config/constants';
 import { showAlert } from '@/utils/alert';
+import { useFinance } from '@/composables/useFinance';
+import { fetchTransactions } from '@/services/transactionService';
 
+// const props = defineProps({
+//     expenses: Object,
+//     categories: Array,
+//     income_categories: Array,
+//     totalExpense: {
+//         type: [Number, String],
+//         default: DEFAULT_TOTAL_EXPENSE,
+//     },
+//     totalIncome: {
+//         type: [Number, String],
+//         default: DEFAULT_TOTAL_INCOME,
+//     },
+//     transactions: Object, // ページネーション形式
+//     latestTransactions: Array, // 配列形式
+// });
 const props = defineProps({
-    expenses: Object,
+    totalExpense: Number,
+    totalIncome: Number,
+    transactions: Object,
     categories: Array,
     income_categories: Array,
-    totalExpense: {
-        type: [Number, String],
-        default: DEFAULT_TOTAL_EXPENSE,
-    },
-    totalIncome: {
-        type: [Number, String],
-        default: DEFAULT_TOTAL_INCOME,
-    },
-    transactions: Object, // ページネーション形式
-    latestTransactions: Array, // 配列形式
 });
+
+const {
+    totalExpense: currentTotalExpense,
+    totalIncome: currentTotalIncome,
+    formattedExpense,
+    formattedIncome,
+    formattedBalance,
+    updateExpense,
+    updateIncome,
+} = useFinance(props.totalExpense, props.totalIncome);
+
+const currentPage = ref(1);
+const transactionList = ref(props.transactions?.data ?? []); // 一覧データを直接管理
+const refreshKey = ref(0) // グラフ用のみに使用
+const page = usePage(); // 現在のページのpropsを取得
 
 // フォーム切り替え用の状態
 const activeForm = ref('expense'); // 'expense' または 'income'
-
 // フォーム切り替え関数
 const switchToExpense = () => {
     activeForm.value = 'expense';
 };
-
 const switchToIncome = () => {
     activeForm.value = 'income';
 };
 
 // 収支の算出
-const currentBalance = computed(() => {
-    return currentTotalIncome.value - currentTotalExpense.value;
-});
+// const currentBalance = computed(() => {
+//     return currentTotalIncome.value - currentTotalExpense.value;
+// });
 
 // 合計金額をリアルタイムで管理
-const currentTotalExpense = ref(Number(props.totalExpense) || INITIAL_TOTAL_VALUE);
-const currentTotalIncome = ref(Number(props.totalIncome) || INITIAL_TOTAL_VALUE);
+// const currentTotalExpense = ref(Number(props.totalExpense) || INITIAL_TOTAL_VALUE);
+// const currentTotalIncome = ref(Number(props.totalIncome) || INITIAL_TOTAL_VALUE);
 
 const formattedTotalExpense = computed(() => {
     return currentTotalExpense.value.toLocaleString();
@@ -54,35 +76,35 @@ const formattedTotalIncome = computed(() => {
     return currentTotalIncome.value.toLocaleString();
 });
 
-const formattedBalance = computed(() => {
-    return currentBalance.value.toLocaleString();
-});
+// const formattedBalance = computed(() => {
+//     return currentBalance.value.toLocaleString();
+// });
 
 // const currentPage = ref(props.expenses.current_page || 1)
-const currentPage = ref(props.transactions || DEFAULT_PAGE_NUMBER)
-const refreshKey = ref(0) // グラフ用のみに使用
+// const currentPage = ref(props.transactions || DEFAULT_PAGE_NUMBER)
+
+
 const transactionListRef = ref(null)
 const transactions = ref([])
 
-// 一覧データを直接管理
-// props からローカル state にコピー
-const transactionList = ref(props.transactions?.data ?? []);
 
-// 現在のページのpropsを取得
-const page = usePage();
-const latestTransactions = page.props.latestTransactions;
+
+// const latestTransactions = page.props.latestTransactions;
 
 // 一覧データを更新する関数(収入 + 支出)
+// const updateTransactionList = async () => {
+//     try {
+//         console.log('Dashboard: updateTransactionList called'); // デバック
+//         const response = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
+//         transactionList.value = response.data.transactions.data;
+//         console.log('Dashboard: transactionList update with', transactionList.value.length, 'items'); // デバック
+//     } catch (e) {
+//         console.error('Dashboard: 一覧更新エラー', e);
+//     }
+// }
 const updateTransactionList = async () => {
-    try {
-        console.log('Dashboard: updateTransactionList called'); // デバック
-        const response = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
-        transactionList.value = response.data.transactions.data;
-        console.log('Dashboard: transactionList update with', transactionList.value.length, 'items'); // デバック
-    } catch (e) {
-        console.error('Dashboard: 一覧更新エラー', e);
-    }
-}
+    transactionList.value = await fetchTransactions(currentPage.value);
+};
 
 // 合計金額を更新する関数
 const updateTotalExpense = async () => {
@@ -108,44 +130,65 @@ const updateTotalIncome = async () => {
     }
 }
 
-const handleExpenseAdded = async () => {
-    console.log('handleExpenseAdded called'); // デバッグログ
+// const handleExpenseAdded = async () => {
+//     console.log('handleExpenseAdded called'); // デバッグログ
 
-    // 合計支出更新 -> グラフ更新 -> 一覧更新
-    await updateTotalExpense();
-    await updateTransactionList();
-    refreshKey.value++;
-}
+//     // 合計支出更新 -> グラフ更新 -> 一覧更新
+//     await updateTotalExpense();
+//     await updateTransactionList();
+//     refreshKey.value++;
+// }
 
-const handleIncomeAdded = async () => {
-    console.log('handleIncomeAdded called'); // デバックログ
+// const handleIncomeAdded = async () => {
+//     console.log('handleIncomeAdded called'); // デバックログ
 
-    // 合計支出更新 -> グラフ更新 -> 一覧更新
-    await updateTotalIncome();
-    await updateTransactionList();
-    refreshKey.value++;
-}
+//     // 合計支出更新 -> グラフ更新 -> 一覧更新
+//     await updateTotalIncome();
+//     await updateTransactionList();
+//     refreshKey.value++;
+// }
 
-const fetchTransactions = async () => {
-    const res = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
-    transactionList.value = res.data.transactions.data;
-}
-
-onMounted(fetchTransactions);
-
-// 削除完了時の処理
-const handleTransactionDeleted = async (type) => {
-    console.log('Dashboard handleTransactionDeleted called for', type);
-
-    if(type === 'income') {
-        await updateTotalIncome();
-    } else if (type === 'expense') {
-        await updateTotalExpense();
+const handleTransactionAdded = async (type) => {
+    if (type === 'income') {
+        await updateIncome();
+    } else {
+        await updateExpense();
     }
 
     await updateTransactionList();
     refreshKey.value++;
-}
+};
+
+// const fetchTransactions = async () => {
+//     const res = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
+//     transactionList.value = res.data.transactions.data;
+// }
+
+// onMounted(fetchTransactions);
+
+// 削除完了時の処理
+// const handleTransactionDeleted = async (type) => {
+//     console.log('Dashboard handleTransactionDeleted called for', type);
+
+//     if(type === 'income') {
+//         await updateTotalIncome();
+//     } else if (type === 'expense') {
+//         await updateTotalExpense();
+//     }
+
+//     await updateTransactionList();
+//     refreshKey.value++;
+// }
+const handleTransactionDeleted = async (type) => {
+    if (type === 'income') {
+        await updateIncome();
+    } else if (type === 'expense') {
+        await updateExpense();
+    }
+
+    await updateTransactionList();
+    refreshKey.value++;
+};
 
 // フラッシュメッセージの監視
 watch(
@@ -158,11 +201,12 @@ watch(
 );
 
 // onMountedを追加（ページ遷移時に即チェック）
-onMounted(() => {
-    if (page.props.flash?.message) {
-        showAlert(page.props.flash.message, 'success');
-    }
-});
+// onMounted(() => {
+//     if (page.props.flash?.message) {
+//         showAlert(page.props.flash.message, 'success');
+//     }
+// });
+onMounted(updateTransactionList);
 
 </script>
 
@@ -203,11 +247,13 @@ onMounted(() => {
                             <p class="text-lg font-semibold">
                                 今月の合計支出：
                                 <span class="text-red-500 text-xl font-bold">{{ formattedTotalExpense }}円</span>
+                                <!-- <span class="text-red-500 text-xl font-bold">{{ currentTotalExpense }}円</span> -->
                             </p>
 
                             <p class="text-lg font-semibold">
                                 今月の合計収入：
                                 <span class="text-green-500 text-xl font-bold">{{ formattedTotalIncome }}円</span>
+                                <!-- <span class="text-green-500 text-xl font-bold">{{ currentTotalIncome }}円</span> -->
                             </p>
 
                             <p
@@ -260,7 +306,7 @@ onMounted(() => {
                                         :categories="props.categories"
                                         :submitUrl="route('expenses.store')"
                                         :method="'post'"
-                                        @submitted="handleExpenseAdded"
+                                        @submitted="handleTransactionAdded"
                                     />
                                 </div>
                                 <div v-else-if="activeForm === 'income'">
@@ -269,7 +315,7 @@ onMounted(() => {
                                         :income_categories="props.income_categories"
                                         :submitUrl="route('incomes.store')"
                                         :method="'post'"
-                                        @submitted="handleIncomeAdded"
+                                        @submitted="handleTransactionAdded"
                                     />
                                 </div>
                             </div>

@@ -34,8 +34,8 @@ class DashboardController extends Controller
             'flash' => [
                 'message' => session('message')
             ],
-            'totalExpense' => $totalExpense,
-            'totalIncome' => $totalIncome,
+            'totalExpense' => (int) $totalExpense,
+            'totalIncome' => (int) $totalIncome,
         ]);
 
     }
