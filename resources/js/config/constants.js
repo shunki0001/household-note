@@ -17,6 +17,7 @@ export const YEAR_END_MONTH = 12;      // 年末月
 export const QUARTERS = [
     { start: 1, end: 3, label: '1~3月' },
     { start: 4, end: 6, label: '4~6月' },
+
     { start: 7, end: 9, label: '7~9月' },
     { start: 10, end: 12, label: '10~12月' },
 ];
@@ -30,14 +31,16 @@ export const DEFAULT_TOTAL_INCOME = 0;      // 合計収入のデフォルト
 
 export const INITIAL_TOTAL_VALUE = 0;       // 金額が未定義の場合の初期値
 
-// SweetAlert2の共通部分
-// title,iconを引数にした関数にする予定
-export const DEFAULT_ALERT_CONFIG = {
-    toast: true,
-    position: 'top-end',
-    icon: 'success',
-    showConfirmButton: false,
-    timerProgressBar: true,
-};
-
 export const VALIDATE_ERROR_STATUS = 422;
+
+export const DEFAULT_CHART_COLOR = '#42b983';     // 棒グラフのデフォルト色
+export const CHART_MAX_PADDING = 10000;     // グラフの上限を補正するための補正
+export const CHART_ROUND_UNIT = 1000;       // 上限値の丸め単位
+export const CHART_ASPECT_RATIO = 1;        // グラフの縦横比
+export const LABEL_TEXT_COLOR = '#333';     // データラベル文字色
+export const LABEL_FONT_SIZE_MOBILE = 10;   // フォントサイズ(モバイル)
+export const LABEL_FONT_SIZE_DESKTOP = 12;  // フォントサイズ(PC)
+export const LABEL_ANCHOR_POSITION = 'end'; // ahchorの位置指定
+export const LABEL_ALIGN_POSITION = 'end';  // alignの位置指定
+
+export const CHART_HEIGHT = "400";          // グラフの高さ

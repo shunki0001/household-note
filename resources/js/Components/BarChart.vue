@@ -7,7 +7,7 @@ import {
     BarElement, CategoryScale, LinearScale
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { MOBILE_BREAKPOINT, YEAR_END_MONTH, YEAR_START_MONTH } from '@/config/constants'
+import { CHART_MAX_PADDING, CHART_ROUND_UNIT, DEFAULT_CHART_COLOR, LABEL_ALIGN_POSITION, LABEL_ANCHOR_POSITION, LABEL_FONT_SIZE_DESKTOP, LABEL_FONT_SIZE_MOBILE, LABEL_TEXT_COLOR, MOBILE_BREAKPOINT, YEAR_END_MONTH, YEAR_START_MONTH } from '@/config/constants'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels)
 
@@ -16,7 +16,7 @@ const props = defineProps({
     apiUrl: { type: String, default: '/api/chart-data' },
     colors: {
         type: Array,
-        default: () => ['#42b983']
+        default: () => [DEFAULT_CHART_COLOR]
     },
     year: {
         type: Number,
@@ -74,7 +74,7 @@ const fetchData = async () => {
             : json.totals;
 
         const maxValue = Math.max(...(totals.length ? totals : [0]))
-        const adjustedMax = Math.ceil((maxValue + 10000) / 1000) * 1000
+        const adjustedMax = Math.ceil((maxValue + CHART_MAX_PADDING) / CHART_ROUND_UNIT) * CHART_ROUND_UNIT
 
         chartData.value = {
         labels,
@@ -93,11 +93,11 @@ const fetchData = async () => {
         aspectRatio:1,
         plugins: {
             datalabels: {
-            anchor: 'end',
-            align: 'end',
+            anchor: LABEL_ANCHOR_POSITION,
+            align: LABEL_ALIGN_POSITION,
             formatter: (value) => `¥${value.toLocaleString()}`,
-            color: '#333',
-            font: { weight: 'bold', size: isMobile.value ? 10 : 12 }
+            color: LABEL_TEXT_COLOR,
+            font: { weight: 'bold', size: isMobile.value ? LABEL_FONT_SIZE_MOBILE : LABEL_FONT_SIZE_DESKTOP }
             },
             legend: { display: true },
             tooltip: {
@@ -132,7 +132,7 @@ watch(() => [props.year, props.startMonth, props.endMonth],
 </script>
 
 <template>
-    <div style="height: 400px;">
+    <div >
         <div v-if="errorMessage" class="text-red-600 text-center p-4">
             <p class="font-bold">エラーが発生しました</p>
             <p class="text-sm">{{ errorMessage }}</p>
