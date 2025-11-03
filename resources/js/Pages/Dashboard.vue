@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed  } from 'vue';
 import Toast from '@/Components/Toast.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
@@ -9,6 +9,7 @@ import DoughnutChart from '@/Components/DoughnutChart.vue';
 import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_TOTAL_EXPENSE, DEFAULT_TOTAL_INCOME, INITIAL_TOTAL_VALUE, SWEET_ALERT2_TIMER } from '@/config/constants';
+import { showAlert } from '@/utils/alert';
 
 const props = defineProps({
     expenses: Object,
@@ -153,15 +154,16 @@ watch(
     () => page.props.flash?.message,
     (message) => {
         if (message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: message,
-                showConfirmButton: false,
-                timer: SWEET_ALERT2_TIMER,
-                timerProgressBar: true,
-            });
+            // Swal.fire({
+            //     toast: true,
+            //     position: 'top-end',
+            //     icon: 'success',
+            //     title: message,
+            //     showConfirmButton: false,
+            //     timer: SWEET_ALERT2_TIMER,
+            //     timerProgressBar: true,
+            // });
+            showAlert(message, 'success');
         }
     }
 );
@@ -169,15 +171,16 @@ watch(
 // onMountedを追加（ページ遷移時に即チェック）
 onMounted(() => {
     if (page.props.flash?.message) {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: page.props.flash.message,
-            showConfirmButton: false,
-            timer: SWEET_ALERT2_TIMER,
-            timerProgressBar: true,
-        });
+        // Swal.fire({
+        //     toast: true,
+        //     position: 'top-end',
+        //     icon: 'success',
+        //     title: page.props.flash.message,
+        //     showConfirmButton: false,
+        //     timer: SWEET_ALERT2_TIMER,
+        //     timerProgressBar: true,
+        // });
+        showAlert(page.props.flash.message, 'success');
     }
 });
 

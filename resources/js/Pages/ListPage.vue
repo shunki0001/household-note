@@ -2,10 +2,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { YEAR_START_MONTH, YEAR_END_MONTH, DEFAULT_CURRENT_PAGE, SWEET_ALERT2_TIMER } from '@/config/constants';
+import { showAlert } from '@/utils/alert';
 
 const props = defineProps({
     transactions: {
@@ -63,15 +64,16 @@ onMounted(() => {
     fetchTransactions();
     const message = page.props.flash?.message;
     if(message) {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: message,
-            showConfirmButton: false,
-            timer: SWEET_ALERT2_TIMER,
-            timerProgressBar: true,
-        });
+        // Swal.fire({
+        //     toast: true,
+        //     position: 'top-end',
+        //     icon: 'success',
+        //     title: message,
+        //     showConfirmButton: false,
+        //     timer: SWEET_ALERT2_TIMER,
+        //     timerProgressBar: true,
+        // });
+        showAlert(message, 'success');
     }
 });
 

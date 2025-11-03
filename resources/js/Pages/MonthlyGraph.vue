@@ -6,23 +6,6 @@ import { Head } from '@inertiajs/vue3';
 import { MOBILE_BREAKPOINT, MONTH_PER_QUARTER, TOTAL_QUARTER, YEAR_START_MONTH, YEAR_END_MONTH, QUARTERS } from '@/config/constants';
 
 // =============================
-// 定数定義
-// =============================
-// const MOBILE_BREAKPOINT = 768;  // 単位px
-// const MONTH_PER_QUARTER = 3;    // 四半期あたりの月数
-// const TOTAL_QUARTER = 4;        // 四半期の数
-// const YEAR_START_MONTH = 1;     // 年初月
-// const YEAR_END_MONTH = 12;      // 年末月
-
-// 四半期の定義
-// const QUARTERS = [
-//     { start: 1, end: 3, label: '1~3月' },
-//     { start: 4, end: 6, label: '4~6月' },
-//     { start: 7, end: 9, label: '7~9月' },
-//     { start: 10, end: 12, label: '10~12月' },
-// ];
-
-// =============================
 // 動的データ
 // =============================
 const currentYear = ref(new Date().getFullYear());

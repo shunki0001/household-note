@@ -7,6 +7,7 @@ import {
     BarElement, CategoryScale, LinearScale
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { MOBILE_BREAKPOINT, YEAR_END_MONTH, YEAR_START_MONTH } from '@/config/constants'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels)
 
@@ -21,9 +22,9 @@ const props = defineProps({
         type: Number,
         default: new Date().getFullYear()
     },
-    startMonth: { type: Number, default: 1 },
-    endMonth: { type: Number, default: 12 },
-    monthlyData: {           // ← 🔹追加（任意にする）
+    startMonth: { type: Number, default: YEAR_START_MONTH },
+    endMonth: { type: Number, default: YEAR_END_MONTH },
+    monthlyData: {           // 任意にする
         type: Array,
         default: () => []
     }
@@ -31,11 +32,11 @@ const props = defineProps({
 
 const chartData = ref({ labels: [], datasets: [] })
 const chartOptions = ref({})
-const isMobile = ref(window.innerWidth < 768)
+const isMobile = ref(window.innerWidth < MOBILE_BREAKPOINT)
 const errorMessage = ref('')
 
 window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 768
+    isMobile.value = window.innerWidth < MOBILE_BREAKPOINT
 })
 
 const fetchData = async () => {
@@ -71,8 +72,6 @@ const fetchData = async () => {
         const totals = isMobile.value
             ? json.totals.slice(props.startMonth -1, props.endMonth)
             : json.totals;
-        // const labels = json.labels.slice(props.startMonth - 1, props.endMonth)
-        // const totals = json.totals.slice(props.startMonth - 1, props.endMonth)
 
         const maxValue = Math.max(...(totals.length ? totals : [0]))
         const adjustedMax = Math.ceil((maxValue + 10000) / 1000) * 1000
