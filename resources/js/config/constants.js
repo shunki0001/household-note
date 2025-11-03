@@ -44,3 +44,12 @@ export const LABEL_ANCHOR_POSITION = 'end'; // ahchorの位置指定
 export const LABEL_ALIGN_POSITION = 'end';  // alignの位置指定
 
 export const CHART_HEIGHT = "400";          // グラフの高さ
+
+export const CATEGORY_ICON_SIZE_MOBILE = 16;    // カテゴリーアイコンサイズ(モバイル)
+export const CATEGORY_ICON_SIZE_DESKTOP = 24; // カテゴリーアイコンサイズ(PC)
+
+export const ICON_OFFSET_Y_DESKTOP = 5;         // グラフ下のアイコンをy軸方向の微調整用(PC)
+export const ICON_OFFSET_Y_MOBILE = 5;         // グラフ下のアイコンをy軸方向の微調整用(モバイル)
+export const ICON_OFFSET_X_DESKTOP = 11;    // グラフ下のアイコンをx軸方向の微調整(PC)
+export const ICON_OFFSET_X_MOBILE = 7;     // グラフ下のアイコンをx軸方向の微調整(モバイル)
+

@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import axios from 'axios'
+import { CATEGORY_ICON_SIZE_DESKTOP, CATEGORY_ICON_SIZE_MOBILE, ICON_OFFSET_X_DESKTOP, ICON_OFFSET_X_MOBILE, ICON_OFFSET_Y_DESKTOP, ICON_OFFSET_Y_MOBILE, MOBILE_BREAKPOINT } from '@/config/constants'
 
 Chart.register(...registerables)
 
@@ -37,21 +38,21 @@ const renderChart = (labels, datasets, icons) => {
         afterDraw: chart => {
             const { ctx, chartArea, scales } = chart
             const xAxis = scales.x
-            const yButton = chartArea.bottom + 5
+            const yBottom = chartArea.bottom
 
             // 画面幅に応じてアイコンサイズを変更
-            const isMobile = window.innerWidth < 640 // Tailwindのsmサイズ基準
-            const iconSize = isMobile ? 16 : 24
+            const isMobile = window.innerWidth < MOBILE_BREAKPOINT
+            const iconSize = isMobile ? CATEGORY_ICON_SIZE_MOBILE : CATEGORY_ICON_SIZE_DESKTOP
 
             labels.forEach((label, index) => {
-                const x = xAxis.getPixelForTick(index)
+                const xBottom = xAxis.getPixelForTick(index)
                 const img = new Image()
                 img.src = icons[index]
                 img.onload = () => {
                     if(isMobile) {
-                        ctx.drawImage(img, x - 7, yButton, iconSize, iconSize)
+                        ctx.drawImage(img, xBottom - ICON_OFFSET_X_MOBILE, yBottom + ICON_OFFSET_Y_MOBILE, iconSize, iconSize)
                     } else {
-                        ctx.drawImage(img, x - 11, yButton, iconSize, iconSize)
+                        ctx.drawImage(img, xBottom - ICON_OFFSET_X_DESKTOP, yBottom + ICON_OFFSET_Y_DESKTOP, iconSize, iconSize)
                     }
                 }
             })
@@ -68,10 +69,10 @@ const renderChart = (labels, datasets, icons) => {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    font: { size: 18 },
-                },
+                // title: {
+                //     display: true,
+                //     font: { size: 18 },
+                // },
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
