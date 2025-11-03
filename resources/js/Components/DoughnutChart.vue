@@ -7,6 +7,7 @@ import {
     ArcElement
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { CHART_ANIMATION_DURATION, CHART_BORDER_COLOR, CHART_BORDER_WIDTH, DOUGHNUT_CUTOUT, FALLBACK_COLOR, LABEL_FONT_SIZE_DESKTOP, LABEL_TEXT_COLOR } from '@/config/constants'
 
 // Chart.jsのプラグイン登録
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels)
@@ -30,11 +31,11 @@ function createChartOptions() {
     return {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '60%',
+        cutout: DOUGHNUT_CUTOUT,
         plugins: {
             datalabels: {
-                color: '#333',
-                font: { weight: 'bold', size: 12 },
+                color: LABEL_TEXT_COLOR,
+                font: { weight: 'bold', size: LABEL_FONT_SIZE_DESKTOP },
                 formatter: (value, context) => {
                     // 💡 context.dataset.data を参照（Chart.js公式推奨）
                     const data = context.dataset?.data || [];
@@ -67,7 +68,7 @@ function createChartOptions() {
         animation: {
             animateRotate: true,
             animateScale: true,
-            duration: 1500
+            duration: CHART_ANIMATION_DURATION
         }
     }
 }
@@ -89,7 +90,7 @@ async function fetchChartData() {
         const totals = json.totals.map(t => Number(t))
         const colors = json.colors && json.colors.length > 0
             ? json.colors
-            : ['#cccccc'] // fallback 色未設定時
+            : [FALLBACK_COLOR] // fallback 色未設定時
 
         chartData.value = {
             labels: json.labels,
@@ -98,8 +99,8 @@ async function fetchChartData() {
                     labels: props.label,
                     data: totals,
                     backgroundColor: colors.slice(0, json.labels.length),
-                    borderColor: '#ffffff',
-                    borderWidth: 2,
+                    borderColor: CHART_BORDER_COLOR,
+                    borderWidth: CHART_BORDER_WIDTH,
                 }
             ]
         }
