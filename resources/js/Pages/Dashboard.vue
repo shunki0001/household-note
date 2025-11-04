@@ -6,26 +6,10 @@ import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
 import TransactionList from '@/Components/TransactionList.vue';
 import IncomeForm from '@/Components/IncomeForm.vue';
-import { DEFAULT_PAGE_NUMBER, DEFAULT_TOTAL_EXPENSE, DEFAULT_TOTAL_INCOME, INITIAL_TOTAL_VALUE, SWEET_ALERT2_TIMER } from '@/config/constants';
 import { showAlert } from '@/utils/alert';
 import { useFinance } from '@/composables/useFinance';
 import { fetchTransactions } from '@/services/transactionService';
 
-// const props = defineProps({
-//     expenses: Object,
-//     categories: Array,
-//     income_categories: Array,
-//     totalExpense: {
-//         type: [Number, String],
-//         default: DEFAULT_TOTAL_EXPENSE,
-//     },
-//     totalIncome: {
-//         type: [Number, String],
-//         default: DEFAULT_TOTAL_INCOME,
-//     },
-//     transactions: Object, // ページネーション形式
-//     latestTransactions: Array, // 配列形式
-// });
 const props = defineProps({
     totalExpense: Number,
     totalIncome: Number,
@@ -59,15 +43,6 @@ const switchToIncome = () => {
     activeForm.value = 'income';
 };
 
-// 収支の算出
-// const currentBalance = computed(() => {
-//     return currentTotalIncome.value - currentTotalExpense.value;
-// });
-
-// 合計金額をリアルタイムで管理
-// const currentTotalExpense = ref(Number(props.totalExpense) || INITIAL_TOTAL_VALUE);
-// const currentTotalIncome = ref(Number(props.totalIncome) || INITIAL_TOTAL_VALUE);
-
 const formattedTotalExpense = computed(() => {
     return currentTotalExpense.value.toLocaleString();
 });
@@ -76,77 +51,12 @@ const formattedTotalIncome = computed(() => {
     return currentTotalIncome.value.toLocaleString();
 });
 
-// const formattedBalance = computed(() => {
-//     return currentBalance.value.toLocaleString();
-// });
-
-// const currentPage = ref(props.expenses.current_page || 1)
-// const currentPage = ref(props.transactions || DEFAULT_PAGE_NUMBER)
-
-
 const transactionListRef = ref(null)
 const transactions = ref([])
 
-
-
-// const latestTransactions = page.props.latestTransactions;
-
-// 一覧データを更新する関数(収入 + 支出)
-// const updateTransactionList = async () => {
-//     try {
-//         console.log('Dashboard: updateTransactionList called'); // デバック
-//         const response = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
-//         transactionList.value = response.data.transactions.data;
-//         console.log('Dashboard: transactionList update with', transactionList.value.length, 'items'); // デバック
-//     } catch (e) {
-//         console.error('Dashboard: 一覧更新エラー', e);
-//     }
-// }
 const updateTransactionList = async () => {
     transactionList.value = await fetchTransactions(currentPage.value);
 };
-
-// 合計金額を更新する関数
-const updateTotalExpense = async () => {
-    try {
-        console.log('Dashboard: updateTotalExpense called'); // デバッグログ
-        const response = await axios.get(route('dashboard.totalExpense'));
-        currentTotalExpense.value = Number(response.data.totalExpense) || INITIAL_TOTAL_VALUE;
-        console.log('Dashboard: totalExpense updated to', currentTotalExpense.value); // デバッグログ
-    } catch (e) {
-        console.error('Dashboard: 合計金額更新エラー', e);
-    }
-}
-
-// 合計収入金額を更新する関数
-const updateTotalIncome = async () => {
-    try {
-        console.log('Dashboard: updateTotalIncome called'); // デバックログ
-        const response = await axios.get(route('dashboard.totalIncome'));
-        currentTotalIncome.value = Number(response.data.totalIncome) || INITIAL_TOTAL_VALUE;
-        console.log('Dashboard: totalIncome updated to', currentTotalIncome.value); // デバックログ
-    } catch (e) {
-        console.error('Dashboard: 合計収入金額更新エラー', e);
-    }
-}
-
-// const handleExpenseAdded = async () => {
-//     console.log('handleExpenseAdded called'); // デバッグログ
-
-//     // 合計支出更新 -> グラフ更新 -> 一覧更新
-//     await updateTotalExpense();
-//     await updateTransactionList();
-//     refreshKey.value++;
-// }
-
-// const handleIncomeAdded = async () => {
-//     console.log('handleIncomeAdded called'); // デバックログ
-
-//     // 合計支出更新 -> グラフ更新 -> 一覧更新
-//     await updateTotalIncome();
-//     await updateTransactionList();
-//     refreshKey.value++;
-// }
 
 const handleTransactionAdded = async (type) => {
     if (type === 'income') {
@@ -159,26 +69,6 @@ const handleTransactionAdded = async (type) => {
     refreshKey.value++;
 };
 
-// const fetchTransactions = async () => {
-//     const res = await axios.get(route('transaction.latestJson', { page: currentPage.value}));
-//     transactionList.value = res.data.transactions.data;
-// }
-
-// onMounted(fetchTransactions);
-
-// 削除完了時の処理
-// const handleTransactionDeleted = async (type) => {
-//     console.log('Dashboard handleTransactionDeleted called for', type);
-
-//     if(type === 'income') {
-//         await updateTotalIncome();
-//     } else if (type === 'expense') {
-//         await updateTotalExpense();
-//     }
-
-//     await updateTransactionList();
-//     refreshKey.value++;
-// }
 const handleTransactionDeleted = async (type) => {
     if (type === 'income') {
         await updateIncome();
@@ -200,12 +90,6 @@ watch(
     }
 );
 
-// onMountedを追加（ページ遷移時に即チェック）
-// onMounted(() => {
-//     if (page.props.flash?.message) {
-//         showAlert(page.props.flash.message, 'success');
-//     }
-// });
 onMounted(updateTransactionList);
 
 </script>
@@ -247,13 +131,11 @@ onMounted(updateTransactionList);
                             <p class="text-lg font-semibold">
                                 今月の合計支出：
                                 <span class="text-red-500 text-xl font-bold">{{ formattedTotalExpense }}円</span>
-                                <!-- <span class="text-red-500 text-xl font-bold">{{ currentTotalExpense }}円</span> -->
                             </p>
 
                             <p class="text-lg font-semibold">
                                 今月の合計収入：
                                 <span class="text-green-500 text-xl font-bold">{{ formattedTotalIncome }}円</span>
-                                <!-- <span class="text-green-500 text-xl font-bold">{{ currentTotalIncome }}円</span> -->
                             </p>
 
                             <p
