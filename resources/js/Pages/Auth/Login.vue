@@ -29,55 +29,12 @@ const customErrors = reactive({
     password: ''
 });
 
-// バリデーション関数
-const validateForm = () => {
-    let isValid = true;
-
-    // エラーメッセージをリセット
-    customErrors.email = '';
-    customErrors.password = '';
-
-    // メールアドレスのバリデーション
-    if (!form.email || form.email.toString().trim() === '') {
-        customErrors.email = 'メールアドレスを入力して下さい';
-        isValid = false;
-    } else {
-        // メールアドレスの形式チェック
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.email)) {
-            customErrors.email = 'メールアドレスまたはパスワードが間違っています';
-            isValid = false;
-        }
-    }
-
-    // パスワードのバリデーション
-    if (!form.password || form.password.toString().trim() === '') {
-        customErrors.password = 'パスワードを入力して下さい';
-        isValid = false;
-    } else if (form.password.length < 8) {
-        customErrors.password = 'メールアドレスまたはパスワードが間違っています';
-        isValid = false;
-    }
-
-    return isValid;
-};
 
 const submit = () => {
-    // カスタムバリデーションを実行
-    if (!validateForm()) {
-        return; // バリデーションエラーがある場合は送信を中止
-    }
-
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
         onError: (errors) => {
-            // サーバーからのエラーをカスタムエラーに設定
-            if (errors.email) {
-                customErrors.email = errors.email;
-            }
-            if (errors.password) {
-                customErrors.password = errors.password;
-            }
+            console.log(errors);
         },
     });
 };
@@ -121,23 +78,25 @@ const submit = () => {
                 <InputError class="mt-2" :message="customErrors.password || form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
+            <!-- 未実装 -->
+            <!-- <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
+                    <span class="ms-2 text-sm text-gray-600"
                         >アカウントを記憶する</span
                     >
                 </label>
-            </div>
+            </div> -->
 
             <div class="mt-4 flex items-center justify-end">
-                <Link
+                <!-- 未実装 -->
+                <!-- <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                     パスワードリセット
-                </Link>
+                </Link> -->
 
                 <PrimaryButton
                     class="ms-4"

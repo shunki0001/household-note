@@ -10,7 +10,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name']; // nameを登録可能に
+    protected $fillable = ['name', 'icon_path', 'sort_order','color'];
 
     public function expenses(): HasMany
     {

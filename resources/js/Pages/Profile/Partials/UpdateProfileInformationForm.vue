@@ -28,51 +28,11 @@ const customErrors = reactive({
     email: ''
 });
 
-// バリデーション関数
-const validateForm = () => {
-    let isValid = true;
-
-    // エラーメッセージをリセット
-    customErrors.name = '';
-    customErrors.email = '';
-
-    // 名前のバリデーション
-    if (!form.name || form.name.toString().trim() === '') {
-        customErrors.name = '名前を入力して下さい';
-        isValid = false;
-    }
-
-    // メールアドレスのバリデーション
-    if (!form.email || form.email.toString().trim() === '') {
-        customErrors.email = 'メールアドレスを入力して下さい';
-        isValid = false;
-    } else {
-        // メールアドレスの形式チェック
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.email)) {
-            customErrors.email = '正しいメールアドレスの形式で入力して下さい';
-            isValid = false;
-        }
-    }
-
-    return isValid;
-};
-
 const updateProfile = () => {
-    // カスタムバリデーションを実行
-    if (!validateForm()) {
-        return; // バリデーションエラーがある場合は送信を中止
-    }
 
     form.patch(route('profile.update'), {
         onError: (errors) => {
-            // サーバーからのエラーをカスタムエラーに設定
-            if (errors.name) {
-                customErrors.name = errors.name;
-            }
-            if (errors.email) {
-                customErrors.email = errors.email;
-            }
+            console.log(errors);
         },
     });
 };
@@ -81,11 +41,11 @@ const updateProfile = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-gray-900">
                 アカウント情報
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-600">
                 アカウントの名前とメールドレスを編集できます。
             </p>
         </header>
@@ -124,13 +84,13 @@ const updateProfile = () => {
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                <p class="mt-2 text-sm text-gray-800">
                     メールアドレスが正しくありません
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         こちらをクリックして認証メールを送信してください(未実装)
                     </Link>
@@ -138,13 +98,13 @@ const updateProfile = () => {
 
                 <div
                     v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600 dark:text-green-400"
+                    class="mt-2 text-sm font-medium text-green-600"
                 >
                     認証メールを送信しました。確認してください。(未実装)
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex justify-end sm:justify-start max-w-xl">
                 <PrimaryButton :disabled="form.processing">保存</PrimaryButton>
 
                 <Transition
@@ -155,7 +115,7 @@ const updateProfile = () => {
                 >
                     <p
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600 dark:text-gray-400"
+                        class="text-sm text-gray-600"
                     >
                         保存中...
                     </p>

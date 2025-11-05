@@ -7,6 +7,7 @@ import {
     ArcElement
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { CHART_ANIMATION_DURATION, CHART_BORDER_COLOR, CHART_BORDER_WIDTH, DOUGHNUT_CUTOUT, FALLBACK_COLOR, LABEL_FONT_SIZE_DESKTOP, LABEL_TEXT_COLOR } from '@/config/constants'
 
 // Chart.jsのプラグイン登録
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels)
@@ -15,17 +16,6 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels)
 const props = defineProps({
     label: { type: String, default: 'カテゴリー別支出合計' },
     apiUrl: { type: String, default: 'api/chart-data/doughnut' },
-    colors: {
-        type: Array,
-        // default: () => [
-        //     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        //     '#FF9F40', '#66FF66', '#FF66B2', '#C9CBCF', '#FF6666'
-        // ]
-        default: () => [
-            '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0',
-            '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
-        ]
-    },
     chartData: Object,
     chartOptions: Object,
     refreshKey: { type: Number, default: 0 },
@@ -41,18 +31,24 @@ function createChartOptions() {
     return {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '60%',
+        cutout: DOUGHNUT_CUTOUT,
         plugins: {
             datalabels: {
-                color: '#333',
-                font: { weight: 'bold', size: 12 },
+                color: LABEL_TEXT_COLOR,
+                font: { weight: 'bold', size: LABEL_FONT_SIZE_DESKTOP },
                 formatter: (value, context) => {
                     // 💡 context.dataset.data を参照（Chart.js公式推奨）
                     const data = context.dataset?.data || [];
                     const total = data.reduce((a, b) => a + b, 0) || 1; // 万が一0でもエラー防止
-                    if (!total || isNaN(total)) return '0%';
-                    const percentage = (value / total * 100).toFixed(1);
-                    return isNaN(percentage) ? '0%' : `${percentage}%`;
+                    if (!total || isNaN(total)) return ' ';
+
+                    const percentage = (value / total * 100);
+                    // 0%の場合は非表示にする
+                    if(percentage === 0) return '';
+
+                    // 小数1桁で表示
+                    const formatted = percentage.toFixed(1);
+                    return `${formatted}%`;
                 }
             },
             legend: {
@@ -72,7 +68,7 @@ function createChartOptions() {
         animation: {
             animateRotate: true,
             animateScale: true,
-            duration: 1500
+            duration: CHART_ANIMATION_DURATION
         }
     }
 }
@@ -88,9 +84,13 @@ async function fetchChartData() {
     try {
         const response = await fetch(props.apiUrl)
         const json = await response.json()
-        const totals = json.totals.map(t => Number(t))
 
         console.log('API response:', json);
+
+        const totals = json.totals.map(t => Number(t))
+        const colors = json.colors && json.colors.length > 0
+            ? json.colors
+            : [FALLBACK_COLOR] // fallback 色未設定時
 
         chartData.value = {
             labels: json.labels,
@@ -98,8 +98,9 @@ async function fetchChartData() {
                 {
                     labels: props.label,
                     data: totals,
-                    backgroundColor: props.colors.slice(0, json.labels.length)
-
+                    backgroundColor: colors.slice(0, json.labels.length),
+                    borderColor: CHART_BORDER_COLOR,
+                    borderWidth: CHART_BORDER_WIDTH,
                 }
             ]
         }

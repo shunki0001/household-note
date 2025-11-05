@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue';
 import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useForm } from '@inertiajs/vue3';
+import { VALIDATE_ERROR_STATUS } from '@/config/constants';
+import { showAlert } from '@/utils/alert';
 
 
 export function useIncomeForm(props, emit) {
@@ -20,39 +20,6 @@ export function useIncomeForm(props, emit) {
         income_category_id: ''
     });
 
-    // バリデーション関数
-    const validateForm = () => {
-        let isValid = true;
-
-        // エラーメッセージをリセット
-        Object.keys(errors).forEach(key => {
-            errors[key] = '';
-        });
-
-        // 金額のバリデーション
-        if (!form.amount || form.amount.toString().trim() === '') {
-            errors.amount = '金額を入力して下さい';
-            isValid = false;
-        } else if (parseFloat(form.amount) < 0) {
-            errors.amount = '金額は0以上の値を入力して下さい';
-            isValid = false;
-        }
-
-        // 日付のバリデーション
-        if (!form.income_date || form.income_date.toString().trim() === '') {
-            errors.income_date = '日付を入力して下さい';
-            isValid = false;
-        }
-
-        // カテゴリーのバリデーション
-        if (!form.income_category_id || form.income_category_id.toString().trim() === '') {
-            errors.income_category_id = 'カテゴリーを選択して下さい';
-            isValid = false;
-        }
-
-        return isValid;
-    };
-
     watch(() => props.income, (newIncome) => {
         form.amount = newIncome.amount ?? '';
         form.income_date = newIncome.income_date ?? '';
@@ -60,10 +27,9 @@ export function useIncomeForm(props, emit) {
     });
 
     const submit = async () => {
-        // バリデーションを実行
-        if (!validateForm()) {
-            return; // バリデーションエラーがある場合は送信を中止
-        }
+
+        // 送信前にエラーリセット
+        Object.keys(errors).forEach(key => (errors[key] = ''));
 
         try {
             console.log('useIncomeForm submit started'); // デバッグログ
@@ -74,51 +40,36 @@ export function useIncomeForm(props, emit) {
                 : await axios.put(props.submitUrl, form);
             console.log('API response:', response.data); // デバッグログ
 
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: response.data.message,
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            }).then(() => {
+            showAlert(response.data.message, 'success').then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
                 if (props.method === 'put' && form.back) {
                     window.location.href = window.location.origin + '/' + form.back;
                 } else if (props.method === 'put') {
                     window.location.href = '/dashboard';
+                } else if (props.method === 'post') {
+                    // 新規登録時はフォームをリセット
+                    form.amount = '';
+                    form.income_date = '';
+                    form.income_category_id = '';
+                    // 親コンポーネントに登録完了を通知
+                    emit('submitted', 'income');
                 }
             });
-
-            // 新規登録時（POST）のみイベントを発火
-            if (props.method === 'post') {
-                console.log('Emitting Income-added event'); // デバッグログ
-                emit('submitted');
-                // emit('income-added');
-                console.log('useIncomeForm: income-added event emitted'); // デバッグログ
-            }
-
-            // 新規登録時（POST）のみフォームをリセット
-            if (props.method === 'post') {
-                console.log('Resetting form'); // デバッグログ
-                form.amount='';
-                form.income_date='';
-                form.income_category_id='';
-                console.log('Form reset completed'); // デバッグログ
-            }
         }   catch(error) {
             console.error('Submit error:', error); // デバッグログ
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: '登録失敗しました',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            });
-            console.error('登録失敗', error);
+
+            // Laravelの422バリデーションエラー対応
+            if (error.response && error.response.status == VALIDATE_ERROR_STATUS) {
+                const validationErrors = error.response.data.errors;
+                for (const key in validationErrors) {
+                    if (errors.hasOwnProperty(key)) {
+                        errors[key] = validationErrors[key][0];
+                    }
+                }
+            } else {
+                showAlert('登録失敗しました', 'success');
+                console.error('登録失敗', error);
+            }
         }
     };
 

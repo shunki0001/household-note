@@ -32,6 +32,11 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [];
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *
@@ -46,6 +51,7 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+                // 'email' => trans('メールアドレスまたはパスワードが間違えています'),
             ]);
         }
 

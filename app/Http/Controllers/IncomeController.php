@@ -7,59 +7,41 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Income;
 use App\Models\IncomeCategory;
 use Inertia\Inertia;
-use Carbon\Carbon;
+use App\Http\Requests\StoreIncomeRequest;
+use DragonCode\Contracts\Cache\Store;
 
 class IncomeController extends Controller
 {
-    // 収入のみ一覧表示(デバック用)
-    public function index()
-    {
-
-    }
 
     // 登録処理(ログインユーザーに紐付けて保存)
-    public function store(Request $request)
+    public function store(StoreIncomeRequest $request)
     {
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'income_date' => 'required|date',
-            'income_category_id' => 'required',
+        $validated = $request->validated();
+
+        // ログインユーザーに紐づけて保存
+        Income::create([
+            ...$validated,
+            'user_id' => $request->user()->id,
         ]);
 
-        $request->user()->incomes()->create($validated);
-
-        return response()->json([
-            'message' => '登録しました',
-        ]);
+        return $this->jsonResponse('登録しました');
     }
 
     // 更新処理
-    public function update(Request $request, Income $income)
+    public function update(StoreIncomeRequest $request, Income $income)
     {
-        // ログインユーザーのデータのみ更新処理
-        if ($income->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorizeIncomeOwner($income);
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'income_date' => 'required|date',
-            'income_category_id' => 'required',
-        ]);
-
+        $validated = $request->validated();
         $income->update($validated);
 
-        return response()->json([
-            'message' => '更新しました',
-        ]);
+        return $this->jsonResponse('更新しました');
     }
 
     // 編集ページ表示
     public function edit(Request $request, Income $income)
     {
-        if(Auth::id() !== $income->user_id) {
-            abort(403);
-        }
+        $this->authorizeIncomeOwner($income);
 
         $income_categories = IncomeCategory::all();
         $backRoute = $request->input('back', 'dashboard');
@@ -72,30 +54,21 @@ class IncomeController extends Controller
         ]);
     }
 
-    // 削除処理
-    // public function destroy(Income $income)
-    // {
-    //     if(Auth::id() !== $income->user_id) {
-    //         abort(403);
-    //     }
+    // 削除処理はTransactionControllerが行う
 
-    //     $income->delete();
-    //     return response()->json(['message' => '削除しました']);
-    // }
-
-    // 今月の合計を算出
-    public function getTotalMonthlyIncomes()
+    /**
+     * アクセス制限
+     */
+    private function authorizeIncomeOwner(Income $income): void
     {
-        $now = Carbon::now();
-        $userId = Auth::id();
-
-        $totalIncome = Income::whereYear('income_date', $now->year)
-            ->where('user_id', $userId)
-            ->whereMonth('income_date', $now->month)
-            ->sum('amount');
-
-        return response()->json([
-            'totalIncome' => $totalIncome,
-        ]);
+        if(Auth::id() !== $income->user_id) {
+            abort(403, 'この操作は許可されていません。');
+        }
     }
+
+    private function jsonResponse(string $message, int $status = 200)
+    {
+        return response()->json(['message' => $message], $status, [], JSON_UNESCAPED_UNICODE);
+    }
+
 }

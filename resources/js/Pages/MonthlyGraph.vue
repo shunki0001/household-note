@@ -1,46 +1,108 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import BarChart from '@/Components/BarChart.vue';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head } from '@inertiajs/vue3';
+import { YEAR_START_MONTH, YEAR_END_MONTH } from '@/config/constants';
+import { useQuarter } from '@/composables/useQuarter';
+import { useResponsive } from '@/composables/useResponsive';
 
-const currentYear = ref(new Date().getFullYear())
-const availableYears = ref([2023, 2024, 2025, 2026, 2027]) // ← DBにある年を自動取得したい場合はAPI化も可能
+// =============================
+// 動的データ
+// =============================
+const availableYears = ref([2023, 2024, 2025, 2026, 2027]);
 
-const changeYear = (year) => {
-    currentYear.value = year
-}
+const {currentYear, currentQuarter, currentQuarterLabel ,currentRange, nextQuarter, prevQuarter, changeYear, resetQuarterToCurrentMonth } =
+    useQuarter(availableYears);
+const { isMobile } = useResponsive();
+
+// =============================
+// グラフ期間
+// =============================
+const chartRange = computed(() => {
+    // スマホ → 四半期ごと
+    if (isMobile.value) {
+        return {
+            startMonth: currentRange.value.start,
+            endMonth: currentRange.value.end
+        };
+    }
+    // PC → 年間
+    return {
+        startMonth: YEAR_START_MONTH,
+        endMonth: YEAR_END_MONTH,
+    };
+});
+
+// スマホ↔︎PC切り替え時に四半期や年を再計算
+watch(isMobile, (newVal) => {
+    if (!newVal) {
+        // PC画面に戻った時
+        resetQuarterToCurrentMonth();
+    }
+});
 </script>
 
 <template>
-    <Head title="月別グラフ"/>
+<Head title="月別グラフ" />
 
-    <AuthenticatedLayout>
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <div class="mb-4">
-                            <span class="font-bold text-lg">年別表示：</span>
-                            <button
-                                v-for="year in availableYears"
-                                :key="year"
-                                class="mx-1 px-3 py-1 border rounded"
-                                :class="{ 'bg-blue-500 text-white': currentYear === year }"
-                                @click="changeYear(year)"
-                            >
-                                {{ year }}年
-                            </button>
-                        </div>
-
-                        <BarChart
-                            :year="currentYear"
-                            label="月別支出合計"
-                            apiUrl="/api/chart-data"
-                        />
-                    </div>
-                </div>
+<AuthenticatedLayout>
+    <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                月別支出グラフ
+            </h2>
+        </template>
+<div class="py-8 sm:py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="bg-white shadow-sm rounded-lg w-full">
+        <div
+        class="
+            p-4 sm:p-6 text-gray-900
+            w-full
+            sm:min-w-[700px]
+            overflow-x-auto
+        "
+        >
+        <!-- PC表示(年度切り替え) -->
+        <div class="hidden md:block">
+            <div class="mb-4 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                <span class="font-bold text-lg">年別表示：</span>
+                <button
+                    v-for="year in availableYears"
+                    :key="year"
+                    class="px-3 py-1 border rounded"
+                    :class="{ 'bg-blue-500 text-white': currentYear === year }"
+                    @click="changeYear(year)"
+                    >
+                    {{ year }}年
+                </button>
             </div>
+
         </div>
-    </AuthenticatedLayout>
+
+        <!-- スマホ表示(年 + 四半期まとめ) -->
+        <div class="flex justify-end w-full max-w-xl mx-auto px-4 sm:px-0 md:hidden">
+            <button @click="prevQuarter" class="px-2 py-1 border rounded text-sm">◀︎</button>
+            <span class="font-bold text-lg mx-auto">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
+            <button @click="nextQuarter" class="px-2 py-1 border rounded text-sm">▶︎</button>
+        </div>
+
+        <!-- グラフ -->
+        <div class="w-full">
+            <BarChart
+            :key="`${isMobile}-${currentYear}-${isMobile ? currentQuarter : 'year'}`"
+            :year="currentYear"
+            :startMonth="chartRange.startMonth"
+            :endMonth="chartRange.endMonth"
+            label="月別支出合計"
+            apiUrl="/api/chart-data"
+            />
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+</AuthenticatedLayout>
 </template>
