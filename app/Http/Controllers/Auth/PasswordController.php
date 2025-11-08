@@ -16,13 +16,13 @@ class PasswordController extends Controller
      */
     public function update(PasswordRequest $request): RedirectResponse
     {
-        $validated = $request->validate();
+        $validated = $request->validated();
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
 
-        // return back();
-        return back('status', 'パスワードを更新しました');
+        return back();
+        // return back('status', 'パスワードを更新しました');
     }
 }
