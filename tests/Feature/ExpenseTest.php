@@ -110,7 +110,11 @@ class ExpenseTest extends TestCase
         ]);
 
         // 既存データを削除
-        $response = $this->delete("/expenses/{$expense->id}");
+        // ExpenseControllerから削除処理を実行
+        // $response = $this->delete("/expenses/{$expense->id}");
+
+        // TransactionControllerから削除処理を実行
+        $response = $this->delete("/transactions/expense/{$expense->id}");
 
         $response->assertStatus(200);
 

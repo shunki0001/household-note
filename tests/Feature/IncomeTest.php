@@ -103,7 +103,7 @@ class IncomeTest extends TestCase
         ]);
 
         // 既存データを削除
-        $response = $this->delete("/incomes/{$income->id}");
+        $response = $this->delete("/transactions/income/{$income->id}");
 
         $response->assertStatus(200);
 
