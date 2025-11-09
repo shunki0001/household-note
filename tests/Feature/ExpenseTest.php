@@ -130,4 +130,97 @@ class ExpenseTest extends TestCase
         dump(\DB::connection()->getDatabaseName()); // 接続DBを確認
         $this->assertEquals('testing', \DB::connection()->getDatabaseName());
     }
+
+    // バリデーション違反は登録できない
+    public function test_new_expense_cannot_register_with_invalid_data(): void
+    {
+        // ユーザー作成&ログイン
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // カテゴリー作成
+        $category = Category::factory()->create([
+            'name' => '食費',
+        ]);
+
+        // 登録リスト
+        $invaliDataSets = [
+            [
+                'data' => ['amount' => '', 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
+                'errors' => ['amount'], // amount必須チェック
+                'case' => 'amount必須'
+            ],
+            [
+                'data' => ['amount' => 100, 'date' => '', 'title' => 'Test Title', 'category_id' => $category->id],
+                'errors' => ['date'], // date必須チェック
+                'case' => 'date必須'
+            ],
+            [
+                'data' => ['amount' => 100, 'date' => '2025-11-09', 'title' => '', 'category_id' => $category->id],
+                'errors' => ['title'], // title必須チェック
+                'case' => 'title必須'
+            ],
+            [
+                'data' => ['amount' => 100, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => ''],
+                'errors' => ['category_id'], // category_id必須チェック
+                'case' => 'category_id必須'
+            ],
+            [
+                'data' => ['amount' => -100, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
+                'errors' => ['amount'], // amount不正値チェック
+                'case' => 'amountにマイナスが入力'
+            ],
+            [
+                'data' => ['amount' => 100.32, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
+                'errors' => ['amount'], // amount不正値チェック
+                'case' => 'amountに少数が入力'
+            ],
+        ];
+
+        foreach ($invaliDataSets as $set) {
+            $response = $this->post('/expenses', $set['data']);
+
+            // バリデーションエラー時はリダイレクト
+            $response->assertStatus(302);
+
+            // 各フィールドに対してエラーメッセージが返されているか確認
+            $response->assertSessionHasErrors($set['errors'], "失敗ケース: {$set['case']}");
+
+            // データベースに登録されていないことを確認
+            $this->assertDatabaseCount('expenses', 0);
+        }
+
+    }
+
+
+    // 必須項目が空欄の場合にエラーとなることを確認するテスト
+public function test_expense_cannot_be_stored_with_empty_fields()
+{
+    // ユーザー作成＆ログイン
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    // カテゴリ作成
+    $category = Category::factory()->create([
+        'name' => '食費',
+    ]);
+
+    // 必須項目を空欄でPOST
+    $response = $this->post('/expenses', [
+        'amount' => '',        // 空欄
+        'date' => '',          // 空欄
+        'title' => '',         // 空欄
+        'category_id' => '',   // 空欄
+    ]);
+
+    // バリデーションエラー時はリダイレクト(302)
+    $response->assertStatus(302);
+
+    // 各フィールドに対してエラーメッセージが返されているか確認
+    $response->assertSessionHasErrors(['amount', 'date', 'title', 'category_id']);
+
+    // データベースに登録されていないことを確認
+    $this->assertDatabaseCount('expenses', 0);
+}
+
 }
