@@ -145,36 +145,12 @@ class ExpenseTest extends TestCase
 
         // 登録リスト
         $invaliDataSets = [
-            [
-                'data' => ['amount' => '', 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
-                'errors' => ['amount'], // amount必須チェック
-                'case' => 'amount必須'
-            ],
-            [
-                'data' => ['amount' => 100, 'date' => '', 'title' => 'Test Title', 'category_id' => $category->id],
-                'errors' => ['date'], // date必須チェック
-                'case' => 'date必須'
-            ],
-            [
-                'data' => ['amount' => 100, 'date' => '2025-11-09', 'title' => '', 'category_id' => $category->id],
-                'errors' => ['title'], // title必須チェック
-                'case' => 'title必須'
-            ],
-            [
-                'data' => ['amount' => 100, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => ''],
-                'errors' => ['category_id'], // category_id必須チェック
-                'case' => 'category_id必須'
-            ],
-            [
-                'data' => ['amount' => -100, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
-                'errors' => ['amount'], // amount不正値チェック
-                'case' => 'amountにマイナスが入力'
-            ],
-            [
-                'data' => ['amount' => 100.32, 'date' => '2025-11-09', 'title' => 'Test Title', 'category_id' => $category->id],
-                'errors' => ['amount'], // amount不正値チェック
-                'case' => 'amountに少数が入力'
-            ],
+            $this->invalidData(['amount' => ''], ['amount'], 'amount必須'),
+            $this->invalidData(['date' => ''], ['date'], 'date必須'),
+            $this->invalidData(['title' => ''], ['title'], 'title必須'),
+            $this->invalidData(['category_id' => ''], ['category_id'], 'category_id必須'),
+            $this->invalidData(['amount' => -100], ['amount'], 'amoountマイナスのパターン'),
+            $this->invalidData(['amount' => 100.123], ['amount'], 'amount小数チェック'),
         ];
 
         foreach ($invaliDataSets as $set) {
@@ -194,33 +170,52 @@ class ExpenseTest extends TestCase
 
 
     // 必須項目が空欄の場合にエラーとなることを確認するテスト
-public function test_expense_cannot_be_stored_with_empty_fields()
-{
-    // ユーザー作成＆ログイン
-    $user = User::factory()->create();
-    $this->actingAs($user);
+    public function test_expense_cannot_be_stored_with_empty_fields()
+    {
+        // ユーザー作成＆ログイン
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
-    // カテゴリ作成
-    $category = Category::factory()->create([
+        // カテゴリ作成
+        $category = Category::factory()->create([
         'name' => '食費',
-    ]);
+        ]);
 
-    // 必須項目を空欄でPOST
-    $response = $this->post('/expenses', [
-        'amount' => '',        // 空欄
-        'date' => '',          // 空欄
-        'title' => '',         // 空欄
-        'category_id' => '',   // 空欄
-    ]);
+        // 必須項目を空欄でPOST
+        $response = $this->post('/expenses', [
+            'amount' => '',        // 空欄
+            'date' => '',          // 空欄
+            'title' => '',         // 空欄
+            'category_id' => '',   // 空欄
+        ]);
 
-    // バリデーションエラー時はリダイレクト(302)
-    $response->assertStatus(302);
+        // バリデーションエラー時はリダイレクト(302)
+        $response->assertStatus(302);
 
-    // 各フィールドに対してエラーメッセージが返されているか確認
-    $response->assertSessionHasErrors(['amount', 'date', 'title', 'category_id']);
+        // 各フィールドに対してエラーメッセージが返されているか確認
+        $response->assertSessionHasErrors(['amount', 'date', 'title', 'category_id']);
 
-    // データベースに登録されていないことを確認
-    $this->assertDatabaseCount('expenses', 0);
-}
+        // データベースに登録されていないことを確認
+        $this->assertDatabaseCount('expenses', 0);
+    }
+
+    // テストデータを関数化
+    // defaultの値を上書きして使う
+    private function invalidData($overides = [], $errors = [], $case = [])
+    {
+        // カテゴリーが消えないように定義しておく
+        $category = Category::factory()->create();
+
+        return [
+            'data' => array_merge([
+                'amount' => 100,
+                'date' => '2025-11-09',
+                'title' => 'Test Title',
+                'category_id' => $category->id,
+            ], $overides),
+            'errors' => $errors,
+            'case' => $case,
+        ];
+    }
 
 }
