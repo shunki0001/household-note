@@ -14,17 +14,44 @@ class ExpenseTest extends TestCase
 {
     use RefreshDatabase;
 
-    // 追加テスト
-    public function test_expense_can_be_stored()
+    // ユーザー作成 + ログイン + カテゴリー作成を共通化
+    private function create_and_login_user(): array
     {
-        // ユーザーを作成して認証
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // カテゴリーを作成
         $category = Category::factory()->create([
             'name' => '食費',
         ]);
+
+        return compact('user', 'category'); // ['user' => $user, 'category' => $category]
+    }
+
+     // テストデータを関数化
+    // defaultの値を上書きして使う
+    private function invalidData($categoryId, $overides = [], $errors = [], $case = [])
+    {
+        // カテゴリーが消えないように定義しておく
+        /* $category = Category::factory()->create(); */
+
+        return [
+            'data' => array_merge([
+                'amount' => 100,
+                'date' => '2025-11-09',
+                'title' => 'Test Title',
+                'category_id' => $categoryId,
+            ], $overides),
+            'errors' => $errors,
+            'case' => $case,
+        ];
+    }
+
+
+    // 追加テスト
+    public function test_expense_can_be_stored()
+    {
+        // ユーザー作成 + カテゴリー作成
+        ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
         // APIにPOSTリスエスト
         $response = $this->post('/expenses', [
@@ -50,14 +77,8 @@ class ExpenseTest extends TestCase
     // 編集テスト
     public function test_expense_can_be_updated(): void
     {
-        // ユーザー作成
-        $user = User::factory()->create();
-        $this->actingAs($user);
 
-        // カテゴリー作成
-        $category = Category::factory()->create([
-            'name' => '食費',
-        ]);
+        ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
         // 既存データを作成
         $expense = Expense::factory()->create([
@@ -91,15 +112,7 @@ class ExpenseTest extends TestCase
     // 削除テスト
     public function test_expense_can_be_deleted(): void
     {
-        // ユーザー作成
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        // カテゴリー作成
-        $category = Category::factory()->create([
-            'name' => '食費',
-        ]);
-
+        ['user' => $user, 'category' => $category] = $this->create_and_login_user();
         // 既存データを作成
         $expense = Expense::factory()->create([
             'user_id' => $user->id,
@@ -109,9 +122,6 @@ class ExpenseTest extends TestCase
             'date' => '2025-10-15',
         ]);
 
-        // 既存データを削除
-        // ExpenseControllerから削除処理を実行
-        // $response = $this->delete("/expenses/{$expense->id}");
 
         // TransactionControllerから削除処理を実行
         $response = $this->delete("/transactions/expense/{$expense->id}");
@@ -134,23 +144,15 @@ class ExpenseTest extends TestCase
     // バリデーション違反は登録できない
     public function test_new_expense_cannot_register_with_invalid_data(): void
     {
-        // ユーザー作成&ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        // カテゴリー作成
-        $category = Category::factory()->create([
-            'name' => '食費',
-        ]);
-
+        ['user' => $user, 'category' => $category] = $this->create_and_login_user();
         // 登録リスト
         $invaliDataSets = [
-            $this->invalidData(['amount' => ''], ['amount'], 'amount必須'),
-            $this->invalidData(['date' => ''], ['date'], 'date必須'),
-            $this->invalidData(['title' => ''], ['title'], 'title必須'),
-            $this->invalidData(['category_id' => ''], ['category_id'], 'category_id必須'),
-            $this->invalidData(['amount' => -100], ['amount'], 'amoountマイナスのパターン'),
-            $this->invalidData(['amount' => 100.123], ['amount'], 'amount小数チェック'),
+            $this->invalidData($category->id, ['amount' => ''], ['amount'], 'amount必須'),
+            $this->invalidData($category->id, ['date' => ''], ['date'], 'date必須'),
+            $this->invalidData($category->id, ['title' => ''], ['title'], 'title必須'),
+            $this->invalidData($category->id, ['category_id' => ''], ['category_id'], 'category_id必須'),
+            $this->invalidData($category->id, ['amount' => -100], ['amount'], 'amoountマイナスのパターン'),
+            $this->invalidData($category->id, ['amount' => 100.123], ['amount'], 'amount小数チェック'),
         ];
 
         foreach ($invaliDataSets as $set) {
@@ -172,14 +174,8 @@ class ExpenseTest extends TestCase
     // 必須項目が空欄の場合にエラーとなることを確認するテスト
     public function test_expense_cannot_be_stored_with_empty_fields()
     {
-        // ユーザー作成＆ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
 
-        // カテゴリ作成
-        $category = Category::factory()->create([
-        'name' => '食費',
-        ]);
+        ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
         // 必須項目を空欄でPOST
         $response = $this->post('/expenses', [
@@ -199,23 +195,5 @@ class ExpenseTest extends TestCase
         $this->assertDatabaseCount('expenses', 0);
     }
 
-    // テストデータを関数化
-    // defaultの値を上書きして使う
-    private function invalidData($overides = [], $errors = [], $case = [])
-    {
-        // カテゴリーが消えないように定義しておく
-        $category = Category::factory()->create();
-
-        return [
-            'data' => array_merge([
-                'amount' => 100,
-                'date' => '2025-11-09',
-                'title' => 'Test Title',
-                'category_id' => $category->id,
-            ], $overides),
-            'errors' => $errors,
-            'case' => $case,
-        ];
-    }
 
 }
