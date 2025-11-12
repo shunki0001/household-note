@@ -22,7 +22,7 @@ class StoreIncomeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|integer|min:0',
             'income_date' => 'required|date',
             'income_category_id' => 'required',
         ];

@@ -14,16 +14,48 @@ class IncomeTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_store_income()
+    // ユーザー作成 + ログイン + カテゴリー作成を共通化
+    private function create_and_login_user(): array
     {
-        // ユーザーを作成して認証
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // カテゴリーを作成
         $income_category = IncomeCategory::factory()->create([
             'name' => '給与',
         ]);
+
+        return compact('user', 'income_category');
+
+    }
+
+    // ========テストデータを関数化 ============
+    private function invalidData($income_category_id, $overrides = [], $errors = [], $case = [])
+    {
+        return [
+            'data' => array_merge([
+                'amount' => 100,
+                'income_date' => '2025-11-11',
+                'income_category_id' => $income_category_id,
+            ], $overrides),
+            'errors' => $errors,
+            'case' => $case,
+        ];
+    }
+
+    // =========================================
+
+    public function test_user_can_store_income()
+    {
+        // // ユーザーを作成して認証
+        // $user = User::factory()->create();
+        // $this->actingAs($user);
+        //
+        // // カテゴリーを作成
+        // $income_category = IncomeCategory::factory()->create([
+        //     'name' => '給与',
+        // ]);
+
+        ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
 
         // APIにPOSTリクエスト
         $response = $this->post('/incomes', [
@@ -47,15 +79,16 @@ class IncomeTest extends TestCase
     // 編集テスト
     public function test_income_can_be_updated(): void
     {
-        // ユーザー作成
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        // // ユーザー作成
+        // $user = User::factory()->create();
+        // $this->actingAs($user);
+        //
+        // // カテゴリー作成
+        // $income_category = IncomeCategory::factory()->create([
+        //     'name' => '給与',
+        // ]);
 
-        // カテゴリー作成
-        $income_category = IncomeCategory::factory()->create([
-            'name' => '給与',
-        ]);
-
+        ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
         // 既存データを作成
         $income = Income::factory()->create([
             'user_id' => $user->id,
@@ -85,15 +118,16 @@ class IncomeTest extends TestCase
     // 削除テスト
     public function test_income_can_be_deleted(): void
     {
-        // ユーザー作成
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        // // ユーザー作成
+        // $user = User::factory()->create();
+        // $this->actingAs($user);
+        //
+        // // カテゴリー作成
+        // $income_category = IncomeCategory::factory()->create([
+        //     'name' => '給与',
+        // ]);
 
-        // カテゴリー作成
-        $income_category = IncomeCategory::factory()->create([
-            'name' => '給与',
-        ]);
-
+        ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
         // 既存データを作成
         $income = Income::factory()->create([
             'user_id' => $user->id,
@@ -112,18 +146,36 @@ class IncomeTest extends TestCase
         ]);
     }
 
-    public function test_income_database_connection()
+    // ======== バリデーション違反は登録できない ========
+    public function test_new_income_cannot_register_with_invalid_data(): void
     {
-        dump(\DB::connection()->getDatabaseName()); // 接続DBを確認
-        $this->assertEquals('testing', \DB::connection()->getDatabaseName());
-    }
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+        ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
+        // 登録リスト
+        $invalidDataSets = [
+            $this->invalidData($income_category->id, ['amount' => ''], ['amount'], 'amount必須'),
+            $this->invalidData($income_category->id, ['income_date' => ''], ['income_date'], 'income_date必須'),
+            $this->invalidData($income_category->id, ['income_category_id' => ''], ['income_category_id'], 'income_category_idt必須'),
+            $this->invalidData($income_category->id, ['amount' => -100], ['amount'], 'amountマイナスのパターン'),
+            $this->invalidData($income_category->id, ['amount' => 100.23], ['amount'], 'amount小数'),
+        ];
 
-        $response->assertStatus(200);
+        foreach ($invalidDataSets as $set) {
+            $response = $this->post('/incomes', $set['data']);
+
+            // バリデーションエラー時はリダイレクト
+            $response->assertStatus(302);
+
+            // 各フィールドに対してエラーメッセージが返されているか確認
+            $response->assertSessionHasErrors($set['errors'], "失敗ケース: {$set['case']}");
+
+            // データベースに登録されていないことを確認
+            $this->assertDatabaseCount('incomes', 0);
+
+        }
     }
+
+    // ==================================================
+
+
+
 }
