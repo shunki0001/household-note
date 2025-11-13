@@ -42,19 +42,9 @@ class IncomeTest extends TestCase
         ];
     }
 
-    // =========================================
 
     public function test_user_can_store_income()
     {
-        // // ユーザーを作成して認証
-        // $user = User::factory()->create();
-        // $this->actingAs($user);
-        //
-        // // カテゴリーを作成
-        // $income_category = IncomeCategory::factory()->create([
-        //     'name' => '給与',
-        // ]);
-
         ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
 
         // APIにPOSTリクエスト
@@ -79,15 +69,6 @@ class IncomeTest extends TestCase
     // 編集テスト
     public function test_income_can_be_updated(): void
     {
-        // // ユーザー作成
-        // $user = User::factory()->create();
-        // $this->actingAs($user);
-        //
-        // // カテゴリー作成
-        // $income_category = IncomeCategory::factory()->create([
-        //     'name' => '給与',
-        // ]);
-
         ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
         // 既存データを作成
         $income = Income::factory()->create([
@@ -118,16 +99,8 @@ class IncomeTest extends TestCase
     // 削除テスト
     public function test_income_can_be_deleted(): void
     {
-        // // ユーザー作成
-        // $user = User::factory()->create();
-        // $this->actingAs($user);
-        //
-        // // カテゴリー作成
-        // $income_category = IncomeCategory::factory()->create([
-        //     'name' => '給与',
-        // ]);
-
         ['user' => $user, 'income_category' => $income_category] = $this->create_and_login_user();
+
         // 既存データを作成
         $income = Income::factory()->create([
             'user_id' => $user->id,
@@ -173,9 +146,5 @@ class IncomeTest extends TestCase
 
         }
     }
-
-    // ==================================================
-
-
 
 }
