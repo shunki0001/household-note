@@ -46,24 +46,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
 
-    Route::get('/api/dashboard/total-expense', [DashboardController::class, 'getTotalExpense'])->name('dashboard.totalExpense');
-    Route::get('/api/chart-data', [ChartController::class, 'getMonthlyExpenseTotals']);
-    Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryExpenseTotals']);
-    Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryExpenseTotals']);
-
     // ページ移動
     Route::get('/list', [PageController::class, 'list'])->name('list');
     Route::get('/graph/monthly', [PageController::class, 'monthlyGraph'])->name('graph.monthly');
     Route::get('/graph/category', [PageController::class, 'categoryGraph'])->name('graph.category');
 
-    // 収入関連ルート、API
+    // 収入関連ルート
     Route::post('/incomes', [IncomeController::class, 'store'])->name('incomes.store'); // 登録
     Route::put('/incomes/{income}', [IncomeController::class, 'update'])->name('incomes.update'); // 更新
     Route::get('/incomes/{income}/edit', [IncomeController::class, 'edit'])->name('incomes.edit'); // 編集
     Route::delete('/incomes/{income}', [IncomeController::class, 'destroy'])->name('incomes.destroy'); // 削除
+
+    // API関連ルート
     Route::get('/api/incomes/total-monthly-incomes', [DashboardController::class, 'getTotalMonthlyIncomes'])->name('dashboard.totalIncome'); // 合計
     Route::get('/api/report-data/latest-json', [ReportController::class, 'latestJson'])->name('transaction.latestJson'); // 支出+支出一覧(5件)
     Route::get('/api/report-data/monthly-transactions', [ReportController::class, 'getMonthlyTransactions']); // 支出+支出一覧(月別)
+    Route::get('/api/dashboard/total-expense', [DashboardController::class, 'getTotalExpense'])->name('dashboard.totalExpense'); // 支出合計
+    Route::get('/api/chart-data', [ChartController::class, 'getMonthlyExpenseTotals']); // グラフ 月合計
+    Route::get('/api/chart-data/category-monthly-single', [ChartController::class, 'getCategoryExpenseTotals']); // グラフ カテゴリー別月合計
+    Route::get('/api/chart-data/doughnut', [ChartController::class, 'doughnutGetCategoryExpenseTotals']);  // グラフ ドーナツ
 
     // transaction関連
     Route::delete('/transactions/{type}/{id}', [TransactionController::class, 'destroy'])->name('transaction.destroy');

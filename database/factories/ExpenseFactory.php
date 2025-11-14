@@ -24,7 +24,8 @@ class ExpenseFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'category_id' => Category::factory(),
+            // 'category_id' => Category::factory(),
+            // 'category_id' => 1,
             'amount' => $this->faker->numberBetween(100, 10000),
             'title' => $this->faker->word(),
             'date' => $this->faker->date(),

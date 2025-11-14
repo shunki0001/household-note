@@ -25,8 +25,12 @@ class CategoryFactory extends Factory
     // }
     public function definition()
     {
+        // return [
+        //     'name' => $this->faker->word(),
+        // ];
         return [
-            'name' => $this->faker->word(),
+            'name' => '未設定',
+            'sort_order' => 1,
         ];
     }
 }
