@@ -13,16 +13,6 @@ class ChartTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-
     // 月別支出合計グラフテスト
     // ChartController@getMonthlyExpenseTotal の動作テスト
     public function test_monthly_total_is_calculated_correctly(): void
@@ -134,7 +124,97 @@ class ChartTest extends TestCase
 
     //ChartController@doughnutGetCategoryExpenseTotals
     // API: /api/chart-data/doughnut
-    // ========================================
+    // ドーナツグラフ用カテゴリー別支出データの集計ロジックのテスト
+    public function test_doughnut_category_expense_totals(): void
+    {
+        // 既存のカテゴリをすべて削除（テストデータの分離のため）
+        Category::query()->delete();
 
+        // ユーザー作成 + ログイン
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
+        $now = now();
+        $currentYear = $now->year;
+        $currentMonth = $now->month;
+        $currentDate = $now->format('Y-m-d');
+
+        // 期待されるカテゴリ名リスト（labels と一致する必要がある）
+        $categoryNames = [
+            '食費',
+            '日用品費',
+            '交通費',
+            '住居費',
+            '水道・光熱費',
+            '通信費',
+            '医療・保険',
+            '娯楽・交際費',
+            '教育費',
+            'その他',
+        ];
+
+        // カテゴリモデルを格納する配列（呼び出し用）
+        $categories = [];
+
+        // 1カテゴリずつ作成して $categories に保存
+        foreach ($categoryNames as $i => $name) {
+            $categories[$name] = Category::factory()->create([
+                'name' => $name,
+                'sort_order' => $i + 1,
+                'color' => '#000000',
+            ]);
+        }
+
+        // 支出登録（食費: 3000円、日用品費: 2000円、それ以外は0円）
+        Expense::factory()->create([
+            'amount' => 1000,
+            'date' => $currentDate,
+            'category_id' => $categories['食費']->id,
+            'user_id' => $user->id,
+        ]);
+        Expense::factory()->create([
+            'amount' => 2000,
+            'date' => $currentDate,
+            'category_id' => $categories['食費']->id,
+            'user_id' => $user->id,
+        ]);
+        Expense::factory()->create([
+            'amount' => 2000,
+            'date' => $currentDate,
+            'category_id' => $categories['日用品費']->id,
+            'user_id' => $user->id,
+        ]);
+
+        // API 呼び出し
+        $response = $this->get('/api/chart-data/doughnut');
+
+        // ステータス確認
+        $response->assertStatus(200);
+
+        // レスポンス形式の確認
+        $response->assertJsonStructure([
+            'labels',
+            'totals',
+            'colors',
+        ]);
+
+        // ラベル(カテゴリ名)が正しいか
+        $response->assertJson([
+            'labels' => $categoryNames,
+        ]);
+
+        // 食費 = 3000、日用品費 = 2000、それ以外は 0 を確認
+        $response->assertJsonPath('totals.0', 3000); // 食費
+        $response->assertJsonPath('totals.1', 2000); // 日用品費
+
+        for ($i = 2; $i < 10; $i++) {
+            $response->assertJsonPath("totals.$i", 0);
+        }
+
+        // 色の配列が正しく返されているか確認
+        $response->assertJsonCount(10, 'colors');
+    }
+    // ========================================
 
 }
