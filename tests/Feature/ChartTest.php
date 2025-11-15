@@ -14,7 +14,68 @@ class ChartTest extends TestCase
     use RefreshDatabase;
 
     // 月別支出合計グラフテスト
-    // ChartController@getMonthlyExpenseTotal の動作テスト
+    /**
+     * ChartController@getMonthlyExpenseTotal の次のパターンの整合性を担保する
+     * 1. データが全くない場合: APIの初期状態が正しく保証される
+     * 2. データが1件だけ->対応月のみが反映: １ヶ月分の計算ロジックが正しい。ラベルの並び・配列の長さも保証
+     * 3. 同じ月に複数データ->合計されるか: 集計ロジックの核の部分。月別集計処理の計算が正しいか
+     * 4. 別ユーザーのデータが混じっても集計されない: マルチユーザーアプリにおいて整合性を保証
+     */
+
+    // ========================================================================================
+    //ß 1.
+    public function test_returns_zero_for_all_months_when_no_data(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response =$this->get('/api/chart-data');
+        $response->assertStatus(200);
+        $response->assertJson([
+            'labels' => [
+                "1月", "2月", "3月", "4月", "5月", "6月",
+                "7月", "8月", "9月", "10月", "11月", "12月",
+            ],
+            'totals' => [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
+        ]);
+    }
+
+    // 2.
+    public function test_single_expense_is_reflected_in_correct_month(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Expense::factory()->create(['amount' => 1000, 'date'=> '2025-10-12', 'user_id' => $user->id]);
+
+        $response = $this->get('/api/chart-data');
+        $response->assertStatus(200);
+        $response->assertJson([
+            'labels' => [
+                "1月", "2月", "3月", "4月", "5月", "6月",
+                "7月","8月","9月","10月","11月","12月",
+            ],
+            'totals' => [
+                0, // 1月
+                0, // 2月
+                0, // 3月
+                0, // 4月
+                0, // 5月
+                0, // 6月
+                0, // 7月
+                0, // 8月
+                0, // 9月
+                1000, // 10月
+                0, // 11月
+                0, // 12月
+            ]
+        ]);
+
+    }
+
+    // 3.
     public function test_monthly_total_is_calculated_correctly(): void
     {
         $user = User::factory()->create();
@@ -45,6 +106,44 @@ class ChartTest extends TestCase
             ]
         ]);
     }
+
+    // 4.
+    public function test_other_users_expenses_are_not_included(): void
+    {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+
+        $this->actingAs($userA);
+
+        Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $userA->id ]);
+        Expense::factory()->create(['amount' => 2000, 'date' => '2025-10-13', 'user_id' => $userB->id ]);
+
+        $response = $this->get('/api/chart-data');
+        $response->assertStatus(200);
+        $response->assertJson([
+            'labels' => [
+                "1月", "2月", "3月", "4月", "5月", "6月",
+                "7月","8月","9月","10月","11月","12月",
+            ],
+            'totals' => [
+                0, // 1月
+                0, // 2月
+                0, // 3月
+                0, // 4月
+                0, // 5月
+                0, // 6月
+                0, // 7月
+                0, // 8月
+                0, // 9月
+                0, // 10月
+                1000, // 11月
+                0, // 12月
+            ]
+        ]);
+    }
+
+
+    // ========================================================================================
 
     // ChartController@getMonthlyIncomeTotals
     // フロントでは未実装
