@@ -20,43 +20,55 @@ class ChartTest extends TestCase
      * 2. データが1件だけ->対応月のみが反映: １ヶ月分の計算ロジックが正しい。ラベルの並び・配列の長さも保証
      * 3. 同じ月に複数データ->合計されるか: 集計ロジックの核の部分。月別集計処理の計算が正しいか
      * 4. 別ユーザーのデータが混じっても集計されない: マルチユーザーアプリにおいて整合性を保証
+     *
+     * テストするAPIは '/api/chat-data'
      */
 
     // ========================================================================================
-    //ß 1.
+
+    /**
+     * 共通化: labelsの1~12月を定義
+     */
+    private array $labels =[
+        "1月", "2月", "3月", "4月", "5月", "6月",
+        "7月", "8月", "9月", "10月", "11月", "12月"
+    ];
+
+    // 1. データが全て0のパターンのテスト
     public function test_returns_zero_for_all_months_when_no_data(): void
     {
+        // ユーザー作成 + ログイン
         $user = User::factory()->create();
         $this->actingAs($user);
 
         $response =$this->get('/api/chart-data');
         $response->assertStatus(200);
+
+        // 期待するデータ
         $response->assertJson([
-            'labels' => [
-                "1月", "2月", "3月", "4月", "5月", "6月",
-                "7月", "8月", "9月", "10月", "11月", "12月",
-            ],
+            'labels' => $this->labels,
             'totals' => [
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             ]
         ]);
     }
 
-    // 2.
+    // 2. データが1件だけのテスト
     public function test_single_expense_is_reflected_in_correct_month(): void
     {
+        // ユーザー作成 + ログイン
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // テストデータをDBに登録
         Expense::factory()->create(['amount' => 1000, 'date'=> '2025-10-12', 'user_id' => $user->id]);
 
         $response = $this->get('/api/chart-data');
         $response->assertStatus(200);
+
+        // 期待するデータ
         $response->assertJson([
-            'labels' => [
-                "1月", "2月", "3月", "4月", "5月", "6月",
-                "7月","8月","9月","10月","11月","12月",
-            ],
+            'labels' => $this->labels,
             'totals' => [
                 0, // 1月
                 0, // 2月
@@ -75,21 +87,23 @@ class ChartTest extends TestCase
 
     }
 
-    // 3.
+    // 3. 同じ月に複数データ登録されているかテスト
     public function test_monthly_total_is_calculated_correctly(): void
     {
+        // ユーザー登録 + ログイン
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // 同じ年月にデータを2つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $user->id ]);
         Expense::factory()->create(['amount' => 2000, 'date' => '2025-11-13', 'user_id' => $user->id ]);
 
         $response = $this->get('/api/chart-data');
+        $response->assertStatus(200);
+
+        // 期待するデータ
         $response->assertJson([
-            'labels' => [
-                "1月", "2月", "3月", "4月", "5月", "6月",
-                "7月","8月","9月","10月","11月","12月",
-            ],
+            'labels' => $this->labels,
             'totals' => [
                 0, // 1月
                 0, // 2月
@@ -107,24 +121,24 @@ class ChartTest extends TestCase
         ]);
     }
 
-    // 4.
+    // 4. 別ユーザーのデータが混じっても集計されないかテスト
     public function test_other_users_expenses_are_not_included(): void
     {
+        // ユーザーA,Bを作成 + ユーザーAログイン
         $userA = User::factory()->create();
         $userB = User::factory()->create();
-
         $this->actingAs($userA);
 
+        // 各ユーザーが支出を1つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $userA->id ]);
         Expense::factory()->create(['amount' => 2000, 'date' => '2025-10-13', 'user_id' => $userB->id ]);
 
         $response = $this->get('/api/chart-data');
         $response->assertStatus(200);
+
+        // ユーザーAが登録したデータが反映されているか
         $response->assertJson([
-            'labels' => [
-                "1月", "2月", "3月", "4月", "5月", "6月",
-                "7月","8月","9月","10月","11月","12月",
-            ],
+            'labels' => $this->labels,
             'totals' => [
                 0, // 1月
                 0, // 2月
