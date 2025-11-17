@@ -34,22 +34,95 @@ class ChartTest extends TestCase
         "7月", "8月", "9月", "10月", "11月", "12月"
     ];
 
+    /**
+     * 共通化: ユーザー作成 + ログイン
+     */
+    private function createUserAndLogin()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        return $user;
+    }
+
+    /**
+     * 共通化: ユーザーA,B作成 + ログイン
+     */
+    private function create_and_login_users(): array
+    {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+        $this->actingAs($userA);
+
+        return compact('userA', 'userB');
+    }
+
+    /**
+     * 共通化: API呼び出し + ステータス確認
+     */
+    private function getAndAsset(string $url)
+    {
+        $response = $this->get($url);
+        $response->assertStatus(200);
+        return $response;
+    }
+
+    /**
+     * 共通化: カテゴリーの作成
+     */
+    private function createCategories()
+    {
+        $categories = [];
+
+        foreach ($this->categoryNames as $i => $name) {
+            $categories[$name] = Category::factory()->create([
+                'name' => $name,
+                'sort_order' => $i + 1,
+            ]);
+        }
+        return $categories;
+    }
+
+    /**
+     * 共通化: 期待値
+     */
+    public function assertMonthlyResponse($response, array $expected)
+    {
+        $response->assertJson([
+            'labels' => $this->labels,
+            'totals' => $expected
+        ]);
+    }
+
+    /**
+     * 共通化: 12ヶ月分の合計を作成
+     * $value = ['10' => 1000]のように渡す
+     */
+    private function makeTotals(array $values = []): array
+    {
+        // １２ヶ月全て0で初期化
+        $totals = array_fill(0, 12, 0);
+
+        // 渡された月だけ値を上書き
+        foreach($values as $month => $amount) {
+            // $monthを1~12として扱う
+            $totals[$month - 1] = $amount;
+        }
+
+        return $totals;
+    }
+
     // 1. データが全て0のパターンのテスト
     public function test_returns_zero_for_all_months_when_no_data(): void
     {
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
-        $response =$this->get('/api/chart-data');
-        $response->assertStatus(200);
+        $response = $this->getAndAsset('/api/chart-data');
 
         // 期待するデータ
         $response->assertJson([
             'labels' => $this->labels,
-            'totals' => [
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-            ]
+            'totals' => $this->makeTotals(),
         ]);
     }
 
@@ -57,32 +130,19 @@ class ChartTest extends TestCase
     public function test_single_expense_is_reflected_in_correct_month(): void
     {
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
         // テストデータをDBに登録
         Expense::factory()->create(['amount' => 1000, 'date'=> '2025-10-12', 'user_id' => $user->id]);
 
         $response = $this->get('/api/chart-data');
-        $response->assertStatus(200);
 
         // 期待するデータ
         $response->assertJson([
             'labels' => $this->labels,
-            'totals' => [
-                0, // 1月
-                0, // 2月
-                0, // 3月
-                0, // 4月
-                0, // 5月
-                0, // 6月
-                0, // 7月
-                0, // 8月
-                0, // 9月
-                1000, // 10月
-                0, // 11月
-                0, // 12月
-            ]
+            'totals' => $this->makeTotals([
+                10 => 1000, // 10月 1000円
+            ]),
         ]);
 
     }
@@ -91,33 +151,20 @@ class ChartTest extends TestCase
     public function test_monthly_total_is_calculated_correctly(): void
     {
         // ユーザー登録 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
         // 同じ年月にデータを2つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $user->id ]);
         Expense::factory()->create(['amount' => 2000, 'date' => '2025-11-13', 'user_id' => $user->id ]);
 
         $response = $this->get('/api/chart-data');
-        $response->assertStatus(200);
 
         // 期待するデータ
         $response->assertJson([
             'labels' => $this->labels,
-            'totals' => [
-                0, // 1月
-                0, // 2月
-                0, // 3月
-                0, // 4月
-                0, // 5月
-                0, // 6月
-                0, // 7月
-                0, // 8月
-                0, // 9月
-                0, // 10月
-                3000, // 11月
-                0, // 12月
-            ]
+            'totals' => $this->makeTotals([
+                11 => 3000,
+            ]),
         ]);
     }
 
@@ -125,34 +172,20 @@ class ChartTest extends TestCase
     public function test_other_users_expenses_are_not_included(): void
     {
         // ユーザーA,Bを作成 + ユーザーAログイン
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
         // 各ユーザーが支出を1つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $userA->id ]);
         Expense::factory()->create(['amount' => 2000, 'date' => '2025-10-13', 'user_id' => $userB->id ]);
 
         $response = $this->get('/api/chart-data');
-        $response->assertStatus(200);
 
         // ユーザーAが登録したデータが反映されているか
         $response->assertJson([
             'labels' => $this->labels,
-            'totals' => [
-                0, // 1月
-                0, // 2月
-                0, // 3月
-                0, // 4月
-                0, // 5月
-                0, // 6月
-                0, // 7月
-                0, // 8月
-                0, // 9月
-                0, // 10月
-                1000, // 11月
-                0, // 12月
-            ]
+            'totals' => $this->makeTotals([
+                11 => 1000,
+            ]),
         ]);
     }
 
@@ -193,23 +226,13 @@ class ChartTest extends TestCase
     public function test_returns_zero_for_all_categories_when_no_data()
     {
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
-        // カテゴリーモデルを格納する配列
-        $categories = [];
-
-        // 1カテゴリーずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-            ]);
-        }
+        // // 1カテゴリーずつ作成して $categories に保存
+        $categories = $this->createCategories();
 
         // API呼び出し
         $response = $this->get('/api/chart-data/category-monthly-single');
-        $response->assertStatus(200);
 
         // ラベルが正しいか
         $response->assertJson([
@@ -230,19 +253,10 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
-        // カテゴリモデルを格納する配列（呼び出し用）
-        $categories = [];
-
-        // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-            ]);
-        }
+        // // 1カテゴリずつ作成して $categories に保存
+        $categories = $this->createCategories();
 
        // 支出登録（食費のみ）
         Expense::factory()->create([
@@ -254,9 +268,6 @@ class ChartTest extends TestCase
 
         // API 呼び出し
         $response = $this->get('/api/chart-data/category-monthly-single');
-
-        // ステータス確認
-        $response->assertStatus(200);
 
         // ラベル(カテゴリ名)が正しいか
         $response->assertJson([
@@ -279,19 +290,10 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        // カテゴリモデルを格納する配列（呼び出し用）
-        $categories = [];
+        $user = $this->createUserAndLogin();
 
         // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // 支出登録（食費のみ）
         Expense::factory()->create([
@@ -307,11 +309,7 @@ class ChartTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        // API 呼び出し
         $response = $this->get('/api/chart-data/category-monthly-single');
-
-        // ステータス確認
-        $response->assertStatus(200);
 
         // ラベル(カテゴリ名)が正しいか
         $response->assertJson([
@@ -332,20 +330,9 @@ class ChartTest extends TestCase
     {
         Category::query()->delete();
 
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
-        // カテゴリーモデルを格納する配列
-        $categories = [];
-
-        // 1カテゴリーずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // 支出登録(ユーザーA,B 1件ずつ)
         Expense::factory()->create([
@@ -363,7 +350,6 @@ class ChartTest extends TestCase
 
         // API呼び出し
         $response = $this->get('/api/chart-data/category-monthly-single');
-        $response->assertStatus(200);
 
         // ラベル(カテゴリー名)が正しいか
         $response->assertJson([
@@ -403,34 +389,22 @@ class ChartTest extends TestCase
         return compact('now', 'currentYear', 'currentMonth', 'currentDate');
     }
 
-    // TODO 1. データが0件
+    // 1. データが0件
     public function test_returns_zero_for_all_doughnut_categories_when_no_data(): void
     {
         // 既存のカテゴリーを全て削除
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
         // 現在の年月を取得
         ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
 
-        // カテゴリーモデルを格納する配列(呼び出し用)
-        $categories = [];
-
-        // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-                'color' => '#000000',
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // API呼び出し
         $response = $this->get('/api/chart-data/doughnut');
-        $response->assertStatus(200);
 
         // レスポンス形式の確認
         $response->assertJsonStructure([
@@ -455,29 +429,18 @@ class ChartTest extends TestCase
 
     }
 
-    // TODO 2. データが1件
+    // 2. データが1件
     public function test_single_expense_is_reflected_in_correct_category_doughnut(): void
     {
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
         ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
 
-        // カテゴリモデルを格納する配列（呼び出し用）
-        $categories = [];
-
-        // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-                'color' => '#000000',
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // 支出登録（食費: 1000円）
         Expense::factory()->create([
@@ -489,7 +452,6 @@ class ChartTest extends TestCase
 
         // API呼び出し
         $response = $this->get('/api/chart-data/doughnut');
-        $response->assertStatus(200);
 
         // レスポンス形式の確認
         $response->assertJsonStructure([
@@ -521,23 +483,12 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->createUserAndLogin();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
         ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
 
-        // カテゴリモデルを格納する配列（呼び出し用）
-        $categories = [];
-
-        // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-                'color' => '#000000',
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // 支出登録（食費: 3000円、日用品費: 2000円、それ以外は0円）
         Expense::factory()->create([
@@ -559,11 +510,7 @@ class ChartTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        // API 呼び出し
         $response = $this->get('/api/chart-data/doughnut');
-
-        // ステータス確認
-        $response->assertStatus(200);
 
         // レスポンス形式の確認
         $response->assertJsonStructure([
@@ -589,31 +536,19 @@ class ChartTest extends TestCase
         $response->assertJsonCount(10, 'colors');
     }
 
-    // TODO 4. 別ユーザーが混じっても集計されない
+    // 4. 別ユーザーが混じっても集計されない
     public function test_other_users_categories_doughnut_are_not_included(): void
     {
         // 既存のカテゴリをすべて削除（テストデータの分離のため）
         Category::query()->delete();
 
         // ユーザー作成A,B + ログインA
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
         ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
 
-        // カテゴリモデルを格納する配列（呼び出し用）
-        $categories = [];
-
-        // 1カテゴリずつ作成して $categories に保存
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-                'color' => '#000000',
-            ]);
-        }
+        $categories = $this->createCategories();
 
         // 支出登録 食費 A:1000円, B:2000円
         Expense::factory()->create([
@@ -629,11 +564,7 @@ class ChartTest extends TestCase
             'user_id' => $userB->id,
         ]);
 
-        // API 呼び出し
         $response = $this->get('/api/chart-data/doughnut');
-
-        // ステータス確認
-        $response->assertStatus(200);
 
         // レスポンス形式の確認
         $response->assertJsonStructure([
