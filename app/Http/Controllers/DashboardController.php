@@ -107,6 +107,10 @@ class DashboardController extends Controller
             'userId' => Auth::id(),
             'now' => Carbon::now(),
         ];
+        // return [
+        //     'userId' => auth()->id(),
+        //     'now' => now(),
+        // ];
     }
 
     private function jsonResponse(array $data, int $status)

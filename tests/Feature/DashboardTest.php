@@ -15,13 +15,22 @@ use Inertia\Testing\AssertableInertia as Assert;
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * DashboardControllerのロジックのテスト
-     * @index: 初回表示
-     * @getTotalExpense: 今月の合計支出を取得するAPI
-     * @getTotalMonthlyIncome: 今月の合計収入を取得するAPI
-     */
+/**
+ * DashboardController の機能全体を検証するテスト
+ *
+ * 以下の動作が仕様通りであることを確認する:
+ *
+ * - ダッシュボード初回表示が正常に行われること
+ * - 支出カテゴリー (categories) が props に正しく渡されること
+ * - 収入カテゴリー (income_categories) が props に正しく渡されること
+ * - 今月の合計支出の計算ロジックが正しく動作すること
+ * - 今月の合計収入の計算ロジックが正しく動作すること
+ * - 今月の合計支出 API が正しい値を返すこと
+ * - 今月の合計収入 API が正しい値を返すこと
+ */
 
+
+    // ユーザー作成 + ログイン
     private function createUserAndLogin()
     {
         $user = User::factory()->create();
@@ -29,6 +38,7 @@ class DashboardTest extends TestCase
         return $user;
     }
 
+    // ユーザー A / B を作成し、Aでログイン
     private function create_and_login_users(): array
     {
         $userA = User::factory()->create();
@@ -38,13 +48,112 @@ class DashboardTest extends TestCase
         return compact('userA', 'userB');
     }
 
-    private function response_and_assert_json(string $url, $status = 200, string $total ,int $totalAmount)
+    /**
+     * API + ステータス + 合計金額の確認
+     *
+     * @param string $url: ルート
+     * @param int $status: ステータスコード
+     * @param string $type: totalExpense or totalIncome
+     * @param int $totalAmount: 合計金額
+     */
+    private function response_and_assert_json(string $url, int $status = 200, string $type ,int $totalAmount)
     {
         $response = $this->get($url);
         $response->assertStatus($status);
 
         $response->assertJson([
-            $total => $totalAmount
+            $type => $totalAmount
+        ]);
+    }
+
+    // 支出カテゴリー一覧
+    private array $categoryNames =[
+        '食費',
+        '日用品費',
+        '交通費',
+        '住居費',
+        '水道・光熱費',
+        '通信費',
+        '医療・保険',
+        '娯楽・交際費',
+        '教育費',
+        'その他',
+    ];
+
+    // 収入カテゴリー一覧
+    private array $incomeCategoryNames = [
+        '給与',
+        '賞与',
+        '副業収入',
+        'ポイント収入',
+        '臨時収入',
+        'その他',
+    ];
+
+    // カテゴリー登録(支出)
+    private function create_expense_category()
+    {
+        $categories = [];
+
+        foreach ($this->categoryNames as $i => $name) {
+            $categories[] = Category::factory()->create([
+                'name' => $name,
+                'sort_order' => $i + 1,
+            ]);
+        }
+        return $categories;
+    }
+
+    // カテゴリー登録(収入)
+    private function create_income_category()
+    {
+        $income_categories = [];
+
+        foreach($this->incomeCategoryNames as $i => $name) {
+            $income_categories[] = IncomeCategory::factory()->create([
+                'name' => $name,
+            ]);
+        }
+        return $income_categories;
+    }
+
+    // 現在の日付取得
+    private function nowDate(): string
+    {
+        return now()->format('Y-m-d');
+    }
+
+    /**
+     * 支出登録用のテストデータを作成する
+     *
+     * @param int $amount: 金額
+     * @param string $date: 日付
+     * @param int $userId: ユーザーID
+     * @return Expense
+     */
+    private function createUserWithExpenses(int $amount, string $date, int $userId): Expense
+    {
+        return Expense::factory()->create([
+            'amount' => $amount,
+            'date' => $date,
+            'user_id' => $userId
+        ]);
+    }
+
+    /**
+     * 収入登録用のテストデータを作成
+     *
+     * @param int $amount: 金額
+     * @param string $date: 日付
+     * @param int $userId: ユーザーID
+     * @return Income
+     */
+    private function createUserWithIncomes(int $amount, string $date, int $userId): Income
+    {
+        return Income::factory()->create([
+            'amount' => $amount,
+            'income_date' => $date,
+            'user_id' => $userId
         ]);
     }
 
@@ -70,106 +179,41 @@ class DashboardTest extends TestCase
         );
     }
 
-    // TODO categoriesの内容が正しいか
+    // categoriesの内容が正しいか
     public function test_dashboard_categories_content_is_correct()
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $this->createUserAndLogin();
 
-        // --- テストデータ ---
-        $cat1 = Category::factory()->create([
-            'name' => '食費',
-            'sort_order' => 1,
-        ]);
-        $cat2 = Category::factory()->create([
-            'name' => '日用品費',
-            'sort_order' => 2,
-        ]);
-        $cat3 = Category::factory()->create([
-            'name' => '交通費',
-            'sort_order' => 3,
-        ]);
-        $cat4 = Category::factory()->create([
-            'name' => '住居費',
-            'sort_order' => 4,
-        ]);
-        $cat5 = Category::factory()->create([
-            'name' => '水道・光熱費',
-            'sort_order' => 5,
-        ]);
-        $cat6 = Category::factory()->create([
-            'name' => '通信費',
-            'sort_order' => 6,
-        ]);
-        $cat7 = Category::factory()->create([
-            'name' => '医療・保険',
-            'sort_order' => 7,
-        ]);
-        $cat8 = Category::factory()->create([
-            'name' => '娯楽・交通費',
-            'sort_order' => 8,
-        ]);
-        $cat9 = Category::factory()->create([
-            'name' => '教育費',
-            'sort_order' => 9,
-        ]);
-        $cat10 = Category::factory()->create([
-            'name' => 'その他',
-            'sort_order' => 10,
-        ]);
+        // カテゴリー10件作成
+        $categories = $this->create_expense_category();
+
         // --- 画面アクセス ---
         $response = $this->get('/dashboard');
 
-        // --- Inertiaのpropsの中身検証 ---
+        // Inertiaの検証
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
-                ->has('categories', 10) // 件数チェック
-                ->where('categories.0.id', $cat1->id)
-                ->where('categories.0.name', '食費')
-                ->where('categories.0.sort_order', 1)
-                ->where('categories.1.id', $cat2->id)
-                ->where('categories.1.name', '日用品費')
-                ->where('categories.1.sort_order', 2)
-                ->where('categories.2.id', $cat3->id)
-                ->where('categories.2.name', '交通費')
-                ->where('categories.2.sort_order', 3)
-                ->where('categories.3.id', $cat4->id)
-                ->where('categories.3.name', '住居費')
-                ->where('categories.3.sort_order', 4)
-                ->where('categories.4.id', $cat5->id)
-                ->where('categories.4.name', '水道・光熱費')
-                ->where('categories.4.sort_order', 5)
-                ->where('categories.5.id', $cat6->id)
-                ->where('categories.5.name', '通信費')
-                ->where('categories.5.sort_order', 6)
-                ->where('categories.6.id', $cat7->id)
-                ->where('categories.6.name', '医療・保険')
-                ->where('categories.6.sort_order', 7)
-                ->where('categories.7.id', $cat8->id)
-                ->where('categories.7.name', '娯楽・交通費')
-                ->where('categories.7.sort_order', 8)
-                ->where('categories.8.id', $cat9->id)
-                ->where('categories.8.name', '教育費')
-                ->where('categories.8.sort_order', 9)
-                ->where('categories.9.id', $cat10->id)
-                ->where('categories.9.name', 'その他')
-                ->where('categories.9.sort_order', 10)
+                ->has('categories', count($this->categoryNames))
+                ->where('categories', function ($cats) use ($categories) {
+
+                    foreach ($cats as $i => $cat) {
+                        $this->assertEquals($categories[$i]->id, $cat['id']);
+                        $this->assertEquals($categories[$i]->name, $cat['name']);
+                        $this->assertEquals($categories[$i]->sort_order, $cat['sort_order']);
+                    }
+
+                    return true;
+                })
         );
     }
 
-    // TODO income_categoriesの内容が正しいか
+    // income_categoriesの内容が正しいか
     public function test_dashboard_income_categories_content_is_correct()
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $this->createUserAndLogin();
 
-        // --- テストデータ ---
-        $in_cat1 = IncomeCategory::factory()->create([
-            'name' => '給与'
-        ]);
-        $in_cat2 = IncomeCategory::factory()->create([
-            'name' => '副収入'
-        ]);
+        // カテゴリー作成
+        $income_categories = $this->create_income_category();
 
         // --- 画面アクセス ---
         $response = $this->get('/dashboard');
@@ -177,54 +221,36 @@ class DashboardTest extends TestCase
         // --- Inertia props の中身検証
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
-                ->has('income_categories', 2)
-                ->where('income_categories.0.id', $in_cat1->id)
-                ->where('income_categories.0.name', '給与')
-                ->where('income_categories.1.id', $in_cat2->id)
-                ->where('income_categories.1.name', '副収入')
+                ->has('income_categories', count($this->incomeCategoryNames))
+                ->where('categories', function ($cats) use ($income_categories) {
+
+                    foreach($cats as $i => $cat) {
+                        $this->assertEquals($income_categories[$i]->id, $cat['id']);
+                        $this->assertEquals($income_categories[$i]->id, $cat['name']);
+                    }
+
+                    return true;
+                })
         );
     }
 
     // 今月の支出合計を取得するテスト
     public function test_calculate_total_expense()
     {
-        // ユーザー作成
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        // ユーザー A / B を作成し、Aでログイン
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
-        // 現在の年月を取得
-        $now = now();
-        $currentYear = $now->year;
-        $currentMonth = $now->month;
-        $currentDate = $now->format('Y-m-d');
-
-        // 今月のデータ
-        Expense::factory()->create([
-            'amount' => 1000,
-            'date' => $currentDate,
-            'user_id' =>$userA->id
-        ]);
-
-        Expense::factory()->create([
-            'amount' => 2000,
-            'date' => $currentDate,
-            'user_id' => $userA->id
-        ]);
-
-        // 別ユーザー(含まれない)
-        Expense::factory()->create([
-            'amount' => 99999,
-            'date' => $currentDate,
-            'user_id' => $userB->id
-        ]);
-
-        // 別月(含まれない)
-        Expense::factory()->create([
-            'amount' => 55555,
-            'date' => '2025-10-01',
-            'user_id' => $userA->id
-        ]);
+        /**
+         * テストデータ作成
+         *
+         * - 今月の支出(ユーザーA): 1000 + 2000 = 3000 (期待値)
+         * - 今月の支出(ユーザーB): 99999 (Aの値に影響なし)
+         * - 先月の支出(ユーザーA): 55555 (今月分に含まれない)
+         */
+        $this->createUserWithExpenses(1000, $this->nowDate(), $userA->id);
+        $this->createUserWithExpenses(2000, $this->nowDate(), $userA->id);
+        $this->createUserWithExpenses(99999, $this->nowDate(), $userB->id);
+        $this->createUserWithExpenses(55555, '2025-10-01', $userA->id);
 
         $response = $this->get('/dashboard');
 
@@ -239,42 +265,20 @@ class DashboardTest extends TestCase
     // 今月の収入を取得するテスト
     public function test_calculate_total_income()
     {
-        // ユーザー作成
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        // ユーザー A / B を作成し、Aでログイン
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
-        //現在の年月を取得
-        $now = now();
-        $currentYear = $now->year;
-        $currentMonth = $now->month;
-        $currentDate = $now->format('Y-m-d');
-
-        // 今月のデータ
-        Income::factory()->create([
-            'amount' => 3000,
-            'income_date' => $currentDate,
-            'user_id' => $userA->id
-        ]);
-        Income::factory()->create([
-            'amount' => 6000,
-            'income_date' => $currentDate,
-            'user_id' => $userA->id
-        ]);
-
-        // 別ユーザー(含まれない)
-        Income::factory()->create([
-            'amount' => 2000,
-            'income_date' => $currentDate,
-            'user_id' => $userB->id
-        ]);
-
-        /// 別月(含まれない)
-        Income::factory()->create([
-            'amount' => 3000,
-            'income_date' => '2025-09-01',
-            'user_id' => $userA->id
-        ]);
+        /**
+         * テストデータ作成
+         *
+         * - 今月の収入(ユーザーA): 3000 + 6000 = 9000 (期待値)
+         * - 今月の収入(ユーザーB): 2000 (Aの値に影響なし)
+         * - 先月の収入(ユーザーA): 3000 (今月分に含まれない)
+         */
+        $this->createUserWithIncomes(3000, $this->nowDate(), $userA->id);
+        $this->createUserWithIncomes(6000, $this->nowDate(), $userA->id);
+        $this->createUserWithIncomes(2000, $this->nowDate(), $userB->id);
+        $this->createUserWithIncomes(3000, '2025-09-01', $userA->id);
 
         $response = $this->get('/dashboard');
 
@@ -285,86 +289,50 @@ class DashboardTest extends TestCase
         );
     }
 
-    // 今月の合計支出のAPI
+    // 今月の合計支出を返すAPIのテスト
     public function test_api_total_expense_returns_correct_value()
     {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        // ユーザー A / B を作成し、Aでログイン
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
-        Expense::factory()->create([
-            'amount' => 1000,
-            'date' => '2025-11-01',
-            'user_id' => $userA->id
-        ]);
-        Expense::factory()->create([
-            'amount' => 6000,
-            'date' => '2025-11-04',
-            'user_id' => $userA->id
-        ]);
+        // テストデータ
+        /**
+         * テストデータ作成
+         *
+         * - 今月の収入(ユーザーA): 1000 + 6000 = 7000 (期待値)
+         * - 今月の収入(ユーザーB): 2222 (Aの値に影響なし)
+         * - 先月の収入(ユーザーA): 4000 (今月分に含まれない)
+         */
+        $this->createUserWithExpenses(1000, $this->nowDate(), $userA->id);
+        $this->createUserWithExpenses(6000, $this->nowDate(), $userA->id);
+        $this->createUserWithExpenses(2222, $this->nowDate(), $userB->id);
+        $this->createUserWithExpenses(4000, '2025-10-11', $userA->id);
 
-        // 別ユーザー(含まれない)
-        Expense::factory()->create([
-            'amount' => 2222,
-            'date' => '2025-11-01',
-            'user_id' => $userB->id
-        ]);
-
-        // 別月(含まれない)
-        Expense::factory()->create([
-            'amount' => 9999,
-            'date' => '2025-12-01',
-            'user_id' => $userA->id
-        ]);
-
-        $response = $this->get('/api/dashboard/total-expense');
-        $response->assertStatus(200);
-
-        // 期待するデータ
-        $response->assertJson([
-            'totalExpense' => 7000
-        ]);
+        // APIレスポンスとJSONの値(totalExpense=7000)を検証
+        $this->response_and_assert_json('/api/dashboard/total-expense', 200, 'totalExpense', 7000);
 
     }
 
-    // 今月の合計収入のAPI
+    // 今月の合計収入を返すAPIのテスト
     public function test_api_total_income_returns_correct_value()
     {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
+        // ユーザー A / B を作成し、Aでログイン
+        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
 
-        Income::factory()->create([
-            'amount' => 1000,
-            'income_date' => '2025-11-01',
-            'user_id' => $userA->id
-        ]);
-        Income::factory()->create([
-            'amount' => 6000,
-            'income_date' => '2025-11-04',
-            'user_id' => $userA->id
-        ]);
+        // テストデータ
+        /**
+         * テストデータ作成
+         *
+         * - 今月の収入(ユーザーA): 1000 + 6000 = 7000 (期待値)
+         * - 今月の収入(ユーザーB): 1000 (Aの値に影響なし)
+         * - 先月の収入(ユーザーA): 9999 (今月分に含まれない)
+         */
+        $this->createUserWithIncomes(1000, $this->nowDate(), $userA->id);
+        $this->createUserWithIncomes(6000, $this->nowDate(), $userA->id);
+        $this->createUserWithIncomes(1000, $this->nowDate(), $userB->id);
+        $this->createUserWithIncomes(9999, '2025-10-01', $userA->id);
 
-        // 別ユーザー(含まれない)
-        Income::factory()->create([
-            'amount' => 2222,
-            'income_date' => '2025-11-01',
-            'user_id' => $userB->id
-        ]);
-
-        // 別月(含まれない)
-        Income::factory()->create([
-            'amount' => 9999,
-            'income_date' => '2025-12-01',
-            'user_id' => $userA->id
-        ]);
-
-        $response = $this->get('/api/incomes/total-monthly-incomes');
-        $response->assertStatus(200);
-
-        // 期待するデータ
-        $response->assertJson([
-            'totalIncome' => 7000
-        ]);
+        // APIレスポンスとJSONの値(totalIncome=7000)を検証
+        $this->response_and_assert_json('api/incomes/total-monthly-incomes', 200, 'totalIncome', 7000);
     }
 }
