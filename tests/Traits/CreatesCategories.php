@@ -7,7 +7,7 @@ use App\Models\Category;
 trait CreatesCategories
 {
     // 支出カテゴリー一覧
-    private array $categoryNames =[
+    protected array $categoryNames =[
         '食費',
         '日用品費',
         '交通費',
@@ -26,10 +26,12 @@ trait CreatesCategories
         $categories = [];
 
         foreach ($this->categoryNames as $i => $name) {
-            $categories[] = Category::factory()->create([
+            $category = Category::factory()->create([
                 'name' => $name,
                 'sort_order' => $i + 1,
             ]);
+
+            $categories[$name] = $category;
         }
         return $categories;
     }

@@ -105,6 +105,8 @@ class DashboardTest extends TestCase
                 ->has('categories', count($this->categoryNames))
                 ->where('categories', function ($cats) use ($categories) {
 
+                    $categories = array_values($categories);
+
                     foreach ($cats as $i => $cat) {
                         $this->assertEquals($categories[$i]->id, $cat['id']);
                         $this->assertEquals($categories[$i]->name, $cat['name']);
@@ -245,6 +247,6 @@ class DashboardTest extends TestCase
         $this->createIncome(9999, '2025-10-01', $userA->id);
 
         // APIレスポンスとJSONの値(totalIncome=7000)を検証
-        $this->response_and_assert_json('api/incomes/total-monthly-incomes', 200, 'totalIncome', 7000);
+        $this->response_and_assert_json('/api/incomes/total-monthly-incomes', 200, 'totalIncome', 7000);
     }
 }
