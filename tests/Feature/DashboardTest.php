@@ -6,12 +6,10 @@ use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use App\Models\User;
-use App\Models\Expense;
-use App\Models\Income;
-use App\Models\IncomeCategory;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Traits\CreatesCategories;
 use Tests\Traits\CreatesExpenses;
+use Tests\Traits\CreatesIncomeCategories;
 use Tests\Traits\CreatesIncomes;
 use Tests\Traits\CreateUsers;
 
@@ -21,6 +19,8 @@ class DashboardTest extends TestCase
     use CreateUsers;
     use CreatesExpenses;
     use CreatesIncomes;
+    use CreatesCategories;
+    use CreatesIncomeCategories;
 /**
  * DashboardController の機能全体を検証するテスト
  *
@@ -54,76 +54,28 @@ class DashboardTest extends TestCase
         ]);
     }
 
-    // 支出カテゴリー一覧
-    private array $categoryNames =[
-        '食費',
-        '日用品費',
-        '交通費',
-        '住居費',
-        '水道・光熱費',
-        '通信費',
-        '医療・保険',
-        '娯楽・交際費',
-        '教育費',
-        'その他',
-    ];
-
-    // 収入カテゴリー一覧
-    private array $incomeCategoryNames = [
-        '給与',
-        '賞与',
-        '副業収入',
-        'ポイント収入',
-        '臨時収入',
-        'その他',
-    ];
-
-    // カテゴリー登録(支出)
-    private function create_expense_category()
-    {
-        $categories = [];
-
-        foreach ($this->categoryNames as $i => $name) {
-            $categories[] = Category::factory()->create([
-                'name' => $name,
-                'sort_order' => $i + 1,
-            ]);
-        }
-        return $categories;
-    }
-
-    // カテゴリー登録(収入)
-    private function create_income_category()
-    {
-        $income_categories = [];
-
-        foreach($this->incomeCategoryNames as $i => $name) {
-            $income_categories[] = IncomeCategory::factory()->create([
-                'name' => $name,
-            ]);
-        }
-        return $income_categories;
-    }
-
     // 現在の日付取得
     private function nowDate(): string
     {
         return now()->format('Y-m-d');
     }
 
-    // Dashboardの初回表示が正常に行われるか
+    /**
+     * Dashboardページの初回表示が正常に行われるか
+     *
+     * 手順
+     * - ユーザー作成 + ログイン
+     * - Dashboardページにアクセス
+     * - ステータスコード200確認
+     * - Inertiaレスポンス確認
+     */
     public function test_index()
     {
-        // テストユーザー作成
         $user = $this->createLoginUser();
-        // // ダッシュボードページにアクセス
         $response = $this->actingAs($user)->get('/dashboard');
-        // $response = $this->get('/dashboard');
 
-        // ステータスコード200を確認
         $response->assertStatus(200);
 
-        // Inertiaレスポンスの確認
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
                 ->has('categories')
@@ -133,18 +85,21 @@ class DashboardTest extends TestCase
         );
     }
 
-    // categoriesの内容が正しいか
+    /**
+     * カテゴリー(支出)の登録が正しいか
+     *
+     * 手順
+     * - ユーザー作成 + ログイン
+     * - Dashboardページアクセス
+     * - Inertiaレスポンスが登録したカテゴリーと一致しているか確認
+     */
     public function test_dashboard_categories_content_is_correct()
     {
         $this->createLoginUser();
+        $categories = $this->createCategories();
 
-        // カテゴリー10件作成
-        $categories = $this->create_expense_category();
-
-        // --- 画面アクセス ---
         $response = $this->get('/dashboard');
 
-        // Inertiaの検証
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
                 ->has('categories', count($this->categoryNames))
@@ -161,18 +116,21 @@ class DashboardTest extends TestCase
         );
     }
 
-    // income_categoriesの内容が正しいか
+    /**
+     * カテゴリー(収入)の登録が正しいか
+     *
+     * 手順
+     * - ユーザー作成 + ログイン
+     * - Dashboardページアクセス
+     * - Inertiaレスポンスが登録したカテゴリーと一致しているか確認
+     */
     public function test_dashboard_income_categories_content_is_correct()
     {
         $this->createLoginUser();
+        $income_categories = $this->createIncomeCategory();
 
-        // カテゴリー作成
-        $income_categories = $this->create_income_category();
-
-        // --- 画面アクセス ---
         $response = $this->get('/dashboard');
 
-        // --- Inertia props の中身検証
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
                 ->has('income_categories', count($this->incomeCategoryNames))

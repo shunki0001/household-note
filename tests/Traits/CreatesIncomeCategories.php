@@ -18,7 +18,7 @@ trait CreatesIncomeCategories
     ];
 
     // カテゴリー登録(収入)
-    private function create_income_category()
+    private function createIncomeCategory()
     {
         $income_categories = [];
 

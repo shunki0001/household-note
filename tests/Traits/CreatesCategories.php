@@ -26,7 +26,7 @@ trait CreatesCategories
         $categories = [];
 
         foreach ($this->categoryNames as $i => $name) {
-            $categories[$name] = Category::factory()->create([
+            $categories[] = Category::factory()->create([
                 'name' => $name,
                 'sort_order' => $i + 1,
             ]);
