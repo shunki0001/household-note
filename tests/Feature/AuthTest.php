@@ -12,57 +12,69 @@ class AuthTest extends TestCase
     use RefreshDatabase;
 
     // 正しいユーザー情報でログインできること
+    /**
+     * 正しいユーザー情報でログインできること
+     * 1. テスト用のユーザーを作成
+     * 2. ログインページにアクセスして、ログインフォームを送信
+     * 3. ログイン後のリダイレクトを確認
+     */
     public function test_registered_user_can_login(): void
     {
-        // 1. テスト用のユーザーを作成
         $user = User::factory()->create([
-            'password' => bcrypt($password = 'password123'), // パスワードを指定
+            'password' => bcrypt($password = 'password123'),
         ]);
 
-        // 2. ログインページにアクセスして、ログインフォームを送信
         $response = $this->post('/login', [
             'email' => $user->email,
             'password' => $password,
         ]);
 
-        // 3. ログイン後のリダイレクトを確認
         $response->assertRedirect('/dashboard');
-        $this->assertAuthenticatedAs($user); // 認証されていることを確認
+        $this->assertAuthenticatedAs($user);
     }
 
-    // ログイン失敗のテスト
+    /**
+     * ログイン失敗のテスト
+     *
+     * 手順
+     * 1. テスト用のユーザーを作成
+     * 2. ログインページにアクセスして無効なパスワードでログイン
+     * 3. 想定動作: /loginにリダイレクト、エラーメッセージ表示、認証されていないことを確認
+     */
     public function test_user_cannot_login_with_invalid_password(): void
     {
-        // 1. テスト用のユーザーを作成
         $user = User::factory()->create([
             'password' => bcrypt('correct_password'), // 正しいパスワードを指定
         ]);
 
-        // 2. ログインページにアクセスして、無効なパスワードでログインフォームを送信
         $response = $this->from('/login')->post('/login', [
             'email' => $user->email,
             'password' => 'wrong_password', // 間違ったパスワード
         ]);
 
-        // 3. ログイン失敗後のリダイレクトとエラーメッセージを確認
         $response->assertRedirect('/login');
-        $response->assertSessionHasErrors('email'); // エラーメッセージがセッションにあることを確認
-        $this->assertGuest(); // 認証されていないことを確認
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     // ログアウトのテスト
+    /**
+     * ログアウトのテスト
+     *
+     * 手順
+     * 1. ユーザー作成 + ログイン
+     * 2. ログアウトリクエストを送信
+     * 3. トップページにリダイレクト + 未ログイン状態か確認
+     */
     public function test_authenticated_user_can_logout(): void
     {
-        // 1. テスト用のユーザーを作成してログイン
         $user = User::factory()->create();
-        $this->be($user); // ユーザーを認証状態にする
+        $this->be($user);
 
-        // 2. ログアウトリクエストを送信
         $response = $this->post('/logout');
 
-        // 3. ログアウト後のリダイレクトと認証状態を確認
-        $response->assertRedirect('/'); // ログアウト後にトップページにリダイレクトされることを確認
-        $this->assertGuest(); // 認証されていないことを確認
+        $response->assertRedirect('/');
+        $this->assertGuest();
     }
 
 }

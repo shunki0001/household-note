@@ -8,10 +8,12 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Expense;
 use App\Models\Category;
+use Tests\Traits\CreateUsers;
 
 class ChartTest extends TestCase
 {
     use RefreshDatabase;
+    use CreateUsers;
 
     // 月別支出合計グラフテスト
     /**
@@ -33,28 +35,6 @@ class ChartTest extends TestCase
         "1月", "2月", "3月", "4月", "5月", "6月",
         "7月", "8月", "9月", "10月", "11月", "12月"
     ];
-
-    /**
-     * 共通化: ユーザー作成 + ログイン
-     */
-    private function createUserAndLogin()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
-        return $user;
-    }
-
-    /**
-     * 共通化: ユーザーA,B作成 + ログイン
-     */
-    private function create_and_login_users(): array
-    {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
-
-        return compact('userA', 'userB');
-    }
 
     /**
      * 共通化: API呼び出し + ステータス確認
@@ -111,11 +91,35 @@ class ChartTest extends TestCase
         return $totals;
     }
 
+    /**
+     * 共通化:
+     */
+    private array $categoryNames =[
+        '食費',
+        '日用品費',
+        '交通費',
+        '住居費',
+        '水道・光熱費',
+        '通信費',
+        '医療・保険',
+        '娯楽・交際費',
+        '教育費',
+        'その他',
+    ];
+
+    /**
+     * 共通化: 現在の年月を取得
+     */
+    private function nowDate()
+    {
+        return now()->format('Y-m-d');
+    }
+
     // 1. データが全て0のパターンのテスト
     public function test_returns_zero_for_all_months_when_no_data(): void
     {
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         $response = $this->getAndAsset('/api/chart-data');
 
@@ -130,7 +134,7 @@ class ChartTest extends TestCase
     public function test_single_expense_is_reflected_in_correct_month(): void
     {
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // テストデータをDBに登録
         Expense::factory()->create(['amount' => 1000, 'date'=> '2025-10-12', 'user_id' => $user->id]);
@@ -151,7 +155,7 @@ class ChartTest extends TestCase
     public function test_monthly_total_is_calculated_correctly(): void
     {
         // ユーザー登録 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // 同じ年月にデータを2つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $user->id ]);
@@ -172,7 +176,7 @@ class ChartTest extends TestCase
     public function test_other_users_expenses_are_not_included(): void
     {
         // ユーザーA,Bを作成 + ユーザーAログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         // 各ユーザーが支出を1つ登録
         Expense::factory()->create(['amount' => 1000, 'date' => '2025-11-14', 'user_id' => $userA->id ]);
@@ -206,27 +210,11 @@ class ChartTest extends TestCase
      * テストするAPIは '/api/chat-data/category-monthly-single'
      */
 
-    /**
-     * 共通化:
-     */
-    private array $categoryNames =[
-        '食費',
-        '日用品費',
-        '交通費',
-        '住居費',
-        '水道・光熱費',
-        '通信費',
-        '医療・保険',
-        '娯楽・交際費',
-        '教育費',
-        'その他',
-    ];
-
     // 1. データが全て0
     public function test_returns_zero_for_all_categories_when_no_data()
     {
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // // 1カテゴリーずつ作成して $categories に保存
         $categories = $this->createCategories();
@@ -253,7 +241,7 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // // 1カテゴリずつ作成して $categories に保存
         $categories = $this->createCategories();
@@ -290,7 +278,7 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // 1カテゴリずつ作成して $categories に保存
         $categories = $this->createCategories();
@@ -330,7 +318,7 @@ class ChartTest extends TestCase
     {
         Category::query()->delete();
 
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         $categories = $this->createCategories();
 
@@ -376,19 +364,6 @@ class ChartTest extends TestCase
      * API: '/api/chart-data/doughnut'
      */
 
-    /**
-     * 共通化: 現在の年月を取得
-     */
-    private function getMonthYear()
-    {
-        $now = now();
-        $currentYear = $now->year;
-        $currentMonth = $now->month;
-        $currentDate = $now->format('Y-m-d');
-
-        return compact('now', 'currentYear', 'currentMonth', 'currentDate');
-    }
-
     // 1. データが0件
     public function test_returns_zero_for_all_doughnut_categories_when_no_data(): void
     {
@@ -396,10 +371,11 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // 現在の年月を取得
-        ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        // ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        $this->nowDate();
 
         $categories = $this->createCategories();
 
@@ -435,17 +411,18 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
-        ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        // ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        $this->nowDate();
 
         $categories = $this->createCategories();
 
         // 支出登録（食費: 1000円）
         Expense::factory()->create([
             'amount' => 1000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['食費']->id,
             'user_id' => $user->id,
         ]);
@@ -483,29 +460,30 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成 + ログイン
-        $user = $this->createUserAndLogin();
+        $user = $this->createLoginUser();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
-        ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        // ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        $this->nowDate();
 
         $categories = $this->createCategories();
 
         // 支出登録（食費: 3000円、日用品費: 2000円、それ以外は0円）
         Expense::factory()->create([
             'amount' => 1000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['食費']->id,
             'user_id' => $user->id,
         ]);
         Expense::factory()->create([
             'amount' => 2000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['食費']->id,
             'user_id' => $user->id,
         ]);
         Expense::factory()->create([
             'amount' => 2000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['日用品費']->id,
             'user_id' => $user->id,
         ]);
@@ -543,23 +521,24 @@ class ChartTest extends TestCase
         Category::query()->delete();
 
         // ユーザー作成A,B + ログインA
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         // 現在の年月を取得（doughnutGetCategoryExpenseTotalsは現在の年月を使用）
-        ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        // ['now' => $now, 'currentYear' => $currentYear, 'currentMonth' => $currentMonth, 'currentDate' => $currentDate] = $this->getMonthYear();
+        $this->nowDate();
 
         $categories = $this->createCategories();
 
         // 支出登録 食費 A:1000円, B:2000円
         Expense::factory()->create([
             'amount' => 1000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['食費']->id,
             'user_id' => $userA->id,
         ]);
         Expense::factory()->create([
             'amount' => 2000,
-            'date' => $currentDate,
+            'date' => $this->nowDate(),
             'category_id' => $categories['食費']->id,
             'user_id' => $userB->id,
         ]);

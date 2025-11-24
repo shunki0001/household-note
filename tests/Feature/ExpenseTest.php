@@ -9,12 +9,24 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Expense;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
+use Tests\Traits\CreatesExpenses;
 
 class ExpenseTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesExpenses;
 
     // ユーザー作成 + ログイン + カテゴリー作成を共通化
+    /**
+     * 共通化
+     *
+     * 実装内容
+     * - ユーザー作成 + ログイン
+     * - カテゴリー「食費」作成
+     *
+     * @param $user
+     * @param $category
+     */
     private function create_and_login_user(): array
     {
         $user = User::factory()->create();
@@ -27,33 +39,44 @@ class ExpenseTest extends TestCase
         return compact('user', 'category'); // ['user' => $user, 'category' => $category]
     }
 
-     // テストデータを関数化
-    // defaultの値を上書きして使う
-    private function invalidData($categoryId, $overides = [], $errors = [], $case = [])
+    /**
+     * テストデータ作成
+     * data -> 支出データ
+     * errors -> エラーメッセージ
+     * case -> エラーのパターン
+     * テストケースに応じて各データを上書きして利用する
+     *
+     * @param int $categoryId
+     * @param array $overrides
+     * @param string $errors
+     * @param string $case
+     */
+    private function invalidData($categoryId, $overrides = [], $errors = [], $case = [])
     {
-        // カテゴリーが消えないように定義しておく
-        /* $category = Category::factory()->create(); */
-
         return [
             'data' => array_merge([
                 'amount' => 100,
                 'date' => '2025-11-09',
                 'title' => 'Test Title',
                 'category_id' => $categoryId,
-            ], $overides),
+            ], $overrides),
             'errors' => $errors,
             'case' => $case,
         ];
     }
 
-
-    // 追加テスト
+    /**
+     * 支出追加テスト
+     *
+     * 手順
+     * - ユーザー作成 + ログイン + カテゴリー作成
+     * - 支出登録 + ステータスコード200チェック
+     * - DBに保存されているか確認
+     */
     public function test_expense_can_be_stored()
     {
-        // ユーザー作成 + カテゴリー作成
         ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
-        // APIにPOSTリスエスト
         $response = $this->post('/expenses', [
             'amount' => 1000,
             'date' => '2025-09-13',
@@ -61,10 +84,8 @@ class ExpenseTest extends TestCase
             'category_id' => $category->id, // 作成したカテゴリーのIDを使用
         ]);
 
-        // ステータスコード200かチェック
         $response->assertStatus(200);
 
-        // データベースに保存されているか確認
         $this->assertDatabaseHas('expenses', [
             'user_id' => $user->id,
             'date' => '2025-09-13',
@@ -74,22 +95,22 @@ class ExpenseTest extends TestCase
         ]);
     }
 
-    // 編集テスト
+    /**
+     * 支出編集テスト
+     *
+     * 手順
+     * - ユーザ作成 + ログイン + カテゴリー作成
+     * - 任意の支出データ登録
+     * - 更新処理
+     * - 更新データがDBに登録されているか確認
+     */
     public function test_expense_can_be_updated(): void
     {
 
         ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
-        // 既存データを作成
-        $expense = Expense::factory()->create([
-            'user_id' => $user->id,
-            'category_id' => $category->id,
-            'amount' => 1000,
-            'title' => 'ランチ',
-            'date' => '2025-10-15',
-        ]);
+        $expense = $this->createExpense(1000, '2025-10-15', $user->id, $category->id, 'ランチ');
 
-        // PUTリクエストで更新
         $response = $this->put("expenses/{$expense->id}", [
             'amount' => 1500,
             'title' => 'ディナー',
@@ -99,7 +120,6 @@ class ExpenseTest extends TestCase
 
         $response->assertStatus(200);
 
-        // データベースに更新後のデータがあるか確認
         $this->assertDatabaseHas('expenses', [
             'id' => $expense->id,
             'amount' => 1500,
@@ -109,21 +129,21 @@ class ExpenseTest extends TestCase
         ]);
     }
 
-    // 削除テスト
+    /**
+     * 支出削除テスト
+     *
+     * 手順
+     * - ユーザー作成 + ログイン + カテゴリー作成
+     * - 支出データ登録
+     * - 削除処理を呼び出し
+     * - DBにデータが削除されているか確認
+     */
     public function test_expense_can_be_deleted(): void
     {
         ['user' => $user, 'category' => $category] = $this->create_and_login_user();
-        // 既存データを作成
-        $expense = Expense::factory()->create([
-            'user_id' => $user->id,
-            'category_id' => $category->id,
-            'amount' => 1000,
-            'title' => 'ランチ',
-            'date' => '2025-10-15',
-        ]);
 
+        $expense = $this->createExpense(1000, '2025-10-15', $user->id, $category->id, 'ランチ');
 
-        // TransactionControllerから削除処理を実行
         $response = $this->delete("/transactions/expense/{$expense->id}");
 
         $response->assertStatus(200);
@@ -141,57 +161,66 @@ class ExpenseTest extends TestCase
         $this->assertEquals('testing', \DB::connection()->getDatabaseName());
     }
 
-    // バリデーション違反は登録できない
+    /**
+     * バリデーション違反は登録できない
+     *
+     * 手順
+     * - バリデーション登録リストを設定
+     * - 支出登録
+     * - バリデーションエラー、リダイレクトされるかチェック
+     * - エラーメッセージを返す
+     * - DBに登録されていないことを確認
+     */
     public function test_new_expense_cannot_register_with_invalid_data(): void
     {
         ['user' => $user, 'category' => $category] = $this->create_and_login_user();
         // 登録リスト
-        $invaliDataSets = [
+        $invalidDataSets = [
             $this->invalidData($category->id, ['amount' => ''], ['amount'], 'amount必須'),
             $this->invalidData($category->id, ['date' => ''], ['date'], 'date必須'),
             $this->invalidData($category->id, ['title' => ''], ['title'], 'title必須'),
             $this->invalidData($category->id, ['category_id' => ''], ['category_id'], 'category_id必須'),
-            $this->invalidData($category->id, ['amount' => -100], ['amount'], 'amoountマイナスのパターン'),
+            $this->invalidData($category->id, ['amount' => -100], ['amount'], 'amountマイナスのパターン'),
             $this->invalidData($category->id, ['amount' => 100.123], ['amount'], 'amount小数チェック'),
         ];
 
-        foreach ($invaliDataSets as $set) {
+        foreach ($invalidDataSets as $set) {
             $response = $this->post('/expenses', $set['data']);
 
-            // バリデーションエラー時はリダイレクト
             $response->assertStatus(302);
 
-            // 各フィールドに対してエラーメッセージが返されているか確認
             $response->assertSessionHasErrors($set['errors'], "失敗ケース: {$set['case']}");
 
-            // データベースに登録されていないことを確認
             $this->assertDatabaseCount('expenses', 0);
         }
 
     }
 
-
-    // 必須項目が空欄の場合にエラーとなることを確認するテスト
+    /**
+     * 必須項目が空欄の場合にエラーとなることを確認
+     *
+     * 手順
+     * - ユーザー作成 + ログイン + カテゴリー作成
+     * - 支出項目を全て空白で登録
+     * - エラー(302)が返されるか確認
+     * - エラーメッセージが返されるか確認
+     * - DBに登録されていないことを確認
+     */
     public function test_expense_cannot_be_stored_with_empty_fields()
     {
-
         ['user' => $user, 'category' => $category] = $this->create_and_login_user();
 
-        // 必須項目を空欄でPOST
         $response = $this->post('/expenses', [
-            'amount' => '',        // 空欄
-            'date' => '',          // 空欄
-            'title' => '',         // 空欄
-            'category_id' => '',   // 空欄
+            'amount' => '',
+            'date' => '',
+            'title' => '',
+            'category_id' => '',
         ]);
 
-        // バリデーションエラー時はリダイレクト(302)
         $response->assertStatus(302);
 
-        // 各フィールドに対してエラーメッセージが返されているか確認
         $response->assertSessionHasErrors(['amount', 'date', 'title', 'category_id']);
 
-        // データベースに登録されていないことを確認
         $this->assertDatabaseCount('expenses', 0);
     }
 

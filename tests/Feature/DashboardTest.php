@@ -11,10 +11,16 @@ use App\Models\Expense;
 use App\Models\Income;
 use App\Models\IncomeCategory;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Traits\CreatesExpenses;
+use Tests\Traits\CreatesIncomes;
+use Tests\Traits\CreateUsers;
 
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
+    use CreateUsers;
+    use CreatesExpenses;
+    use CreatesIncomes;
 /**
  * DashboardController の機能全体を検証するテスト
  *
@@ -29,24 +35,6 @@ class DashboardTest extends TestCase
  * - 今月の合計収入 API が正しい値を返すこと
  */
 
-
-    // ユーザー作成 + ログイン
-    private function createUserAndLogin()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
-        return $user;
-    }
-
-    // ユーザー A / B を作成し、Aでログイン
-    private function create_and_login_users(): array
-    {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-        $this->actingAs($userA);
-
-        return compact('userA', 'userB');
-    }
 
     /**
      * API + ステータス + 合計金額の確認
@@ -123,48 +111,14 @@ class DashboardTest extends TestCase
         return now()->format('Y-m-d');
     }
 
-    /**
-     * 支出登録用のテストデータを作成する
-     *
-     * @param int $amount: 金額
-     * @param string $date: 日付
-     * @param int $userId: ユーザーID
-     * @return Expense
-     */
-    private function createUserWithExpenses(int $amount, string $date, int $userId): Expense
-    {
-        return Expense::factory()->create([
-            'amount' => $amount,
-            'date' => $date,
-            'user_id' => $userId
-        ]);
-    }
-
-    /**
-     * 収入登録用のテストデータを作成
-     *
-     * @param int $amount: 金額
-     * @param string $date: 日付
-     * @param int $userId: ユーザーID
-     * @return Income
-     */
-    private function createUserWithIncomes(int $amount, string $date, int $userId): Income
-    {
-        return Income::factory()->create([
-            'amount' => $amount,
-            'income_date' => $date,
-            'user_id' => $userId
-        ]);
-    }
-
     // Dashboardの初回表示が正常に行われるか
     public function test_index()
     {
         // テストユーザー作成
-        $user = User::factory()->create();
-
-        // ダッシュボードページにアクセス
+        $user = $this->createLoginUser();
+        // // ダッシュボードページにアクセス
         $response = $this->actingAs($user)->get('/dashboard');
+        // $response = $this->get('/dashboard');
 
         // ステータスコード200を確認
         $response->assertStatus(200);
@@ -182,7 +136,7 @@ class DashboardTest extends TestCase
     // categoriesの内容が正しいか
     public function test_dashboard_categories_content_is_correct()
     {
-        $this->createUserAndLogin();
+        $this->createLoginUser();
 
         // カテゴリー10件作成
         $categories = $this->create_expense_category();
@@ -210,7 +164,7 @@ class DashboardTest extends TestCase
     // income_categoriesの内容が正しいか
     public function test_dashboard_income_categories_content_is_correct()
     {
-        $this->createUserAndLogin();
+        $this->createLoginUser();
 
         // カテゴリー作成
         $income_categories = $this->create_income_category();
@@ -238,7 +192,7 @@ class DashboardTest extends TestCase
     public function test_calculate_total_expense()
     {
         // ユーザー A / B を作成し、Aでログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         /**
          * テストデータ作成
@@ -247,10 +201,10 @@ class DashboardTest extends TestCase
          * - 今月の支出(ユーザーB): 99999 (Aの値に影響なし)
          * - 先月の支出(ユーザーA): 55555 (今月分に含まれない)
          */
-        $this->createUserWithExpenses(1000, $this->nowDate(), $userA->id);
-        $this->createUserWithExpenses(2000, $this->nowDate(), $userA->id);
-        $this->createUserWithExpenses(99999, $this->nowDate(), $userB->id);
-        $this->createUserWithExpenses(55555, '2025-10-01', $userA->id);
+        $this->createExpense(1000, $this->nowDate(), $userA->id);
+        $this->createExpense(2000, $this->nowDate(), $userA->id);
+        $this->createExpense(99999, $this->nowDate(), $userB->id);
+        $this->createExpense(55555, '2025-10-01', $userA->id);
 
         $response = $this->get('/dashboard');
 
@@ -266,7 +220,7 @@ class DashboardTest extends TestCase
     public function test_calculate_total_income()
     {
         // ユーザー A / B を作成し、Aでログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         /**
          * テストデータ作成
@@ -275,10 +229,10 @@ class DashboardTest extends TestCase
          * - 今月の収入(ユーザーB): 2000 (Aの値に影響なし)
          * - 先月の収入(ユーザーA): 3000 (今月分に含まれない)
          */
-        $this->createUserWithIncomes(3000, $this->nowDate(), $userA->id);
-        $this->createUserWithIncomes(6000, $this->nowDate(), $userA->id);
-        $this->createUserWithIncomes(2000, $this->nowDate(), $userB->id);
-        $this->createUserWithIncomes(3000, '2025-09-01', $userA->id);
+        $this->createIncome(3000, $this->nowDate(), $userA->id);
+        $this->createIncome(6000, $this->nowDate(), $userA->id);
+        $this->createIncome(2000, $this->nowDate(), $userB->id);
+        $this->createIncome(3000, '2025-09-01', $userA->id);
 
         $response = $this->get('/dashboard');
 
@@ -293,7 +247,7 @@ class DashboardTest extends TestCase
     public function test_api_total_expense_returns_correct_value()
     {
         // ユーザー A / B を作成し、Aでログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         // テストデータ
         /**
@@ -303,10 +257,10 @@ class DashboardTest extends TestCase
          * - 今月の収入(ユーザーB): 2222 (Aの値に影響なし)
          * - 先月の収入(ユーザーA): 4000 (今月分に含まれない)
          */
-        $this->createUserWithExpenses(1000, $this->nowDate(), $userA->id);
-        $this->createUserWithExpenses(6000, $this->nowDate(), $userA->id);
-        $this->createUserWithExpenses(2222, $this->nowDate(), $userB->id);
-        $this->createUserWithExpenses(4000, '2025-10-11', $userA->id);
+        $this->createExpense(1000, $this->nowDate(), $userA->id);
+        $this->createExpense(6000, $this->nowDate(), $userA->id);
+        $this->createExpense(2222, $this->nowDate(), $userB->id);
+        $this->createExpense(4000, '2025-10-11', $userA->id);
 
         // APIレスポンスとJSONの値(totalExpense=7000)を検証
         $this->response_and_assert_json('/api/dashboard/total-expense', 200, 'totalExpense', 7000);
@@ -317,7 +271,7 @@ class DashboardTest extends TestCase
     public function test_api_total_income_returns_correct_value()
     {
         // ユーザー A / B を作成し、Aでログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_and_login_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
         // テストデータ
         /**
@@ -327,10 +281,10 @@ class DashboardTest extends TestCase
          * - 今月の収入(ユーザーB): 1000 (Aの値に影響なし)
          * - 先月の収入(ユーザーA): 9999 (今月分に含まれない)
          */
-        $this->createUserWithIncomes(1000, $this->nowDate(), $userA->id);
-        $this->createUserWithIncomes(6000, $this->nowDate(), $userA->id);
-        $this->createUserWithIncomes(1000, $this->nowDate(), $userB->id);
-        $this->createUserWithIncomes(9999, '2025-10-01', $userA->id);
+        $this->createIncome(1000, $this->nowDate(), $userA->id);
+        $this->createIncome(6000, $this->nowDate(), $userA->id);
+        $this->createIncome(1000, $this->nowDate(), $userB->id);
+        $this->createIncome(9999, '2025-10-01', $userA->id);
 
         // APIレスポンスとJSONの値(totalIncome=7000)を検証
         $this->response_and_assert_json('api/incomes/total-monthly-incomes', 200, 'totalIncome', 7000);

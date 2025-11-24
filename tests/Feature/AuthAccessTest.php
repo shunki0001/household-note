@@ -10,55 +10,14 @@ use PHPUnit\Framework\Attrubutes\Test;
 use App\Models\Expense;
 use App\Models\Income;
 use App\Models\Category;
+use Tests\Traits\CreatesExpenses;
+use Tests\Traits\CreateUsers;
 
 class AuthAccessTest extends TestCase
 {
     use RefreshDatabase;
-
-    // 未ログインユーザーはダッシュボードにアクセスできずログインんページにリダイレクトされる
-    public function test_not_login_user_cannot_access_page(): void
-    {
-        $response = $this->get('/dashboard');
-        // $response = $this->get('/list');
-
-        $response->assertRedirect('/login'); // ログインページにリダイレクトされるか確認
-    }
-
-    // ログイン中にアクセス可能なページに全てアクセス
-    public function test_login_user_can_access_all_pages(): void
-    {
-        $user = User::factory()->create();
-
-        // ログイン中の状態を作る
-        $this->actingAs($user);
-
-        // ログイン中にアクセス可能なルート一覧
-        $pages = [
-            '/dashboard',
-            '/list',
-            '/graph/monthly',
-            '/graph/category',
-            '/profile',
-        ];
-
-        foreach ($pages as $page) {
-            $response = $this->get($page);
-            $response->assertStatus(200, "{$page} にアクセスできませんでした");
-        }
-    }
-    // 他ユーザーのデータにアクセスできない事をテスト ==
-
-    // 共通化
-    // ユーザーAとユーザーBを作成 + ユーザーAがログイン
-    private function create_users(): array
-    {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
-
-        $this->actingAs($userA);
-
-        return compact('userA', 'userB');
-    }
+    use CreateUsers;
+    use CreatesExpenses;
 
     // 共通化
     // モデル作成 + HTTPメソッド共通化
@@ -75,58 +34,92 @@ class AuthAccessTest extends TestCase
         return $model::factory()->create(array_merge(['user_id' => $userB->id], $attributes));
     }
 
-    // 支出の削除時に他のユーザーが操作できないか
+    /**
+     * ログイン中にアクセス可能なページに全てアクセス
+     *
+     * 手順
+     * - ユーザーA作成 + ログイン
+     * - ログイン中にアクセス可能なルート一覧を定義
+     * - 定義したルート一覧に全てアクセス -> アクセス可(200)
+     */
+    public function test_login_user_can_access_all_pages(): void
+    {
+        // ログイン中の状態を作る
+        $this->createLoginUser();
+
+        // ログイン中にアクセス可能なルート一覧
+        $pages = [
+            '/dashboard',
+            '/list',
+            '/graph/monthly',
+            '/graph/category',
+            '/profile',
+        ];
+
+        foreach ($pages as $page) {
+            $response = $this->get($page);
+            $response->assertStatus(200, "{$page} にアクセスできませんでした");
+        }
+    }
+
+    /**
+     * 支出の削除時に他のユーザーが操作できないか
+     *
+     * 手順
+     * - ユーザーA,B作成 + ユーザーAログイン
+     * - ユーザーBで任意の支出データを登録
+     */
     public function test_other_user_cannot_delete_expense(): void
     {
-        // ユーザーA,B作成 + ユーザーAログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
-        // ユーザーBが作成したデータ
-        $expense = $this->create_other_users_record(Expense::class, [
-            'user_id' => $userB->id,
-            'amount' => 1000,
-            'date' => '2025-11-14',
-            'title' => 'Test Title',
-        ]);
+        $expense = $this->createExpense(1000, '2025-11-14', $userB->id);
 
-        // 削除処理 + アクセス拒否チェック
         $this->assert_forbidden_for_other_user(
             'delete',
             "/transactions/expense/{$expense->id}"
         );
     }
 
-    // 収入の削除時に他のユーザーが操作できないか
+    /**
+     * 収入の削除時に他のユーザーが操作できないか
+     *
+     * 手順
+     * - ユーザーA,B作成 + ユーザーAログイン
+     * - ユーザーBで任意の収入データを登録
+     * - AがBのデータを削除処理 -> アクセス拒否チェック
+     */
     public function test_other_user_cannot_delete_income(): void
     {
-        // ユーザーA,B作成 + ユーザーAログイン
-        ['userA' => $userA, 'userB' => $userB] = $this->create_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
-        // ユーザーBが作成したデータ
         $income = $this->create_other_users_record(Income::class);
 
-        // 削除処理 + アクセス拒否チェック
         $this->assert_forbidden_for_other_user(
             'delete',
             "/transactions/income/{$income->id}"
         );
     }
 
-    // 支出の編集時に他のユーザーが操作できないか
+    /**
+     * 支出の編集時に他のユーザーが操作できないか
+     *
+     * 手順
+     * - ユーザーA,B作成 + ユーザーAログイン
+     * - カテゴリー作成
+     * - ユーザーBの任意の支出データ作成
+     * - ユーザーAがBのデータを編集 ->アクセス拒否
+     */
     public function test_other_user_cannot_edit_expense(): void
     {
-        // ユーザーA,B作成
-        ['userA' => $userA, 'userB' => $userB] = $this->create_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
-        // カテゴリーデータ作成
         $category = Category::factory()->create([
             'name' => '食費'
         ]);
 
-        // ユーザーBのデータ作成
         $expense = $this->create_other_users_record(Expense::class);
 
-        // ユーザーAがユーザーBのデータを編集 -> アクセス拒否
         $this->assert_forbidden_for_other_user(
             'put',
             "expenses/{$expense->id}",
@@ -139,21 +132,25 @@ class AuthAccessTest extends TestCase
             );
     }
 
-    // 収入の編集時に他のユーザーが操作できないか
+    /**
+     * 収入の編集時に他のユーザーが操作できないか
+     *
+     * 手順
+     * - ユーザーA,B作成 + ユーザーAログイン
+     * - カテゴリー作成
+     * - ユーザーBの任意の収入データ作成
+     * - ユーザーAがBのデータを編集 ->アクセス拒否
+     */
     public function test_other_user_cannot_edit_income(): void
     {
-        // ユーザーA,B作成
-        ['userA' => $userA, 'userB' => $userB] = $this->create_users();
+        ['userA' => $userA, 'userB' => $userB] = $this->createLoginUsers();
 
-        // カテゴリー作成
         $income_category = Category::factory()->create([
             'name' => '給与'
         ]);
 
-        // ユーザーBのデータ作成=====
         $income = $this->create_other_users_record(Income::class);
 
-        // ユーザーAがユーザーBのデータ編集 -> アクセス拒否  ==
         $this-> assert_forbidden_for_other_user(
             'put',
             "incomes/{$income->id}",
