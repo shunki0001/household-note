@@ -20,40 +20,37 @@ import Footer from '@/Layouts/Footer.vue';
             <slot />
         </div>
     </div> -->
-    <nav
-        class="border-b border-gray-100 bg-gray-100"
-    >
+    <nav class="border-b border-gray-100 bg-gray-100">
         <!-- Primary Navigation Menu -->
         <div class="px-4 sm:px-6 lg:px-8">
             <!-- ナビ全体を左右に分ける -->
-            <div class="flex h-16 justify-between items-center">
+            <div class="flex h-16 items-center justify-between">
                 <!-- 左: ロゴ -->
                 <div class="flex items-center">
-                        <Link :href="route('dashboard')">
-                            <ApplicationLogo
-                                class="block h-11 w-auto fill-current text-gray-800"
-                            />
-                        </Link>
+                    <Link :href="route('dashboard')">
+                        <ApplicationLogo
+                            class="block h-11 w-auto fill-current text-gray-800"
+                        />
+                    </Link>
                 </div>
                 <!-- 右: ログイン・新規登録 -->
                 <div class="flex items-center space-x-4">
                     <Link
                         href="/register"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition duration-300"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow transition duration-300 hover:bg-blue-700"
                     >
                         新規登録
                     </Link>
 
                     <Link
                         href="/login"
-                        class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition duration-300"
+                        class="rounded-lg border border-blue-600 px-4 py-2 text-blue-600 transition duration-300 hover:bg-blue-50"
                     >
                         ログイン
                     </Link>
                 </div>
             </div>
         </div>
-
     </nav>
     <!-- <div class="min-h-screen bg-gray-100 text-gray-800">
         <slot />

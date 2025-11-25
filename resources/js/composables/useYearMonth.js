@@ -12,12 +12,12 @@ export function useYearMonth(initialYear = [2023, 2024, 2025, 2026, 2027]) {
     // 年度の変更
     const changeYear = (year) => {
         currentYear.value = year;
-    }
+    };
 
     // 月の変更
     const changeMonths = (month) => {
         currentMonth.value = month;
-    }
+    };
 
     // 次の月
     const nextMonth = () => {

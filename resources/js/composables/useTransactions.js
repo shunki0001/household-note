@@ -1,9 +1,9 @@
-import { YEAR_END_MONTH, YEAR_START_MONTH } from "@/config/constants";
-import { showAlert } from "@/utils/alert";
-import { usePage } from "@inertiajs/vue3";
+import { YEAR_END_MONTH, YEAR_START_MONTH } from '@/config/constants';
+import { showAlert } from '@/utils/alert';
+import { usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import axios from "axios";
-import { onMounted } from "vue";
+import axios from 'axios';
+import { onMounted } from 'vue';
 
 export function useTransactions(initialData = []) {
     const page = usePage();
@@ -16,10 +16,14 @@ export function useTransactions(initialData = []) {
     // データ取得
     const fetchTransactions = async () => {
         try {
-            const { data } = await axios.get('/api/report-data/monthly-transactions', {
-                params: { year: year.value, month: month.value },
-            });
-            transactions.value = data.transactions?.data ?? data.transactions ?? [];
+            const { data } = await axios.get(
+                '/api/report-data/monthly-transactions',
+                {
+                    params: { year: year.value, month: month.value },
+                },
+            );
+            transactions.value =
+                data.transactions?.data ?? data.transactions ?? [];
         } catch (error) {
             console.error('データ取得失敗', error);
         }
@@ -29,7 +33,7 @@ export function useTransactions(initialData = []) {
     const changeMonth = (delta) => {
         month.value += delta;
 
-        if(month.value > YEAR_END_MONTH) {
+        if (month.value > YEAR_END_MONTH) {
             month.value = YEAR_START_MONTH;
             year.value++;
         } else if (month.value < YEAR_START_MONTH) {

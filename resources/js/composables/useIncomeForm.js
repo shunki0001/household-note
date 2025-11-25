@@ -3,9 +3,7 @@ import axios from 'axios';
 import { VALIDATE_ERROR_STATUS } from '@/config/constants';
 import { showAlert } from '@/utils/alert';
 
-
 export function useIncomeForm(props, emit) {
-
     const form = reactive({
         amount: props.income.amount ?? '',
         income_date: props.income.income_date ?? '',
@@ -17,33 +15,37 @@ export function useIncomeForm(props, emit) {
     const errors = reactive({
         amount: '',
         income_date: '',
-        income_category_id: ''
+        income_category_id: '',
     });
 
-    watch(() => props.income, (newIncome) => {
-        form.amount = newIncome.amount ?? '';
-        form.income_date = newIncome.income_date ?? '';
-        form.income_category_id = newIncome.income_category_id ?? '';
-    });
+    watch(
+        () => props.income,
+        (newIncome) => {
+            form.amount = newIncome.amount ?? '';
+            form.income_date = newIncome.income_date ?? '';
+            form.income_category_id = newIncome.income_category_id ?? '';
+        },
+    );
 
     const submit = async () => {
-
         // 送信前にエラーリセット
-        Object.keys(errors).forEach(key => (errors[key] = ''));
+        Object.keys(errors).forEach((key) => (errors[key] = ''));
 
         try {
             console.log('useIncomeForm submit started'); // デバッグログ
             console.log('Form data:', form); // デバッグログ
 
-            const response = props.method === 'post'
-                ? await axios.post(props.submitUrl, form)
-                : await axios.put(props.submitUrl, form);
+            const response =
+                props.method === 'post'
+                    ? await axios.post(props.submitUrl, form)
+                    : await axios.put(props.submitUrl, form);
             console.log('API response:', response.data); // デバッグログ
 
             showAlert(response.data.message, 'success').then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
                 if (props.method === 'put' && form.back) {
-                    window.location.href = window.location.origin + '/' + form.back;
+                    window.location.href =
+                        window.location.origin + '/' + form.back;
                 } else if (props.method === 'put') {
                     window.location.href = '/dashboard';
                 } else if (props.method === 'post') {
@@ -55,11 +57,14 @@ export function useIncomeForm(props, emit) {
                     emit('submitted', 'income');
                 }
             });
-        }   catch(error) {
+        } catch (error) {
             console.error('Submit error:', error); // デバッグログ
 
             // Laravelの422バリデーションエラー対応
-            if (error.response && error.response.status == VALIDATE_ERROR_STATUS) {
+            if (
+                error.response &&
+                error.response.status == VALIDATE_ERROR_STATUS
+            ) {
                 const validationErrors = error.response.data.errors;
                 for (const key in validationErrors) {
                     if (errors.hasOwnProperty(key)) {

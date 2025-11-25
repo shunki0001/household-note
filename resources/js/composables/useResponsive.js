@@ -1,5 +1,5 @@
 import { MOBILE_BREAKPOINT } from '@/config/constants';
-import { ref, onMounted, onUnmounted} from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 // 画面サイズ監視
 export function useResponsive() {

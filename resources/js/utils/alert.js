@@ -8,10 +8,10 @@
  * iconとtitleを引数として渡して使う
  * 必要に応じて上書き・追加可能
  */
-import Swal from "sweetalert2";
-import { SWEET_ALERT2_TIMER } from "@/config/constants";
+import Swal from 'sweetalert2';
+import { SWEET_ALERT2_TIMER } from '@/config/constants';
 
-export function showAlert(title, icon = 'success', options ={}) {
+export function showAlert(title, icon = 'success', options = {}) {
     return Swal.fire({
         toast: true,
         position: 'top-end',

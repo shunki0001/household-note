@@ -10,7 +10,7 @@ const page = usePage();
 watch(
     () => page.props.flash?.message,
     (message) => {
-        if(message) {
+        if (message) {
             Swal.fire({
                 toast: true,
                 position: 'top-end',
@@ -21,11 +21,10 @@ watch(
                 timerProgressBar: true,
             });
         }
-    }
+    },
 );
-
 </script>
 
 <template>
-    <!-- UIは無し -->
+    <span class="sr-only" aria-hidden="true"></span>
 </template>

@@ -19,11 +19,10 @@ const form = useForm({
 const customErrors = reactive({
     current_password: '',
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
 });
 
 const updatePassword = () => {
-
     form.put(route('password.update'), {
         preserveScroll: true,
         onSuccess: () => form.reset(),
@@ -37,16 +36,14 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                パスワード変更
-            </h2>
+            <h2 class="text-lg font-medium text-gray-900">パスワード変更</h2>
 
             <p class="mt-1 text-sm text-gray-600">
                 パスワードは英数字含む8文字以上で設定して下さい
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
+        <form class="mt-6 space-y-6" @submit.prevent="updatePassword">
             <div>
                 <InputLabel for="current_password" value="現在のパスワード" />
 
@@ -60,7 +57,10 @@ const updatePassword = () => {
                 />
 
                 <InputError
-                    :message="customErrors.current_password || form.errors.current_password"
+                    :message="
+                        customErrors.current_password ||
+                        form.errors.current_password
+                    "
                     class="mt-2"
                 />
             </div>
@@ -77,14 +77,14 @@ const updatePassword = () => {
                     autocomplete="new-password"
                 />
 
-                <InputError :message="customErrors.password || form.errors.password" class="mt-2" />
+                <InputError
+                    :message="customErrors.password || form.errors.password"
+                    class="mt-2"
+                />
             </div>
 
             <div>
-                <InputLabel
-                    for="password_confirmation"
-                    value="もう一度入力"
-                />
+                <InputLabel for="password_confirmation" value="もう一度入力" />
 
                 <TextInput
                     id="password_confirmation"
@@ -95,13 +95,16 @@ const updatePassword = () => {
                 />
 
                 <InputError
-                    :message="customErrors.password_confirmation || form.errors.password_confirmation"
+                    :message="
+                        customErrors.password_confirmation ||
+                        form.errors.password_confirmation
+                    "
                     class="mt-2"
                 />
             </div>
 
             <!-- <div class="flex items-center gap-4 justify-end sm:justify-start max-w-xl mr-8"> -->
-            <div class="flex justify-end sm:justify-start max-w-xl">
+            <div class="flex max-w-xl justify-end sm:justify-start">
                 <PrimaryButton :disabled="form.processing">保存</PrimaryButton>
 
                 <Transition

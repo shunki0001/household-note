@@ -41,31 +41,29 @@ const closeModal = () => {
 <template>
     <section class="space-y-6">
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                アカウント削除
-            </h2>
+            <h2 class="text-lg font-medium text-gray-900">アカウント削除</h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                アカウントが削除されると、データは全て削除されます。<br>
+                アカウントが削除されると、データは全て削除されます。<br />
                 削除されたアカウントは元に戻せません。
             </p>
         </header>
 
-        <div class="flex justify-end sm:justify-start max-w-xl">
-            <DangerButton @click="confirmUserDeletion">アカウント削除</DangerButton>
+        <div class="flex max-w-xl justify-end sm:justify-start">
+            <DangerButton @click="confirmUserDeletion"
+                >アカウント削除</DangerButton
+            >
         </div>
 
         <Modal :show="confirmingUserDeletion" @close="closeModal">
             <div class="p-6">
-                <h2
-                    class="text-lg font-medium text-gray-900"
-                >
+                <h2 class="text-lg font-medium text-gray-900">
                     本当にアカウントを削除してもよろしいですか？
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
-                    アカウントが削除されると、データは全て削除されます。<br>
-                    削除されたアカウントは元に戻せません。<br>
+                    アカウントが削除されると、データは全て削除されます。<br />
+                    削除されたアカウントは元に戻せません。<br />
                     アカウントを削除するには、パスワードを入力して下さい。
                 </p>
 

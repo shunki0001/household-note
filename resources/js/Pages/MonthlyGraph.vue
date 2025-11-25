@@ -12,8 +12,16 @@ import { useResponsive } from '@/composables/useResponsive';
 // =============================
 const availableYears = ref([2023, 2024, 2025, 2026, 2027]);
 
-const {currentYear, currentQuarter, currentQuarterLabel ,currentRange, nextQuarter, prevQuarter, changeYear, resetQuarterToCurrentMonth } =
-    useQuarter(availableYears);
+const {
+    currentYear,
+    currentQuarter,
+    currentQuarterLabel,
+    currentRange,
+    nextQuarter,
+    prevQuarter,
+    changeYear,
+    resetQuarterToCurrentMonth,
+} = useQuarter(availableYears);
 const { isMobile } = useResponsive();
 
 // =============================
@@ -24,7 +32,7 @@ const chartRange = computed(() => {
     if (isMobile.value) {
         return {
             startMonth: currentRange.value.start,
-            endMonth: currentRange.value.end
+            endMonth: currentRange.value.end,
         };
     }
     // PC → 年間
@@ -44,65 +52,79 @@ watch(isMobile, (newVal) => {
 </script>
 
 <template>
-<Head title="月別グラフ" />
+    <Head title="月別グラフ" />
 
-<AuthenticatedLayout>
-    <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
+    <AuthenticatedLayout>
+        <template #header>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 月別支出グラフ
             </h2>
         </template>
-<div class="py-8 sm:py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="bg-white shadow-sm rounded-lg w-full">
-        <div
-        class="
-            p-4 sm:p-6 text-gray-900
-            w-full
-            sm:min-w-[700px]
-            overflow-x-auto
-        "
-        >
-        <!-- PC表示(年度切り替え) -->
-        <div class="hidden md:block">
-            <div class="mb-4 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
-                <span class="font-bold text-lg">年別表示：</span>
-                <button
-                    v-for="year in availableYears"
-                    :key="year"
-                    class="px-3 py-1 border rounded"
-                    :class="{ 'bg-blue-500 text-white': currentYear === year }"
-                    @click="changeYear(year)"
+        <div class="py-8 sm:py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="w-full rounded-lg bg-white shadow-sm">
+                    <div
+                        class="w-full overflow-x-auto p-4 text-gray-900 sm:min-w-[700px] sm:p-6"
                     >
-                    {{ year }}年
-                </button>
+                        <!-- PC表示(年度切り替え) -->
+                        <div class="hidden md:block">
+                            <div
+                                class="mb-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start"
+                            >
+                                <span class="text-lg font-bold"
+                                    >年別表示：</span
+                                >
+                                <button
+                                    v-for="year in availableYears"
+                                    :key="year"
+                                    class="rounded border px-3 py-1"
+                                    :class="{
+                                        'bg-blue-500 text-white':
+                                            currentYear === year,
+                                    }"
+                                    @click="changeYear(year)"
+                                >
+                                    {{ year }}年
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- スマホ表示(年 + 四半期まとめ) -->
+                        <div
+                            class="mx-auto flex w-full max-w-xl justify-end px-4 sm:px-0 md:hidden"
+                        >
+                            <button
+                                class="rounded border px-2 py-1 text-sm"
+                                @click="prevQuarter"
+                            >
+                                ◀︎
+                            </button>
+                            <span class="mx-auto text-lg font-bold"
+                                >{{ currentYear }}年
+                                {{ currentQuarterLabel }}</span
+                            >
+                            <button
+                                class="rounded border px-2 py-1 text-sm"
+                                @click="nextQuarter"
+                            >
+                                ▶︎
+                            </button>
+                        </div>
+
+                        <!-- グラフ -->
+                        <div class="w-full">
+                            <BarChart
+                                :key="`${isMobile}-${currentYear}-${isMobile ? currentQuarter : 'year'}`"
+                                :year="currentYear"
+                                :start-month="chartRange.startMonth"
+                                :end-month="chartRange.endMonth"
+                                label="月別支出合計"
+                                api-url="/api/chart-data"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
-
         </div>
-
-        <!-- スマホ表示(年 + 四半期まとめ) -->
-        <div class="flex justify-end w-full max-w-xl mx-auto px-4 sm:px-0 md:hidden">
-            <button @click="prevQuarter" class="px-2 py-1 border rounded text-sm">◀︎</button>
-            <span class="font-bold text-lg mx-auto">{{ currentYear }}年 {{ currentQuarterLabel }}</span>
-            <button @click="nextQuarter" class="px-2 py-1 border rounded text-sm">▶︎</button>
-        </div>
-
-        <!-- グラフ -->
-        <div class="w-full">
-            <BarChart
-            :key="`${isMobile}-${currentYear}-${isMobile ? currentQuarter : 'year'}`"
-            :year="currentYear"
-            :startMonth="chartRange.startMonth"
-            :endMonth="chartRange.endMonth"
-            label="月別支出合計"
-            apiUrl="/api/chart-data"
-            />
-        </div>
-        </div>
-    </div>
-    </div>
-</div>
-</AuthenticatedLayout>
+    </AuthenticatedLayout>
 </template>

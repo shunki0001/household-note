@@ -1,5 +1,5 @@
-import { MONTH_PER_QUARTER, QUARTERS, TOTAL_QUARTER } from "@/config/constants";
-import { computed, ref } from "vue";
+import { MONTH_PER_QUARTER, QUARTERS, TOTAL_QUARTER } from '@/config/constants';
+import { computed, ref } from 'vue';
 
 // 四半期操作
 export function useQuarter(availableYears) {
@@ -12,8 +12,10 @@ export function useQuarter(availableYears) {
     const getQuarter = (month) => Math.ceil(month / MONTH_PER_QUARTER);
     const currentQuarter = ref(getQuarter(currentMonth));
 
-    const currentQuarterLabel = computed(() => QUARTERS[currentQuarter.value -1].label);
-    const currentRange = computed(() =>QUARTERS[currentQuarter.value - 1]);
+    const currentQuarterLabel = computed(
+        () => QUARTERS[currentQuarter.value - 1].label,
+    );
+    const currentRange = computed(() => QUARTERS[currentQuarter.value - 1]);
 
     // =============================
     // 四半期切り替え
@@ -28,7 +30,7 @@ export function useQuarter(availableYears) {
 
     const prevQuarter = () => {
         if (currentQuarter.value > 1) currentQuarter.value--;
-        else if(currentYear.value > availableYears.value[0]) {
+        else if (currentYear.value > availableYears.value[0]) {
             currentYear.value--;
             currentQuarter.value = TOTAL_QUARTER;
         }
@@ -38,7 +40,7 @@ export function useQuarter(availableYears) {
     const changeYear = (year) => {
         currentYear.value = year;
         currentQuarter.value = getQuarter(currentMonth);
-    }
+    };
 
     const resetQuarterToCurrentMonth = () => {
         currentQuarter.value = getQuarter(currentMonth);

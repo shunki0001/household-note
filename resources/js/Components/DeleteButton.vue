@@ -4,8 +4,16 @@ import { defineEmits } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    transactionId: Number,
-    transactionType: String,
+    // transactionId: Number,
+    transactionId: {
+        type: [Number, String],
+        required: true,
+    },
+    // transactionType: String,
+    transactionType: {
+        type: String,
+        required: true,
+    },
 });
 
 const emit = defineEmits(['deleted']); // 削除通知イベント
@@ -21,25 +29,29 @@ const deleteTransaction = async () => {
             cancelButtonColor: '#3085d6',
             confirmButtonText: '削除する',
             cancelButtonText: 'キャンセル',
-        })
+        });
 
         if (confirmed.isConfirmed) {
-            await axios.delete(route('transaction.destroy', {
-                type: props.transactionType,
-                id: props.transactionId,
-            }))
-            emit('deleted')
-            Swal.fire('削除しました', '', 'success')
+            await axios.delete(
+                route('transaction.destroy', {
+                    type: props.transactionType,
+                    id: props.transactionId,
+                }),
+            );
+            emit('deleted');
+            Swal.fire('削除しました', '', 'success');
         }
     } catch (e) {
-        Swal.fire('エラー', '削除に失敗しました', 'error')
+        Swal.fire('エラー', '削除に失敗しました', 'error');
     }
-}
-
+};
 </script>
 
 <template>
-    <button @click="deleteTransaction" class="inline-block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-sm">
+    <button
+        class="inline-block rounded bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
+        @click="deleteTransaction"
+    >
         削除
     </button>
 </template>

@@ -12,6 +12,8 @@ defineProps({
     },
     status: {
         type: String,
+        default: null,
+        fa,
     },
 });
 
@@ -25,11 +27,10 @@ const form = useForm({
 // カスタムバリデーションエラーを管理
 const customErrors = reactive({
     name: '',
-    email: ''
+    email: '',
 });
 
 const updateProfile = () => {
-
     form.patch(route('profile.update'), {
         onError: (errors) => {
             console.log(errors);
@@ -41,32 +42,30 @@ const updateProfile = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                アカウント情報
-            </h2>
+            <h2 class="text-lg font-medium text-gray-900">アカウント情報</h2>
 
             <p class="mt-1 text-sm text-gray-600">
                 アカウントの名前とメールドレスを編集できます。
             </p>
         </header>
 
-        <form
-            @submit.prevent="updateProfile"
-            class="mt-6 space-y-6"
-        >
+        <form class="mt-6 space-y-6" @submit.prevent="updateProfile">
             <div>
                 <InputLabel for="name" value="名前" />
 
                 <TextInput
                     id="name"
+                    v-model="form.name"
                     type="text"
                     class="mt-1 block w-full"
-                    v-model="form.name"
                     autofocus
                     autocomplete="name"
                 />
 
-                <InputError class="mt-2" :message="customErrors.name || form.errors.name" />
+                <InputError
+                    class="mt-2"
+                    :message="customErrors.name || form.errors.name"
+                />
             </div>
 
             <div>
@@ -74,13 +73,16 @@ const updateProfile = () => {
 
                 <TextInput
                     id="email"
+                    v-model="form.email"
                     type="email"
                     class="mt-1 block w-full"
-                    v-model="form.email"
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="customErrors.email || form.errors.email" />
+                <InputError
+                    class="mt-2"
+                    :message="customErrors.email || form.errors.email"
+                />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
@@ -104,7 +106,7 @@ const updateProfile = () => {
                 </div>
             </div>
 
-            <div class="flex justify-end sm:justify-start max-w-xl">
+            <div class="flex max-w-xl justify-end sm:justify-start">
                 <PrimaryButton :disabled="form.processing">保存</PrimaryButton>
 
                 <Transition

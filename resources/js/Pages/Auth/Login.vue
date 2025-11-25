@@ -14,6 +14,7 @@ defineProps({
     },
     status: {
         type: String,
+        default: null,
     },
 });
 
@@ -26,9 +27,8 @@ const form = useForm({
 // カスタムバリデーションエラーを管理
 const customErrors = reactive({
     email: '',
-    password: ''
+    password: '',
 });
-
 
 const submit = () => {
     form.post(route('login'), {
@@ -54,14 +54,17 @@ const submit = () => {
 
                 <TextInput
                     id="email"
+                    v-model="form.email"
                     type="email"
                     class="mt-1 block w-full"
-                    v-model="form.email"
                     autofocus
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="customErrors.email || form.errors.email" />
+                <InputError
+                    class="mt-2"
+                    :message="customErrors.email || form.errors.email"
+                />
             </div>
 
             <div class="mt-4">
@@ -69,13 +72,16 @@ const submit = () => {
 
                 <TextInput
                     id="password"
+                    v-model="form.password"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
                     autocomplete="current-password"
                 />
 
-                <InputError class="mt-2" :message="customErrors.password || form.errors.password" />
+                <InputError
+                    class="mt-2"
+                    :message="customErrors.password || form.errors.password"
+                />
             </div>
 
             <!-- 未実装 -->

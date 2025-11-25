@@ -20,19 +20,14 @@ const {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 カテゴリー別グラフ
             </h2>
         </template>
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-
                         <!-- ページネーション -->
 
                         <!-- PC表示 -->
@@ -41,10 +36,12 @@ const {
                                 <button
                                     v-for="year in availableYears"
                                     :key="year"
-                                    class="mx-1 px-3 py-1 border rounded hover:bg-blue-100"
+                                    class="mx-1 rounded border px-3 py-1 hover:bg-blue-100"
                                     :class="{
-                                        'bg-blue-500 text-white': currentYear === year ,
-                                        'bg-white text-black': currentYear !== year
+                                        'bg-blue-500 text-white':
+                                            currentYear === year,
+                                        'bg-white text-black':
+                                            currentYear !== year,
                                     }"
                                     @click="changeYear(year)"
                                 >
@@ -55,10 +52,12 @@ const {
                                 <button
                                     v-for="month in 12"
                                     :key="month"
-                                    class="px-3 py-1 border rounded hover:bg-blue-100"
+                                    class="rounded border px-3 py-1 hover:bg-blue-100"
                                     :class="{
-                                        'bg-blue-500 text-white': currentMonth === month,
-                                        'bg-white text-black': currentMonth !== month
+                                        'bg-blue-500 text-white':
+                                            currentMonth === month,
+                                        'bg-white text-black':
+                                            currentMonth !== month,
                                     }"
                                     @click="changeMonths(month)"
                                 >
@@ -68,16 +67,30 @@ const {
                         </div>
 
                         <!-- スマホ表示 -->
-                        <div class="flex md:hidden items-center justify-between mb-4">
-                            <button @click="prevMonth" class="px-2 py-1 border rounded text-sm">◀︎</button>
-                            <span class="font-bold text-lg">{{ currentYear }}年 {{ currentMonth }}月</span>
-                            <button @click="nextMonth" class="px-2 py-1 border rounded text-sm">▶︎</button>
+                        <div
+                            class="mb-4 flex items-center justify-between md:hidden"
+                        >
+                            <button
+                                class="rounded border px-2 py-1 text-sm"
+                                @click="prevMonth"
+                            >
+                                ◀︎
+                            </button>
+                            <span class="text-lg font-bold"
+                                >{{ currentYear }}年 {{ currentMonth }}月</span
+                            >
+                            <button
+                                class="rounded border px-2 py-1 text-sm"
+                                @click="nextMonth"
+                            >
+                                ▶︎
+                            </button>
                         </div>
 
                         <!-- <h2>{{ currentMonth }}月のカテゴリー別</h2> -->
                         <BarChart2
                             label="カテゴリー別"
-                            apiUrl="/api/chart-data/category-monthly-single"
+                            api-url="/api/chart-data/category-monthly-single"
                             :month="currentMonth"
                             :year="currentYear"
                         />
