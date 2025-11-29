@@ -79,7 +79,7 @@ class DashboardTest extends TestCase
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
                 ->has('categories')
-                ->has('income_categories')
+                ->has('incomeCategories')
                 ->has('totalExpense')
                 ->has('totalIncome')
         );
@@ -135,7 +135,7 @@ class DashboardTest extends TestCase
 
         $response->assertInertia(fn ($page) =>
             $page->component('Dashboard')
-                ->has('income_categories', count($this->incomeCategoryNames))
+                ->has('incomeCategories', count($this->incomeCategoryNames))
                 ->where('categories', function ($cats) use ($income_categories) {
 
                     foreach($cats as $i => $cat) {

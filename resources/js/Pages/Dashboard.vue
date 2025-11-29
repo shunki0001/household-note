@@ -1,25 +1,21 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// import DeleteButton from '@/Components/DeleteButton.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import Swal from 'sweetalert2';
 import { watch, onMounted, ref, computed } from 'vue';
-import Toast from '@/Components/Toast.vue';
-// import Pagination from '@/Components/Pagination.vue';
 import ExpenseForm from '@/Components/ExpenseForm.vue';
 import DoughnutChart from '@/Components/DoughnutChart.vue';
-// import PrimaryButton from '@/Components/PrimaryButton.vue';
 import axios from 'axios';
-import ExpenseList from '@/Components/ExpenseList.vue';
 import TransactionList from '@/Components/TransactionList.vue';
+import { useFinance } from '@/composables/useFinance';
+import { fetchTransactions } from '@/services/transactionService';
+import { showAlert } from '@/utils/alert';
+import IncomeForm from '@/Components/IncomeForm.vue';
 
 const props = defineProps({
-    // expenses: Object,
     expenses: {
         type: Object,
         default: () => ({ data: [], current_page: 1, links: [] }),
     },
-    // categories: Array,
     categories: {
         type: Array,
         default: () => [],
@@ -28,92 +24,80 @@ const props = defineProps({
         type: [Number, String],
         default: 0,
     },
+    incomeCategories: {
+        type: Array,
+        default: () => [],
+    },
+    totalIncome: {
+        type: [Number, String],
+        default: 0,
+    }
 });
 
-// 合計金額をリアルタイムで管理
-const currentTotalExpense = ref(Number(props.totalExpense) || 0);
+const {
+    totalExpense: currentTotalExpense,
+    totalIncome: currentTotalIncome,
+    formattedExpense,
+    formattedIncome,
+    formattedBalance,
+    updateExpense,
+    updateIncome,
+} = useFinance(props.totalExpense, props.totalIncome);
 
-const formattedTotal = computed(() => {
+// 合計金額をリアルタイムで管理
+// const formattedTotal = computed(() => {
+//     return currentTotalExpense.value.toLocaleString();
+// });
+
+const currentPage = ref(1);
+const transactionList = ref(props.transaction?.data ?? []);
+const refreshKey = ref(0); // グラフ用のみに使用
+
+const page = usePage(); // 現在のページのpropsを取得
+
+// フォーム切り替え用の状態
+const activeForm = ref('expense'); // 'expense' または 'income'
+// フォーム切り替え関数
+const switchToExpense = () => {
+    activeForm.value = 'expense';
+};
+const switchToIncome = () => {
+    activeForm.value = 'income';
+};
+
+const formattedTotalExpense = computed(() => {
     return currentTotalExpense.value.toLocaleString();
 });
 
-const currentPage = ref(props.expenses.current_page || 1);
-const refreshKey = ref(0); // グラフ用のみに使用
-const expenseListRef = ref(null);
+const formattedTotalIncome = computed(() => {
+    return currentTotalIncome.value.toLocaleString();
+});
 
-// 一覧データを直接管理
-const expenseList = ref(props.expenses?.data ?? []);
+const transactionListRef = ref(null);
+const transactions = ref([]);
 
-// 現在のページのpropsを取得
-const page = usePage();
-const latestTransactions = page.props.latestTransactions;
-
-// 一覧データを更新する関数
-const updateExpenseList = async () => {
-    try {
-        console.log('Dashboard: updateExpenseList called'); // デバッグログ
-        const response = await axios.get(
-            route('expenses.latestJson', { page: currentPage.value }),
-        );
-        expenseList.value = response.data.expenses.data;
-        console.log(
-            'Dashboard: expenseList updated with',
-            expenseList.value.length,
-            'items',
-        ); // デバッグログ
-    } catch (e) {
-        console.error('Dashboard: 一覧更新エラー', e);
-    }
+const updateTransactionList = async () => {
+    transactionList.value = await fetchTransactions(currentPage.value);
 };
 
-// 合計金額を更新する関数
-const updateTotalExpense = async () => {
-    try {
-        console.log('Dashboard: updateTotalExpense called'); // デバッグログ
-        const response = await axios.get(route('dashboard.totalExpense'));
-        currentTotalExpense.value = Number(response.data.totalExpense) || 0;
-        console.log(
-            'Dashboard: totalExpense updated to',
-            currentTotalExpense.value,
-        ); // デバッグログ
-    } catch (e) {
-        console.error('Dashboard: 合計金額更新エラー', e);
-    }
-};
-
-const handleExpenseAdded = () => {
-    console.log('handleExpenseAdded called'); // デバッグログ
-
-    // 一覧データを直接更新
-    updateExpenseList();
-
-    // 合計金額を更新
-    updateTotalExpense();
-
-    // ExpenseListコンポーネントのreloadExpensesも呼び出し
-    if (
-        expenseListRef.value &&
-        typeof expenseListRef.value.reloadExpenses === 'function'
-    ) {
-        console.log('Calling reloadExpenses on ExpenseList'); // デバッグログ
-        expenseListRef.value.reloadExpenses();
+const handleTransactionAdded = async (type) => {
+    if (type === 'income') {
+        await updateIncome();
     } else {
-        console.log('ExpenseList ref not available'); // デバッグログ
+        await updateExpense();
     }
-
-    refreshKey.value++; // グラフ再取得
-    console.log('refreshKey updated:', refreshKey.value); // デバッグログ
+    await updateTransactionList();
+    refreshKey.value++;
 };
 
-// 削除完了時の処理
-const handleExpenseDeleted = () => {
-    console.log('Dashboard handleExpenseDeleted called'); // デバッグログ
-
-    // 合計金額を更新
-    updateTotalExpense();
-
-    refreshKey.value++; // グラフ再取得
-    console.log('refreshKey updated after delete:', refreshKey.value); // デバッグログ
+const handleTransactionDeleted = async (type) => {
+    if (type === 'income') {
+        await updateIncome();
+    } else {
+        await updateExpense();
+    }
+    await updateTransactionList();
+    refreshKey.value++;
 };
 
 // フラッシュメッセージの監視
@@ -121,52 +105,19 @@ watch(
     () => page.props.flash?.message,
     (message) => {
         if (message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: message,
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            });
+            showAlert(message, 'success');
         }
-    },
+    }
 );
 
-// onMountedを追加（ページ遷移時に即チェック）
-onMounted(() => {
-    if (page.props.flash?.message) {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: page.props.flash.message,
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-    }
-});
+onMounted(updateTransactionList);
 
-// グラフ設定
-const monthlyChartData = ref(null);
-const categoryChartData = ref(null);
-
-const reloadDashboard = () => {
-    router.visit(route('dashboard'), {
-        preserveScroll: true, // スクロール位置を保持したい場合
-        preserveState: true, // ページ遷移アニメーションを防ぎたい場合(任意)
-    });
-};
 </script>
 
 <template>
     <Head title="アカウントトップページ" />
 
     <AuthenticatedLayout>
-        <!-- SPA構成では動作しない -->
-        <Toast />
         <!-- <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
@@ -188,58 +139,95 @@ const reloadDashboard = () => {
         </div> -->
 
         <!-- ドーナツグラフ&今月の収支状況 -->
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="py-12 px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
                 <div class="flex flex-wrap gap-6 lg:flex-nowrap">
                     <!-- 左：今月の家計状況 -->
                     <div
                         class="w-full bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg lg:w-3/5"
                     >
                         <!-- 今月の家計状況 -->
-                        <h2 class="mb-4 text-lg font-bold">今月の家計状況</h2>
-                        <DoughnutChart :refresh-key="refreshKey" />
-                        <p>今月の合計支出: {{ formattedTotal }}円</p>
-                        <p>今月の合計収入: ◯◯円</p>
-                        <p>収支: ◯◯円</p>
+                        <h2 class="text-xl font-bold mb-6 text-center">今月の家計状況</h2>
+                        <DoughnutChart :refresh-key="refreshKey" class="mb-6" />
+                        <div class="space-y-2 text-center">
+                            <p class="text-lg font-semibold">
+                                今月の合計支出:
+                                <span class="text-red-500 text-xl font-bold">{{ formattedTotalExpense }}</span>
+                            </p>
+                            <p class="text-lg font-semibold">
+                                今月の合計収入:
+                                <span class="text-green-500 text-xl font-bold">{{ formattedTotalIncome }}</span>
+                            </p>
+                            <p class="text-2xl font-extrabold mt-4" :class="parseInt(formattedBalance.replace(/,/g, '')) < 0 ? 'text-red-600' : 'text-green-600'">
+                                収支:{{ formattedBalance }}円
+                            </p>
+                        </div>
                     </div>
 
                     <!-- 右：かんたん入力&グラフ確認 -->
-                    <div class="flex w-full flex-col gap-6 lg:w-2/5">
+                    <div class="w-full lg:w-2/5 flex flex-col gap-6">
                         <!-- かんたん入力 -->
-                        <div
-                            class="bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg"
-                        >
-                            <h2 class="mb-4 text-lg font-bold">かんたん入力</h2>
-                            <ExpenseForm
-                                :expense="{}"
-                                :categories="props.categories"
-                                :submit-url="route('expenses.store')"
-                                :method="'post'"
-                                @expense-added="handleExpenseAdded"
-                            />
+                        <div class="bg-white shadow-sm sm:rounded-lg p-6 text-gray-900">
+                            <h2 class="text-lg font-bold mb-4">かんたん入力</h2>
+
+                            <!-- フォーム切り替えボタン -->
+                            <div class="flex mb-4 border rounded-lg overflow-hidden">
+                                <button
+                                    @click="switchToExpense"
+                                    :class="[
+                                        'flex-1 px-4 py-2 text-sm font-medium transaction-colors',
+                                        activeForm === 'expense'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-tray-100 text-gray-700 hover:bg-gray-200'
+                                    ]"
+                                >
+                                    支出
+                                </button>
+                                <button
+                                    @click="switchToIncome"
+                                    :class="[
+                                        'flex-1 px-4 py-2 text-sm font-medium transaction-colors',
+                                        activeForm === 'income'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-tray-100 text-gray-700 hover:bg-gray-200'
+                                    ]"
+                                >
+                                    収入
+                                </button>
+                            </div>
+
+                            <!-- フォーム表示エリア -->
+                            <div class="min-h-[400px]">
+                                <div v-if="activeForm === 'expense'">
+                                    <ExpenseForm
+                                        :expense="{}"
+                                        :categories="props.categories"
+                                        :submitUrl="route('expenses.store')"
+                                        :method="'post'"
+                                        @submitted="handleTransactionAdded"
+                                    />
+                                </div>
+                                <div v-else-if="activeForm === 'income'">
+                                    <IncomeForm
+                                        :income="{}"
+                                        :incomeCategories="props.incomeCategories"
+                                        :submitUrl="route('incomes.store')"
+                                        :method="'post'"
+                                        @submitted="handleTransactionAdded"
+                                    />
+                                </div>
+                            </div>
+
+
                         </div>
 
                         <!-- 履歴・グラフへのリンク -->
-                        <div
-                            class="bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg"
-                        >
-                            <h2 class="mb-4 text-lg font-bold">
-                                履歴、グラフで確認
-                            </h2>
+                        <div class="bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg">
+                            <h2 class="mb-4 text-lg font-bold">履歴、グラフで確認</h2>
                             <div class="space-y-2">
-                                <Link href="/list" class="btn-icon-text"
-                                    >一覧ページに移動</Link
-                                >
-                                <Link
-                                    href="/graph/monthly"
-                                    class="btn-icon-text"
-                                    >月別支出グラフ</Link
-                                >
-                                <Link
-                                    href="/graph/category"
-                                    class="btn-icon-text"
-                                    >カテゴリー別支出グラフ</Link
-                                >
+                                <Link href="/list" class="btn-icon-text">一覧ページに移動</Link>
+                                <Link href="/graph/monthly" class="btn-icon-text">月別支出グラフ</Link>
+                                <Link href="/graph/category" class="btn-icon-text">カテゴリー別支出グラフ</Link>
                             </div>
                         </div>
                     </div>
@@ -252,11 +240,10 @@ const reloadDashboard = () => {
             <div class="mx-auto max-w-7xl sm:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center text-gray-900">
-                        <ExpenseList
-                            ref="expenseListRef"
-                            :initial-expenses="props.expenses"
-                            :expense-list="expenseList"
-                            @expense-deleted="handleExpenseDeleted"
+                        <TransactionList
+                            :initial-transactions="props.transactions"
+                            :transaction-list="transactionList"
+                            @transaction-deleted="handleTransactionDeleted"
                         />
                     </div>
                 </div>

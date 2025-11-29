@@ -17,7 +17,7 @@ class DashboardController extends Controller
         ['userId' => $userId, 'now' => $now] = $this->getCommonParams();
 
         // 入力フォームの収入用カテゴリーを呼び出し
-        $income_categories = IncomeCategory::all();
+        $incomeCategories = IncomeCategory::all();
 
         // 入力フォームのカテゴリーをsort_orderで並び替え
         $categories = Category::orderBy('sort_order', 'asc')->get();
@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'categories' => $categories,
-            'income_categories' => $income_categories,
+            'incomeCategories' => $incomeCategories,
             'flash' => [
                 'message' => session('message')
             ],
