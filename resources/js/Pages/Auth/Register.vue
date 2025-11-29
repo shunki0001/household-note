@@ -26,7 +26,9 @@ const submit = () => {
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
         onError: (errors) => {
-            console.log(errors);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(errors);
+            }
         },
     });
 };

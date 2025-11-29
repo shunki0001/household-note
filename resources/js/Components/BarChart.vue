@@ -76,17 +76,23 @@ const fetchData = async () => {
 
         const json = await response.json();
 
-        console.log('月別グラフデータ:', json);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('月別グラフデータ:', json);
+        }
 
         // エラーがある場合は処理を停止
         if (json.error) {
-            console.error('API error:', json.error, json.message);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('API error:', json.error, json.message);
+            }
             throw new Error(json.message || json.error);
         }
 
         // labels と totals が存在するか確認
         if (!json.labels || !json.totals) {
-            console.error('Missing required data:', json);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('Missing required data:', json);
+            }
             throw new Error('Missing labels or totals in response');
         }
 
@@ -150,7 +156,9 @@ const fetchData = async () => {
             },
         };
     } catch (err) {
-        console.error('データ取得エラー:', err);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('データ取得エラー:', err);
+        }
         errorMessage.value = err.message || 'データの取得に失敗しました';
         // エラー時は空のデータを設定
         chartData.value = { labels: [], datasets: [] };

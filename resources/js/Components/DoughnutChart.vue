@@ -79,7 +79,9 @@ function createChartOptions() {
 watch(
     () => props.refreshKey,
     async () => {
-        console.log('refreshKey changed:', props.refreshKey);
+        if (process.env.NODE_ENV) {
+            console.log('refreshKey changed:', props.refreshKey);
+        }
         await fetchChartData();
     },
 );
@@ -90,7 +92,9 @@ async function fetchChartData() {
         const response = await fetch(props.apiUrl);
         const json = await response.json();
 
-        console.log('API response:', json);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('API response:', json);
+        }
 
         const totals = json.totals.map((t) => Number(t));
         const colors =
@@ -112,7 +116,9 @@ async function fetchChartData() {
         };
         chartOptions.value = createChartOptions();
     } catch (error) {
-        console.error('データ取得エラー:', error);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('データ取得エラー:', error);
+        }
     }
 }
 

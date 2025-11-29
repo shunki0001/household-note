@@ -29,14 +29,19 @@ const expenses = ref(props.initialExpenses);
 watch(
     () => props.expenseList,
     (newExpenseList) => {
-        console.log('ExpenseList: expenseList props changed', newExpenseList); // デバッグログ
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('ExpenseList: expenseList props changed', newExpenseList); // デバッグログ
+        }
         if (newExpenseList && newExpenseList.length > 0) {
             localExpenseList.value = newExpenseList;
-            console.log(
-                'ExpenseList: localExpenseList updated with',
-                localExpenseList.value.length,
-                'items',
-            ); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(
+                    'ExpenseList: localExpenseList updated with',
+                    localExpenseList.value.length,
+                    'items',
+                ); // デバッグログ
+            }
+
         }
     },
     { deep: true },
@@ -44,35 +49,45 @@ watch(
 
 const reloadExpenses = async () => {
     try {
-        console.log('ExpenseList reloadExpenses called'); // デバッグログ
-        console.log('Current page:', currentPage.value); // デバッグログ
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('ExpenseList reloadExpenses called'); // デバッグログ
+            console.log('Current page:', currentPage.value); // デバッグログ
+        }
+
 
         const response = await axios.get(
             route('expenses.latestJson', { page: currentPage.value }),
         );
-        console.log('API response received:', response.data); // デバッグログ
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('API response received:', response.data);
+        }
 
         // データを更新
         localExpenseList.value = response.data.expenses.data;
         expenses.value = response.data.expenses;
 
-        console.log(
-            'ExpenseList updated with',
-            localExpenseList.value.length,
-            'items',
-        ); // デバッグログ
-        console.log('Updated expenseList:', localExpenseList.value); // デバッグログ
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(
+                'ExpenseList updated with',
+                localExpenseList.value.length,
+                'items',
+            );
+            console.log('Updated expenseList:', localExpenseList.value);
+        }
 
-        // emit('expenses-updated'); // 無限ループの原因となるため削除
-        // emit('expense-deleted');
+
     } catch (e) {
-        console.error('再取得エラー', e);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('再取得エラー', e);
+        }
     }
 };
 
 // 削除完了時の処理
 const handleExpenseDeleted = () => {
-    console.log('ExpenseList handleExpenseDeleted called'); // デバッグログ
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('ExpenseList handleExpenseDeleted called');
+    }
     reloadExpenses();
     emit('expense-deleted'); // 親コンポーネントに削除完了を通知
 };

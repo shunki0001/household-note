@@ -35,14 +35,18 @@ export function useExpenseFrom(props, emit) {
         Object.keys(errors).forEach((key) => (errors[key] = ''));
 
         try {
-            console.log('useExpenseForm submit started'); // デバッグログ
-            console.log('Form data:', form); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('useExpenseForm submit started');
+                console.log('Form data:', form);
+            }
 
             const response =
                 props.method === 'post'
                     ? await axios.post(props.submitUrl, form)
                     : await axios.put(props.submitUrl, form);
-            console.log('API response:', response.data); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('API response:', response.data); // デバッグログ
+            }
 
             showAlert(response.data.message, 'success').then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
@@ -62,7 +66,9 @@ export function useExpenseFrom(props, emit) {
                 }
             });
         } catch (error) {
-            console.error('Submit error:', error); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('Submit error:', error);
+            }
 
             // Laravelの422バリデーションエラー対応
             if (
@@ -77,7 +83,9 @@ export function useExpenseFrom(props, emit) {
                 }
             } else {
                 showAlert('登録失敗しました', 'error');
-                console.error('登録失敗', error);
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error('登録失敗', error);
+                }
             }
         }
     };

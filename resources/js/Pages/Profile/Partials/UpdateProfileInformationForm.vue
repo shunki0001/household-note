@@ -33,7 +33,9 @@ const customErrors = reactive({
 const updateProfile = () => {
     form.patch(route('profile.update'), {
         onError: (errors) => {
-            console.log(errors);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(errors);
+            }
         },
     });
 };

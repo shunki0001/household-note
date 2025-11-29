@@ -27,7 +27,9 @@ const updatePassword = () => {
         preserveScroll: true,
         onSuccess: () => form.reset(),
         onError: (errors) => {
-            console.log(errors);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(errors);
+            }
         },
     });
 };

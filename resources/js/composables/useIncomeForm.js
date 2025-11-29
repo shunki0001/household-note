@@ -32,14 +32,18 @@ export function useIncomeForm(props, emit) {
         Object.keys(errors).forEach((key) => (errors[key] = ''));
 
         try {
-            console.log('useIncomeForm submit started'); // デバッグログ
-            console.log('Form data:', form); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('useIncomeForm submit started'); // デバッグログ
+                console.log('Form data:', form); // デバッグログ
+            }
 
             const response =
                 props.method === 'post'
                     ? await axios.post(props.submitUrl, form)
                     : await axios.put(props.submitUrl, form);
-            console.log('API response:', response.data); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('API response:', response.data); // デバッグログ
+            }
 
             showAlert(response.data.message, 'success').then(() => {
                 // 編集時（PUT）はページ遷移、新規登録時（POST）はページ遷移しない
@@ -58,7 +62,9 @@ export function useIncomeForm(props, emit) {
                 }
             });
         } catch (error) {
-            console.error('Submit error:', error); // デバッグログ
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('Submit error:', error); // デバッグログ
+            }
 
             // Laravelの422バリデーションエラー対応
             if (
@@ -73,7 +79,9 @@ export function useIncomeForm(props, emit) {
                 }
             } else {
                 showAlert('登録失敗しました', 'success');
-                console.error('登録失敗', error);
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error('登録失敗', error);
+                }
             }
         }
     };

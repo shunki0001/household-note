@@ -25,7 +25,9 @@ export function useTransactions(initialData = []) {
             transactions.value =
                 data.transactions?.data ?? data.transactions ?? [];
         } catch (error) {
-            console.error('データ取得失敗', error);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('データ取得失敗', error);
+            }
         }
     };
 

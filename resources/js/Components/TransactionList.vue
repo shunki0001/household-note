@@ -4,7 +4,6 @@ import DeleteButton from '@/Components/DeleteButton.vue';
 // import Pagination from '@/Components/Pagination.vue';
 import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
-// import Swal from 'sweetalert2';
 import { showAlert } from '@/utils/alert';
 
 const props = defineProps({
@@ -47,7 +46,9 @@ const reloadTransactions = async () => {
         localTransactionList.value = response.data.transactions.data;
         transactions.value = response.data.transactions;
     } catch (e) {
-        console.error('再取得エラー', e);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('再取得エラー', e);
+        }
     }
 };
 
@@ -60,15 +61,6 @@ watch(
     () => page.props.flash?.message,
     (message) => {
         if (message) {
-            // Swal.fire({
-            //     toast: true,
-            //     position: 'top-end',
-            //     icon: 'success',
-            //     title: message,
-            //     showConfirmButton: false,
-            //     timer: 2000,
-            //     timerProgressBar: true,
-            // });
             showAlert(message, 'success');
         }
     },
@@ -76,15 +68,6 @@ watch(
 
 onMounted(() => {
     if (page.props.flash?.message) {
-        // Swal.fire({
-        //     toast: true,
-        //     position: 'top-end',
-        //     icon: 'success',
-        //     title: page.props.flash.message,
-        //     showConfirmButton: false,
-        //     timer: 2000,
-        //     timerProgressBar: true,
-        // });
         showAlert(page.props.flash.message, 'success');
     }
 });
@@ -172,13 +155,13 @@ defineExpose({ reloadTransactions });
                                     :href="
                                         transaction.type === 'income'
                                             ? route('incomes.edit', {
-                                                  id: transaction.id,
-                                                  back: 'dashboard',
-                                              })
+                                                    id: transaction.id,
+                                                    back: 'dashboard',
+                                                })
                                             : route('expenses.edit', {
-                                                  id: transaction.id,
-                                                  back: 'dashboard',
-                                              })
+                                                    id: transaction.id,
+                                                    back: 'dashboard',
+                                                })
                                     "
                                     class="inline-flex items-center justify-center rounded bg-green-400 px-3 py-1 text-sm text-white hover:bg-green-500"
                                 >
@@ -249,13 +232,13 @@ defineExpose({ reloadTransactions });
                         :href="
                             transaction.type === 'income'
                                 ? route('incomes.edit', {
-                                      id: transaction.id,
-                                      back: 'dashboard',
-                                  })
+                                    id: transaction.id,
+                                    back: 'dashboard',
+                                })
                                 : route('expenses.edit', {
-                                      id: transaction.id,
-                                      back: 'dashboard',
-                                  })
+                                        id: transaction.id,
+                                        back: 'dashboard',
+                                    })
                         "
                         class="inline-block rounded bg-green-400 px-3 py-2 text-sm text-white hover:bg-green-500"
                     >

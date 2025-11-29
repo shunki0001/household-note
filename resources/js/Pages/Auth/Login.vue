@@ -34,7 +34,9 @@ const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
         onError: (errors) => {
-            console.log(errors);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(errors);
+            }
         },
     });
 };

@@ -151,7 +151,9 @@ const fetchChartData = async () => {
 
         renderChart(labels, coloredDatasets, icons);
     } catch (error) {
-        console.error('グラフデータの取得に失敗しました:', error);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('グラフデータの取得に失敗しました:', error);
+        }
     }
 };
 
