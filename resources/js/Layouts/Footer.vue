@@ -42,7 +42,7 @@
                         </a>
                     </div>
                     <!-- GitHub -->
-                    <div class="felx flex-col items-center">
+                    <!-- <div class="felx flex-col items-center">
                         <a href="https://github.com/shunki0001/household-note">
                             <img
                                 src="/images/github-mark.png"
@@ -52,7 +52,7 @@
                             />
                             <p class="text-sm text-gray-600">GitHubリンク</p>
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <!-- <div class="grid grid-cols-1 md:grid-cols-4 gap-8"> -->
